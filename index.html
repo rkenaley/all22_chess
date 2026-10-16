@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>16-Bit Offensive Coordinator Lab — 20Hz Kinematic Monte Carlo Engine</title>
+  <title>16-Bit Offensive Coordinator Lab — Eagles vs Jaguars All-22 Simulator</title>
   <style>
     :root {
-      --bg-dark: #0b0e14;
-      --panel-bg: #131822;
-      --panel-border: #283246;
+      --bg-dark: #070a0f;
+      --panel-bg: #0f1520;
+      --panel-border: #1e293b;
+      --accent-eagles: #004c54;
+      --accent-jaguars: #006778;
       --accent-gold: #f5b942;
       --accent-cyan: #38bdf8;
       --accent-green: #22c55e;
@@ -29,39 +31,46 @@
       background-color: var(--bg-dark);
       color: var(--text-main);
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: 12.5px;
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* Top Header & Global Situation Bar */
+    /* Top Header & Situation Bar */
     header {
-      background: #0f141d;
+      background: #0b111a;
       border-bottom: 2px solid var(--panel-border);
-      padding: 8px 16px;
+      padding: 7px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
       color: var(--accent-gold);
       letter-spacing: 0.5px;
       text-transform: uppercase;
     }
 
+    .brand-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
     .top-controls {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
@@ -71,17 +80,17 @@
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
-    select, button, input[type="number"] {
-      background: #1c2433;
+    select, button, input[type="number"], input[type="checkbox"] {
+      background: #17202e;
       color: var(--text-main);
-      border: 1px solid #384661;
-      padding: 5px 10px;
+      border: 1px solid #2e3e57;
+      padding: 4px 8px;
       border-radius: 4px;
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: 11.5px;
       cursor: pointer;
     }
 
@@ -92,22 +101,22 @@
 
     button:hover {
       border-color: var(--accent-cyan);
-      background: #243044;
+      background: #202d42;
     }
 
     button.btn-primary {
-      background: #15803d;
-      border-color: #22c55e;
+      background: #047857;
+      border-color: #10b981;
       color: #fff;
     }
-    button.btn-primary:hover { background: #16a34a; }
+    button.btn-primary:hover { background: #059669; }
 
     button.btn-mc {
-      background: #0369a1;
+      background: #0284c7;
       border-color: #38bdf8;
       color: #fff;
     }
-    button.btn-mc:hover { background: #0284c7; }
+    button.btn-mc:hover { background: #0369a1; }
 
     button.btn-mutate {
       background: #b45309;
@@ -116,7 +125,7 @@
     }
     button.btn-mutate:hover { background: #d97706; }
 
-    /* Workspace Layout */
+    /* Workspace */
     .workspace {
       display: grid;
       grid-template-columns: 640px 1fr;
@@ -124,30 +133,29 @@
       overflow: hidden;
     }
 
-    /* Left Field Canvas Column */
     .field-column {
       display: flex;
       flex-direction: column;
-      background: #090c10;
+      background: #06090e;
       border-right: 2px solid var(--panel-border);
       position: relative;
       align-items: center;
       justify-content: center;
-      padding: 8px;
+      padding: 6px;
     }
 
     canvas#fieldCanvas {
-      border: 2px solid #2e3b52;
+      border: 2px solid #233044;
       border-radius: 4px;
       image-rendering: pixelated;
       cursor: crosshair;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
     }
 
     .canvas-footer {
       width: 100%;
       max-width: 600px;
-      margin-top: 8px;
+      margin-top: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -155,7 +163,6 @@
       font-size: 11px;
     }
 
-    /* Right Telemetry & Editor Column */
     .right-column {
       display: flex;
       flex-direction: column;
@@ -163,48 +170,68 @@
       background: var(--panel-bg);
     }
 
-    /* Metric KPI Strip */
+    /* KPI strip */
     .kpi-strip {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-      padding: 10px 14px;
-      background: #0d1118;
+      gap: 6px;
+      padding: 8px 12px;
+      background: #0a0e16;
       border-bottom: 1px solid var(--panel-border);
     }
 
     .kpi-card {
-      background: #151c28;
-      border: 1px solid #263147;
+      background: #121926;
+      border: 1px solid #202b3d;
       border-radius: 4px;
-      padding: 8px 10px;
+      padding: 6px 8px;
     }
 
     .kpi-title {
-      font-size: 10px;
+      font-size: 9.5px;
       color: var(--text-muted);
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .kpi-val {
-      font-size: 18px;
+      font-size: 16.5px;
       font-weight: 800;
     }
 
     .kpi-sub {
-      font-size: 10px;
+      font-size: 9.5px;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
-    /* Tab Bar */
+    /* Pre-snap recognition tell banner */
+    .presnap-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 14px;
+      background: #0e1724;
+      border-bottom: 1px solid #1f2e45;
+      font-size: 11px;
+    }
+
+    .presnap-pill {
+      background: #152438;
+      border: 1px solid #2e4d75;
+      color: #38bdf8;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* Tabs */
     .tabs {
       display: flex;
-      background: #0f141d;
+      background: #0c111a;
       border-bottom: 1px solid var(--panel-border);
-      padding: 0 14px;
-      gap: 6px;
+      padding: 0 12px;
+      gap: 4px;
     }
 
     .tab-btn {
@@ -212,7 +239,7 @@
       border: none;
       border-bottom: 3px solid transparent;
       border-radius: 0;
-      padding: 10px 14px;
+      padding: 8px 12px;
       color: var(--text-muted);
       font-weight: 700;
     }
@@ -220,13 +247,13 @@
     .tab-btn.active {
       color: var(--accent-gold);
       border-bottom-color: var(--accent-gold);
-      background: rgba(245, 185, 66, 0.06);
+      background: rgba(245, 185, 66, 0.05);
     }
 
     .tab-content {
       flex: 1;
       overflow-y: auto;
-      padding: 14px;
+      padding: 12px;
       display: none;
     }
 
@@ -234,21 +261,20 @@
       display: block;
     }
 
-    /* Inspector & Chalkboard Controls */
     .panel-box {
-      background: #18202f;
-      border: 1px solid #2b3851;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 12px;
+      background: #141c2b;
+      border: 1px solid #243247;
+      border-radius: 5px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
     }
 
     .panel-title {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 800;
       color: var(--accent-cyan);
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -257,29 +283,30 @@
     .inspector-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      gap: 8px;
     }
 
-    /* Personnel Ratings Table */
+    /* Roster Table */
     table.roster-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 11.5px;
     }
 
     table.roster-table th,
     table.roster-table td {
-      border-bottom: 1px solid #263147;
-      padding: 6px 6px;
+      border-bottom: 1px solid #1f2c40;
+      padding: 5px 4px;
       text-align: center;
     }
 
     table.roster-table th {
       color: var(--accent-gold);
-      font-size: 11px;
-      background: #10151f;
+      font-size: 10.5px;
+      background: #0c121c;
       position: sticky;
       top: 0;
+      z-index: 10;
     }
 
     table.roster-table tr.selected-row {
@@ -287,31 +314,30 @@
     }
 
     table.roster-table input[type="number"] {
-      width: 48px;
-      padding: 3px 4px;
+      width: 44px;
+      padding: 2px 3px;
       text-align: center;
       font-weight: 700;
     }
 
-    /* Log & Histogram */
     .mutation-log {
-      font-size: 11.5px;
+      font-size: 11px;
       line-height: 1.5;
       color: #cbd5e1;
       max-height: 220px;
       overflow-y: auto;
-      background: #0c1017;
-      padding: 10px;
+      background: #090d14;
+      padding: 8px;
       border-radius: 4px;
-      border: 1px solid #232d42;
+      border: 1px solid #1c2738;
       white-space: pre-wrap;
     }
 
     canvas#histCanvas {
       width: 100%;
-      height: 200px;
-      background: #0c1017;
-      border: 1px solid #232d42;
+      height: 180px;
+      background: #090d14;
+      border: 1px solid #1c2738;
       border-radius: 4px;
     }
   </style>
@@ -319,43 +345,90 @@
 <body>
   <header>
     <div class="brand">
-      <span>🏈 16-BIT OC LAB</span>
-      <span style="font-size:11px; color:#94a3b8; font-weight:400;">20Hz Anisotropic 2D Kinematics + CMA/Annealing Mutator</span>
+      <span>🦅 PHI vs JAX 🐆</span>
+      <span class="brand-sub">20Hz Kinematic All-22 Simulator</span>
     </div>
+
     <div class="top-controls">
-      <label>Situation:
-        <select id="selSituation">
-          <option value="1st_10">1st & 10 (Ball on Own 25 | Goal: +4.5 yds)</option>
-          <option value="3rd_3">3rd & 3 Tight (Ball on Opp 38 | Goal: +3.0 yds)</option>
-          <option value="3rd_10">3rd & 10 Long (Ball on Own 40 | Goal: +10.0 yds)</option>
+      <label>Formation:
+        <select id="selFormation">
+          <option value="GUN_TRIPS_RIGHT">Shotgun Trips Right (3x1)</option>
+          <option value="GUN_DOUBLES">Shotgun 2x2 Doubles</option>
+          <option value="GUN_BUNCH_RIGHT">Shotgun Bunch Right</option>
+          <option value="SINGLEBACK_ACE">Singleback Ace (12 Pers)</option>
+          <option value="EMPTY_QUADS">Empty Quads (4x1)</option>
         </select>
       </label>
-      <label>Defense:
+
+      <label>Motion:
+        <select id="selMotion">
+          <option value="NONE">Static Set (No Motion)</option>
+          <option value="JET_R_TO_L">DeVonta Jet Sweep (R ➔ L)</option>
+          <option value="JET_L_TO_R">DeVonta Jet Sweep (L ➔ R)</option>
+          <option value="ORBIT_RETURN">Orbit & Return</option>
+          <option value="RB_FLAP_OUT">Saquon Flap to Empty</option>
+          <option value="TE_SIFT">Goedert TE Sift Across</option>
+        </select>
+      </label>
+
+      <label>Defense Front:
+        <select id="selFront">
+          <option value="OVER">Over Front (3-Tech Strong)</option>
+          <option value="UNDER">Under Front (3-Tech Weak)</option>
+          <option value="WIDE_9">Wide-9 Edge Rushers</option>
+          <option value="MUG_A">Mug A-Gap Blitz Threat</option>
+        </select>
+      </label>
+
+      <label>Scheme:
         <select id="selDefense">
-          <option value="MIXED">DC Meta Mix (40% Cov3, 30% Cov1, 20% Cov2, 10% Blitz)</option>
-          <option value="COV3">Cover 3 Sky (3-Deep Zone, Pattern Carry)</option>
-          <option value="COV1">Cover 1 Man Free (Tight Man + 5-Man Rush)</option>
-          <option value="COV2">Cover 2 Tampa (2-High Shell, Press Corners, Deep MLB)</option>
-          <option value="BLITZ">Nickel Overload Zero/1 Blitz (6-Man Edge Pressure)</option>
+          <option value="MIXED">DC Meta Mix (35% C3, 25% C1, 20% C2, 12% C4, 8% Blitz)</option>
+          <option value="COV3_SKY">Cover 3 Sky (Single-High, Capped Deep)</option>
+          <option value="COV1_ROBBER">Cover 1 Robber (Tight Man + Hole Safety)</option>
+          <option value="COV2_TAMPA">Cover 2 Tampa (2-High, MLB Deep Pole)</option>
+          <option value="COV4_QUARTERS">Cover 4 Quarters (4 Deep Match)</option>
+          <option value="COV6_SPLIT">Cover 6 Split (Quarter-Quarter-Half)</option>
+          <option value="ZERO_BLITZ">Cover 0 Blitz (6-Man All-Out Pressure)</option>
         </select>
       </label>
-      <button id="btnPlayOne" class="btn-primary">▶ Sim 1 Snap (60 FPS)</button>
-      <button id="btnRunMC" class="btn-mc">⚡ Run 400-Snap Monte Carlo</button>
-      <button id="btnMutate" class="btn-mutate">🧬 Mutate Play for Roster</button>
+
+      <label style="color:#f5b942; font-weight:700;">
+        <input type="checkbox" id="chkLaterals" checked /> Laterals
+      </label>
+
+      <button id="btnPlayOne" class="btn-primary">▶ Sim Snap</button>
+      <button id="btnRunMC" class="btn-mc">⚡ 400 MC</button>
+      <button id="btnMutate" class="btn-mutate">🧬 Mutate</button>
     </div>
   </header>
 
+  <!-- Pre-Snap QB Tell Bar -->
+  <div class="presnap-bar">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-weight:700; color:var(--accent-gold);">QB PRE-SNAP RECOGNITION:</span>
+      <span id="preSnapTellBadge" class="presnap-pill">Evaluating Pre-Snap Alignment & Motion Reaction...</span>
+    </div>
+    <div style="color:var(--text-muted); font-size:10.5px;">
+      Situation:
+      <select id="selSituation" style="padding:2px 6px; font-size:11px;">
+        <option value="1st_10">1st & 10 (Own 25 | Goal: +4.5y)</option>
+        <option value="3rd_3">3rd & 3 (Opp 38 | Goal: +3.0y)</option>
+        <option value="3rd_10">3rd & 10 (Own 40 | Goal: +10.0y)</option>
+      </select>
+    </div>
+  </div>
+
   <div class="workspace">
-    <!-- Left Column: All-22 Interactive Chalkboard & 16-Bit Field -->
+    <!-- Left Field Column -->
     <div class="field-column">
       <canvas id="fieldCanvas" width="600" height="680"></canvas>
       <div class="canvas-footer">
-        <span id="statusBanner">READY — Click any offensive player to select; click turf to add/move route nodes.</span>
+        <span id="statusBanner">PHILADELPHIA EAGLES vs JACKSONVILLE JAGUARS — Ready for Snap</span>
         <span id="clockReadout">t = 0.00 s | Read #1</span>
       </div>
     </div>
 
-    <!-- Right Column: KPIs, Chalkboard Inspector, Personnel Table, and EPA Distribution -->
+    <!-- Right Telemetry & Configuration Column -->
     <div class="right-column">
       <div class="kpi-strip">
         <div class="kpi-card">
@@ -391,102 +464,98 @@
       </div>
 
       <div class="tabs">
-        <button class="tab-btn active" data-tab="tabChalkboard">1. Chalkboard & Route Inspector</button>
-        <button class="tab-btn" data-tab="tabPersonnel">2. Personnel & Roster Ratings (Off/Def)</button>
-        <button class="tab-btn" data-tab="tabAnalytics">3. EPA Distribution & Mutator Log</button>
+        <button class="tab-btn active" data-tab="tabChalkboard">1. Chalkboard & Route Designer</button>
+        <button class="tab-btn" data-tab="tabPersonnel">2. Eagles / Jaguars Granular Ratings</button>
+        <button class="tab-btn" data-tab="tabAnalytics">3. EPA Distribution & Mutator</button>
       </div>
 
-      <!-- TAB 1: CHALKBOARD & PLAYER INSPECTOR -->
+      <!-- TAB 1: CHALKBOARD & ROUTE DESIGNER -->
       <div id="tabChalkboard" class="tab-content active">
         <div class="panel-box">
           <div class="panel-title">
-            <span id="inspPlayerTitle">Selected Player: X-WR1</span>
-            <span id="inspTurnPhysics" style="color:var(--accent-gold); font-size:11px;">Min Turn Radius @ 9yd/s: 2.1 yds</span>
+            <span id="inspPlayerTitle">Selected: A.J. Brown (WR1)</span>
+            <span id="inspTurnPhysics" style="color:var(--accent-gold); font-size:10.5px;">Turn Radius @ 9yd/s: 2.1 yds</span>
           </div>
           <div class="inspector-grid">
             <label>Assignment Role:
               <select id="inspRole">
                 <option value="ROUTE">Run Route Stem</option>
                 <option value="CHIP_RELEASE">Chip Edge (0.45s) + Release Route</option>
-                <option value="PASS_BLOCK">Max Pass Block Protection</option>
+                <option value="PASS_BLOCK">Max Pass Protection</option>
               </select>
             </label>
-            <label>QB Read Progression Order:
+            <label>QB Read Progression:
               <select id="inspRead">
-                <option value="1">Read #1 (Primary)</option>
-                <option value="2">Read #2 (Secondary)</option>
+                <option value="1">Read #1 (Primary Target)</option>
+                <option value="2">Read #2 (Second Look)</option>
                 <option value="3">Read #3 (Tertiary)</option>
                 <option value="4">Read #4 (Outlet)</option>
                 <option value="5">Read #5 (Checkdown)</option>
               </select>
             </label>
-            <label>Pre-Snap Horizontal Split (x yds):
+            <label>Pre-Snap Split (x yds):
               <input type="number" id="inspSplitX" step="0.5" min="-24" max="24" />
             </label>
-            <label>Quick Route Preset:
+            <label>Route Preset:
               <select id="inspPresetRoute">
-                <option value="">-- Custom Chalkboard Nodes --</option>
-                <option value="SLANT">Quick 3-Step Slant (3y stem -> 45° in)</option>
-                <option value="OUT_5">Quick 5-Yard Out (5y stem -> 90° out)</option>
-                <option value="WHIP">Option Whip / Return (6y in -> pivot out)</option>
-                <option value="DIG_12">12-Yard Hard Dig (12y stem -> 90° in)</option>
-                <option value="CORNER_10">10-Yard Smash Corner (10y stem -> 45° corner)</option>
-                <option value="POST_14">14-Yard Deep Post (14y stem -> 45° post)</option>
-                <option value="GO">9-Route Vertical Go Seam</option>
+                <option value="">-- Custom Route Nodes --</option>
+                <option value="SLANT">Quick 3-Step Slant (3y -> 45° in)</option>
+                <option value="OUT_5">Quick 5-Yard Out (5y -> 90° out)</option>
+                <option value="WHIP">Option Whip / Pivot (5.5y)</option>
+                <option value="DIG_12">12-Yard Hard Dig (12y -> 90° in)</option>
+                <option value="CORNER_10">10-Yard Corner (10y -> 45° out)</option>
+                <option value="POST_14">14-Yard Deep Post (14y -> 45° in)</option>
+                <option value="GO">9-Route Vertical Go</option>
                 <option value="SWING">RB Swing Checkdown</option>
               </select>
             </label>
           </div>
-          <div style="margin-top:10px; display:flex; gap:8px;">
-            <button id="btnClearNodes">Reset Selected Route to Vertical</button>
-            <button id="btnLoadConceptMesh">Preset Play: Air Raid Mesh</button>
-            <button id="btnLoadConceptDagger">Preset Play: 7-Step Dagger</button>
-            <button id="btnLoadConceptStick">Preset Play: Quick Stick-Nod</button>
+          <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">
+            <button id="btnClearNodes">Reset to Vertical</button>
+            <button id="btnLoadConceptMesh">Preset: Air Raid Mesh</button>
+            <button id="btnLoadConceptDagger">Preset: 7-Step Dagger</button>
+            <button id="btnLoadConceptStick">Preset: Quick Stick-Nod</button>
+            <button id="btnLoadConceptHookLateral" style="background:#1e3a5f; border-color:#38bdf8; color:#fff;">Preset: Hook & Lateral (Saquon Pitch)</button>
           </div>
         </div>
 
         <div class="panel-box">
           <div class="panel-title">
-            <span>Last Play / Monte Carlo Spatial Breakdown</span>
+            <span>Play Telemetry & Spatial Commentary</span>
             <span id="lastSnapOutcomeBadge" style="color:var(--accent-green);">READY</span>
           </div>
-          <div id="livePlayCommentary" class="mutation-log">Click "Sim 1 Snap (60 FPS)" to watch time-explicit 20 Hz kinematics on the field, or "Run 400-Snap Monte Carlo" to evaluate the full outcome distribution.</div>
+          <div id="livePlayCommentary" class="mutation-log">Click "Sim Snap" to run time-explicit 20 Hz simulation, or "400 MC" to evaluate the full distribution.</div>
         </div>
       </div>
 
-      <!-- TAB 2: PERSONNEL & ROSTER RATINGS -->
+      <!-- TAB 2: GRANULAR PERSONNEL & ROSTER RATINGS -->
       <div id="tabPersonnel" class="tab-content">
-        <div class="panel-box" style="margin-bottom:10px;">
+        <div class="panel-box" style="margin-bottom:8px;">
           <div class="panel-title">
-            <span>Roster Archetype Presets (Instant Attribute Load)</span>
-            <div>
-              <button id="btnPresetBalanced">Balanced Pro</button>
-              <button id="btnPresetWeakOL">Elite Slot + Weak LT (58 PBK)</button>
-              <button id="btnPresetTrackBurners">99-SPD Track Sprinters (64 AGI)</button>
-              <button id="btnPresetTechnicians">98-AGI Route Technicians (84 SPD)</button>
-            </div>
+            <span>Philadelphia Eagles (Offense) & Jacksonville Jaguars (Defense) Ratings</span>
           </div>
           <p style="color:var(--text-muted); font-size:11px;">
-            Edit any attribute (40–99) below. Notice how <strong>SPD</strong> controls straight-line top speed, while <strong>AGI</strong> controls the centripetal turning radius $R_{\min} = v^2 / a_{\perp,\max}(\text{AGI})$ and braking before a route cut.
+            Granular player traits: <strong>PBK Anchor / Rush Power</strong> (vertical pocket push), <strong>PBK Lat / Rush Speed</strong> (lateral edge bend), <strong>Catch in Traffic (CIT) / Cov Man</strong>, and <strong>Tackle Wrap / Hit Power</strong>.
           </p>
         </div>
 
         <div class="panel-box">
-          <div class="panel-title">Offensive & Key Defensive Personnel Ratings</div>
-          <div style="max-height: 430px; overflow-y: auto;">
+          <div style="max-height: 440px; overflow-y: auto;">
             <table class="roster-table" id="rosterTable">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Pos / Role</th>
-                  <th title="Top Straight-Line Speed">SPD</th>
-                  <th title="Tangential Sprint Burst">ACC</th>
-                  <th title="Lateral Centripetal Cut & Braking Limit">AGI</th>
-                  <th title="Physical Momentum & Bull-Rush Anchor">STR</th>
-                  <th title="Route Running Cut Sharpness / QB Throw Power">RR/THP</th>
-                  <th title="Pass Block /QB Throw Accuracy">PBK/THA</th>
-                  <th title="Block Shedding / Tackling">BSH/TAK</th>
-                  <th title="Break Tackle / Elusiveness">BTK/COV</th>
+                  <th>Player (Team / Pos)</th>
+                  <th title="Top Speed">SPD</th>
+                  <th title="Acceleration">ACC</th>
+                  <th title="Agility">AGI</th>
+                  <th title="Strength">STR</th>
+                  <th title="Pass Block Anchor / Bull Rush Power">Anchor / Power</th>
+                  <th title="Pass Block Lateral / Speed Rush Bend">Lateral / Bend</th>
+                  <th title="Throw Power / Block Shedding">THP / Shed</th>
+                  <th title="Catch In Traffic / Man Coverage">CIT / Cov</th>
+                  <th title="Break Tackle / Tackle Wrap">BTK / Wrap</th>
+                  <th title="Lateral Vision / Tackle Hit Power">Lateral / Hit</th>
                 </tr>
               </thead>
               <tbody id="rosterTableBody"></tbody>
@@ -495,22 +564,22 @@
         </div>
       </div>
 
-      <!-- TAB 3: EPA DISTRIBUTION & EVOLUTIONARY MUTATOR LOG -->
+      <!-- TAB 3: EPA DISTRIBUTION & MUTATOR -->
       <div id="tabAnalytics" class="tab-content">
         <div class="panel-box">
           <div class="panel-title">
-            <span>Monte Carlo EPA Outcome Distribution Histogram</span>
+            <span>Monte Carlo EPA Outcome Distribution</span>
             <span id="histSummaryLabel">400 Snaps</span>
           </div>
-          <canvas id="histCanvas" width="680" height="200"></canvas>
+          <canvas id="histCanvas" width="680" height="180"></canvas>
         </div>
 
         <div class="panel-box">
           <div class="panel-title">
-            <span>Evolutionary Play Mutator Telemetry Log</span>
-            <span>Objective: J(θ) = μ_EPA + 0.8·P_goal − 0.22·σ_EPA</span>
+            <span>Evolutionary Play Mutator Log</span>
+            <span>Objective: J(θ) = μ_EPA + 0.85·P_goal − 0.22·σ_EPA</span>
           </div>
-          <div id="mutationLogBox" class="mutation-log">Click "🧬 Mutate Play for Roster" to run multi-generation evolutionary mutations on route stem depths, break angles, splits, TE/RB chip-block assignments, and QB read progressions tailored to your active roster ratings.</div>
+          <div id="mutationLogBox" class="mutation-log">Click "🧬 Mutate" to run evolutionary optimizations on route stems, break depths, pre-snap splits, protection chips, and read orders tailored to the Eagles roster against Jaguars coverage.</div>
         </div>
       </div>
     </div>
