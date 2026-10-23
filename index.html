@@ -3,21 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>16-Bit Offensive Coordinator Lab — Eagles vs Jaguars All-22 Simulator</title>
+  <title>NFL Offensive Coordinator War Room — Tactile Slate Chalkboard & All-22 Simulator</title>
   <style>
     :root {
-      --bg-dark: #070a0f;
-      --panel-bg: #0f1520;
-      --panel-border: #1e293b;
-      --accent-eagles: #004c54;
-      --accent-jaguars: #006778;
-      --accent-gold: #f5b942;
-      --accent-cyan: #38bdf8;
-      --accent-green: #22c55e;
-      --accent-red: #ef4444;
-      --text-main: #e2e8f0;
-      --text-muted: #94a3b8;
-      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+      /* Walnut & Oak Wood Grain Framing */
+      --wood-dark: #1e130c;
+      --wood-mid: #2e1d13;
+      --wood-light: #422a1b;
+      --wood-border: #140c07;
+      --wood-shadow: rgba(8, 5, 3, 0.85);
+
+      /* Brushed Brass Hardware */
+      --brass-base: #a67c38;
+      --brass-bright: #d4af37;
+      --brass-light: #f5d77f;
+      --brass-dark: #704f1a;
+
+      /* Deep Slate Green Chalkboard */
+      --slate-bg: #14231a;
+      --slate-dark: #0e1a13;
+      --slate-surface: #182b20;
+      --slate-card: #1b3024;
+      --slate-border: #284433;
+      --slate-grid: rgba(255, 255, 255, 0.08);
+
+      /* Chalk Pigments */
+      --chalk-white: #f5f5f0;
+      --chalk-dust: rgba(245, 245, 240, 0.45);
+      --chalk-gold: #f6c445;
+      --chalk-cyan: #68b6d8;
+      --chalk-crimson: #e65858;
+      --chalk-green: #6eb079;
+      --chalk-purple: #b388ff;
+
+      --font-serif: 'Georgia', 'Times New Roman', serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
     }
 
     * {
@@ -28,128 +48,275 @@
     }
 
     body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
+      background-color: var(--wood-dark);
+      background-image: 
+        radial-gradient(ellipse at center, rgba(66, 42, 27, 0.25) 0%, rgba(14, 8, 4, 0.95) 100%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 8px);
+      color: var(--chalk-white);
       font-family: var(--font-mono);
-      font-size: 12.5px;
+      font-size: 12px;
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* Top Header & Situation Bar */
+    /* Walnut Wood Header with Brass Accent Plaque */
     header {
-      background: #0b111a;
-      border-bottom: 2px solid var(--panel-border);
-      padding: 7px 14px;
+      background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood-mid) 60%, var(--wood-dark) 100%);
+      border-bottom: 3px solid var(--brass-base);
+      box-shadow: 0 4px 12px var(--wood-shadow);
+      padding: 6px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
+      z-index: 20;
     }
 
-    .brand {
+    .brand-plate {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      font-size: 14px;
-      color: var(--accent-gold);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--brass-bright) 0%, var(--brass-base) 70%, var(--brass-dark) 100%);
+      padding: 4px 12px;
+      border-radius: 4px;
+      box-shadow: inset 0 1px 1px var(--brass-light), 0 2px 5px rgba(0,0,0,0.6);
+      border: 1px solid var(--brass-dark);
     }
 
-    .brand-sub {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      font-weight: 400;
+    .brand-title {
+      font-family: var(--font-serif);
+      font-weight: 900;
+      font-size: 13.5px;
+      color: #1a1107;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+    }
+
+    .brand-subtitle {
+      font-size: 9.5px;
+      color: var(--wood-mid);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
     }
 
     .top-controls {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: wrap;
     }
 
     label {
-      color: var(--text-muted);
-      font-size: 11px;
+      color: #c9bea8;
+      font-size: 10.5px;
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
+      font-weight: 600;
     }
 
-    select, button, input[type="number"], input[type="checkbox"] {
-      background: #17202e;
-      color: var(--text-main);
-      border: 1px solid #2e3e57;
-      padding: 4px 8px;
-      border-radius: 4px;
+    select, button, input[type="number"], input[type="checkbox"], input[type="range"] {
+      background: var(--slate-dark);
+      color: var(--chalk-white);
+      border: 1px solid var(--slate-border);
+      padding: 3px 6px;
+      border-radius: 3px;
       font-family: var(--font-mono);
-      font-size: 11.5px;
+      font-size: 11px;
       cursor: pointer;
+    }
+
+    select:focus, button:focus {
+      outline: none;
+      border-color: var(--brass-bright);
     }
 
     button {
       font-weight: 700;
-      transition: all 0.12s ease;
+      letter-spacing: 0.3px;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
 
     button:hover {
-      border-color: var(--accent-cyan);
-      background: #202d42;
+      border-color: var(--brass-bright);
+      background: #243a2c;
     }
 
     button.btn-primary {
-      background: #047857;
-      border-color: #10b981;
-      color: #fff;
+      background: #195232;
+      border-color: #2e8b57;
+      color: #ffffff;
     }
-    button.btn-primary:hover { background: #059669; }
+    button.btn-primary:hover {
+      background: #226b42;
+      border-color: var(--chalk-green);
+    }
 
     button.btn-mc {
-      background: #0284c7;
-      border-color: #38bdf8;
-      color: #fff;
+      background: #1b3d54;
+      border-color: #388ab8;
+      color: #ffffff;
     }
-    button.btn-mc:hover { background: #0369a1; }
+    button.btn-mc:hover {
+      background: #245272;
+      border-color: var(--chalk-cyan);
+    }
 
     button.btn-mutate {
-      background: #b45309;
-      border-color: #f5b942;
+      background: #633914;
+      border-color: #a86520;
+      color: #ffffff;
+    }
+    button.btn-mutate:hover {
+      background: #7a4619;
+      border-color: var(--chalk-gold);
+    }
+
+    button.btn-matrix {
+      background: #442a59;
+      border-color: #7b4ea3;
+      color: #ffffff;
+    }
+    button.btn-matrix:hover {
+      background: #593775;
+      border-color: var(--chalk-purple);
+    }
+
+    /* Subheader Strategic Strip */
+    .strategic-strip {
+      background: var(--slate-dark);
+      border-bottom: 1px solid var(--slate-border);
+      padding: 5px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+    }
+
+    .chalk-badge {
+      background: rgba(246, 196, 69, 0.12);
+      border: 1px dashed var(--chalk-gold);
+      color: var(--chalk-gold);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: 700;
+    }
+
+    .coordinator-pills {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    .coord-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--slate-border);
+      color: var(--chalk-dim);
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .coord-pill:hover {
+      background: rgba(255, 255, 255, 0.14);
       color: #fff;
     }
-    button.btn-mutate:hover { background: #d97706; }
-
-    /* Workspace */
-    .workspace {
-      display: grid;
-      grid-template-columns: 640px 1fr;
-      flex: 1;
-      overflow: hidden;
+    .coord-pill.active {
+      background: linear-gradient(135deg, #1d402b, #2b543b);
+      border-color: var(--chalk-green);
+      color: #d4f7de;
+      box-shadow: 0 0 6px rgba(78, 186, 111, 0.3);
+    }
+    .coord-pill.active.dc-pill {
+      background: linear-gradient(135deg, #2b1f40, #3e2a5c);
+      border-color: var(--chalk-purple);
+      color: #ebd7ff;
+      box-shadow: 0 0 6px rgba(184, 115, 237, 0.3);
+    }
+    .coord-pill.active.coevo-pill {
+      background: linear-gradient(135deg, #422a18, #5e3b20);
+      border-color: var(--chalk-gold);
+      color: #ffe6ba;
+      box-shadow: 0 0 6px rgba(246, 196, 69, 0.3);
     }
 
-    .field-column {
+    button.btn-coevo {
+      background: #542c16;
+      border-color: #b05c2e;
+      color: #ffffff;
+      font-weight: 700;
+    }
+    button.btn-coevo:hover {
+      background: #6e3a1d;
+      border-color: var(--chalk-gold);
+    }
+
+    .coevo-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+      text-align: left;
+    }
+    .coevo-table th {
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--chalk-gold);
+      padding: 5px 7px;
+      border-bottom: 1px solid var(--slate-border);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 9.5px;
+      letter-spacing: 0.5px;
+    }
+    .coevo-table td {
+      padding: 5px 7px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--chalk-white);
+      vertical-align: middle;
+    }
+    .coevo-table tr:hover td {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    /* Workspace Framing */
+    .workspace {
+      display: grid;
+      grid-template-columns: 630px 1fr;
+      flex: 1;
+      overflow: hidden;
+      background: var(--wood-dark);
+      padding: 6px;
+      gap: 6px;
+    }
+
+    /* Left Chalkboard Column with Quarter-Sawn Oak / Walnut Bevel Frame */
+    .chalkboard-frame {
       display: flex;
       flex-direction: column;
-      background: #06090e;
-      border-right: 2px solid var(--panel-border);
+      background: linear-gradient(135deg, var(--wood-mid) 0%, var(--wood-dark) 100%);
+      border: 4px solid var(--wood-light);
+      border-radius: 6px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 16px rgba(0,0,0,0.7);
+      padding: 8px;
       position: relative;
       align-items: center;
       justify-content: center;
-      padding: 6px;
     }
 
     canvas#fieldCanvas {
-      border: 2px solid #233044;
+      background: var(--slate-bg);
+      border: 2px solid #233a2a;
       border-radius: 4px;
-      image-rendering: pixelated;
+      box-shadow: inset 0 0 35px rgba(5, 12, 8, 0.7), 0 4px 14px rgba(0,0,0,0.5);
       cursor: crosshair;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
     }
 
     .canvas-footer {
@@ -159,79 +326,68 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: var(--text-muted);
-      font-size: 11px;
+      color: #9eb8a7;
+      font-size: 10.5px;
     }
 
-    .right-column {
+    /* Right Command Station */
+    .war-room-console {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: var(--panel-bg);
+      background: var(--slate-dark);
+      border: 3px solid var(--wood-mid);
+      border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
     }
 
-    /* KPI strip */
+    /* Situational KPI Strip */
     .kpi-strip {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 6px;
-      padding: 8px 12px;
-      background: #0a0e16;
-      border-bottom: 1px solid var(--panel-border);
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      padding: 6px 10px;
+      background: var(--slate-surface);
+      border-bottom: 2px solid var(--slate-border);
     }
 
     .kpi-card {
-      background: #121926;
-      border: 1px solid #202b3d;
+      background: var(--slate-card);
+      border: 1px solid var(--slate-border);
       border-radius: 4px;
-      padding: 6px 8px;
+      padding: 5px 7px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .kpi-title {
-      font-size: 9.5px;
-      color: var(--text-muted);
+      font-size: 9px;
+      color: #8da495;
       text-transform: uppercase;
-      margin-bottom: 2px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
     .kpi-val {
-      font-size: 16.5px;
+      font-size: 16px;
       font-weight: 800;
+      color: var(--chalk-white);
+      margin: 1px 0;
     }
 
     .kpi-sub {
-      font-size: 9.5px;
-      color: var(--text-muted);
-      margin-top: 1px;
+      font-size: 9px;
+      color: #799180;
     }
 
-    /* Pre-snap recognition tell banner */
-    .presnap-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 14px;
-      background: #0e1724;
-      border-bottom: 1px solid #1f2e45;
-      font-size: 11px;
-    }
-
-    .presnap-pill {
-      background: #152438;
-      border: 1px solid #2e4d75;
-      color: #38bdf8;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-weight: 700;
-    }
-
-    /* Tabs */
+    /* Tabs Bar */
     .tabs {
       display: flex;
-      background: #0c111a;
-      border-bottom: 1px solid var(--panel-border);
-      padding: 0 12px;
-      gap: 4px;
+      background: var(--slate-dark);
+      border-bottom: 2px solid var(--slate-border);
+      padding: 0 8px;
+      gap: 2px;
     }
 
     .tab-btn {
@@ -239,21 +395,22 @@
       border: none;
       border-bottom: 3px solid transparent;
       border-radius: 0;
-      padding: 8px 12px;
-      color: var(--text-muted);
+      padding: 7px 11px;
+      color: #8ba192;
       font-weight: 700;
+      font-size: 11px;
     }
 
     .tab-btn.active {
-      color: var(--accent-gold);
-      border-bottom-color: var(--accent-gold);
-      background: rgba(245, 185, 66, 0.05);
+      color: var(--chalk-gold);
+      border-bottom-color: var(--chalk-gold);
+      background: rgba(246, 196, 69, 0.06);
     }
 
     .tab-content {
       flex: 1;
       overflow-y: auto;
-      padding: 12px;
+      padding: 10px;
       display: none;
     }
 
@@ -262,96 +419,332 @@
     }
 
     .panel-box {
-      background: #141c2b;
-      border: 1px solid #243247;
-      border-radius: 5px;
-      padding: 10px 12px;
-      margin-bottom: 10px;
+      background: var(--slate-card);
+      border: 1px solid var(--slate-border);
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
     }
 
     .panel-title {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 800;
-      color: var(--accent-cyan);
+      color: var(--chalk-gold);
       text-transform: uppercase;
-      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px dashed var(--slate-border);
+      padding-bottom: 4px;
     }
 
     .inspector-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      gap: 6px;
+    }
+
+    /* QB Sequential Progression HUD */
+    .read-tree-row {
+      display: grid;
+      grid-template-columns: 105px 65px 1fr 50px 75px;
+      align-items: center;
+      gap: 6px;
+      background: var(--slate-surface);
+      padding: 4px 6px;
+      border-radius: 3px;
+      border: 1px solid var(--slate-border);
+      font-size: 10.5px;
+    }
+
+    .read-tree-row.active-look {
+      border-color: var(--chalk-gold);
+      background: rgba(246, 196, 69, 0.10);
+    }
+
+    .read-bar-wrap {
+      width: 100%;
+      height: 7px;
+      background: var(--slate-dark);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .read-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.15s ease;
+    }
+
+    .tag-pill {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 4px;
+      border-radius: 2px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .tag-open { background: rgba(110, 176, 121, 0.25); color: var(--chalk-green); border: 1px solid var(--chalk-green); }
+    .tag-tight { background: rgba(246, 196, 69, 0.25); color: var(--chalk-gold); border: 1px solid var(--chalk-gold); }
+    .tag-smothered { background: rgba(230, 88, 88, 0.25); color: var(--chalk-crimson); border: 1px solid var(--chalk-crimson); }
+    .tag-scramble { background: rgba(179, 136, 255, 0.25); color: var(--chalk-purple); border: 1px solid var(--chalk-purple); }
+    .tag-target { background: rgba(104, 182, 216, 0.3); color: var(--chalk-cyan); border: 1px solid var(--chalk-cyan); font-weight: 800; }
+
+    /* Scouting Dossier Card */
+    .scouting-card {
+      background: linear-gradient(180deg, #1d3326 0%, #15271d 100%);
+      border: 1px solid var(--brass-base);
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+
+    .scouting-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .scouting-name {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--chalk-gold);
+    }
+
+    .scouting-badge {
+      background: var(--brass-dark);
+      color: var(--brass-light);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid var(--brass-bright);
+    }
+
+    .measurables-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      background: var(--slate-dark);
+      padding: 6px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .meas-val {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--chalk-white);
+    }
+    .meas-lbl {
+      font-size: 8.5px;
+      color: #8da495;
+      text-transform: uppercase;
+    }
+
+    .scouting-blurb {
+      font-size: 10.5px;
+      color: #cbdad0;
+      line-height: 1.4;
+      background: rgba(0,0,0,0.25);
+      padding: 6px 8px;
+      border-radius: 3px;
+      border-left: 3px solid var(--chalk-gold);
     }
 
     /* Roster Table */
     table.roster-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11.5px;
+      font-size: 10.5px;
     }
 
     table.roster-table th,
     table.roster-table td {
-      border-bottom: 1px solid #1f2c40;
-      padding: 5px 4px;
+      border-bottom: 1px solid var(--slate-border);
+      padding: 4px;
       text-align: center;
     }
 
     table.roster-table th {
-      color: var(--accent-gold);
-      font-size: 10.5px;
-      background: #0c121c;
+      color: var(--chalk-gold);
+      font-size: 9.5px;
+      background: var(--slate-dark);
       position: sticky;
       top: 0;
       z-index: 10;
     }
 
     table.roster-table tr.selected-row {
-      background: rgba(56, 189, 248, 0.14);
+      background: rgba(246, 196, 69, 0.18);
     }
 
     table.roster-table input[type="number"] {
-      width: 44px;
-      padding: 2px 3px;
+      width: 38px;
+      padding: 1px 2px;
       text-align: center;
       font-weight: 700;
+      font-size: 10.5px;
+    }
+
+    /* Call Sheet Matrix Table */
+    table.matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+      margin-top: 6px;
+    }
+
+    table.matrix-table th,
+    table.matrix-table td {
+      border: 1px solid var(--slate-border);
+      padding: 5px 6px;
+      text-align: center;
+    }
+
+    table.matrix-table th {
+      background: var(--slate-surface);
+      color: var(--chalk-gold);
+      font-size: 9.5px;
+    }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 800;
+      font-size: 11px;
+    }
+    .grade-A { background: rgba(110, 176, 121, 0.25); color: var(--chalk-green); border: 1px solid var(--chalk-green); }
+    .grade-B { background: rgba(104, 182, 216, 0.25); color: var(--chalk-cyan); border: 1px solid var(--chalk-cyan); }
+    .grade-C { background: rgba(246, 196, 69, 0.25); color: var(--chalk-gold); border: 1px solid var(--chalk-gold); }
+    .grade-D { background: rgba(230, 88, 88, 0.25); color: var(--chalk-crimson); border: 1px solid var(--chalk-crimson); }
+    .grade-F { background: #3b1414; color: #ff8585; border: 1px solid #e65858; }
+
+    /* Canvas Hist & Mutation Log */
+    canvas#histCanvas {
+      width: 100%;
+      height: 160px;
+      background: var(--slate-bg);
+      border: 1px solid var(--slate-border);
+      border-radius: 4px;
     }
 
     .mutation-log {
-      font-size: 11px;
-      line-height: 1.5;
-      color: #cbd5e1;
-      max-height: 220px;
+      font-size: 10.5px;
+      line-height: 1.45;
+      color: #d1dfd6;
+      max-height: 190px;
       overflow-y: auto;
-      background: #090d14;
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #1c2738;
+      background: var(--slate-dark);
+      padding: 6px 8px;
+      border-radius: 3px;
+      border: 1px solid var(--slate-border);
       white-space: pre-wrap;
-    }
-
-    canvas#histCanvas {
-      width: 100%;
-      height: 180px;
-      background: #090d14;
-      border: 1px solid #1c2738;
-      border-radius: 4px;
     }
   </style>
 </head>
 <body>
+  <!-- Walnut Wood Framing Top Header -->
   <header>
-    <div class="brand">
-      <span>🦅 PHI vs JAX 🐆</span>
-      <span class="brand-sub">20Hz Kinematic All-22 Simulator</span>
+    <div class="brand-plate">
+      <div class="brand-title">NFL Coordinator War Room</div>
+      <div class="brand-subtitle">Kinematic All-22 Chalkboard</div>
     </div>
 
     <div class="top-controls">
+      <label>Matchup:
+        <select id="selMatchup">
+          <option value="NFL_AVERAGE">★ NFL League-Wide Average (Synthetic 50th %ile)</option>
+          <optgroup label="Marquee Matchups">
+            <option value="PHI_VS_JAX" selected>PHI (Off) vs JAX (Def) [Baseline]</option>
+            <option value="PHI_VS_KC">PHI (Off) vs KC (Def) [Super Bowl Rematch / Blitz]</option>
+            <option value="PHI_VS_BAL">PHI (Off) vs BAL (Def) [Heavyweight Clash]</option>
+            <option value="DET_VS_SF">DET (Off) vs SF (Def) [NFC Title Rematch]</option>
+            <option value="KC_VS_SF">KC (Off) vs SF (Def) [Super Bowl LVIII Rematch]</option>
+            <option value="BAL_VS_KC">BAL (Off) vs KC (Def) [Lamar vs Mahomes]</option>
+            <option value="BUF_VS_KC">BUF (Off) vs KC (Def) [Josh Allen Shootout]</option>
+            <option value="DET_VS_GB">DET (Off) vs GB (Def) [NFC North Rivalry]</option>
+            <option value="HOU_VS_BAL">HOU (Off) vs BAL (Def) [C.J. Stroud vs Roquan]</option>
+            <option value="WAS_VS_PHI">WAS (Off) vs PHI (Def) [Jayden Daniels Test]</option>
+            <option value="CIN_VS_BAL">CIN (Off) vs BAL (Def) [Joe Burrow vs Ravens]</option>
+            <option value="DAL_VS_SF">DAL (Off) vs SF (Def) [Cowboys vs 49ers]</option>
+          </optgroup>
+          <optgroup label="⚡ Pet Theoretical Optimum System (6OL / 2-Insert)">
+            <option value="THEO_VS_LEAGUE">⚡ THEO (Pet Optimum Off) vs NFL Average (Def)</option>
+            <option value="THEO_VS_BAL">⚡ THEO vs BAL [Heavyweight Front vs Roquan]</option>
+            <option value="THEO_VS_KC">⚡ THEO vs KC [Anti-Blitz Test vs Spagnuolo]</option>
+            <option value="THEO_VS_SF">⚡ THEO vs SF [Space Conflict vs Fred Warner]</option>
+          </optgroup>
+          <optgroup label="Custom 32-Team Pairing">
+            <option value="CUSTOM_TEAM_PICK">-- Custom 32-Team Off/Def Pairing --</option>
+          </optgroup>
+        </select>
+      </label>
+
+      <div id="customTeamPickRow" style="display:none; align-items:center; gap:6px;">
+        <label style="font-size:11px; color:var(--chalk-gold);">Off:
+          <select id="selCustomOffTeam" style="font-size:11px; padding:2px 6px;"></select>
+        </label>
+        <label style="font-size:11px; color:#e06b6b;">Def:
+          <select id="selCustomDefTeam" style="font-size:11px; padding:2px 6px;"></select>
+        </label>
+      </div>
+
+      <label>Concept:
+        <select id="selConcept">
+          <option value="CUSTOM">-- Custom Chalkboard Play --</option>
+          <optgroup label="⚡ Pet Theoretical Optimum System (6OL / 2-Insert / Pistol)">
+            <option value="THEO_SWEEP_TOSS">Theo #1: Heavy Pin-Pull Sweep & Toss (vs Base LBs)</option>
+            <option value="THEO_QB_POWER_DRAW">Theo #2: +1 Heavy QB Power / Draw (8v7 Box Math)</option>
+            <option value="THEO_PA_BOOT_SHOT">Theo #3: PA Heavy Bootleg Deep Post-Corner & Leak</option>
+            <option value="THEO_INSERT_HOT_LEAK">Theo #4: B/C Gap Insert Hot Seam Leak (Anti-Blitz)</option>
+          </optgroup>
+          <optgroup label="🏃 Designed Run Concepts">
+            <option value="RUN_PIN_PULL">Pin-and-Pull Sweep (RG/RT Pull + TE Seal)</option>
+            <option value="RUN_GT_COUNTER">GT Counter (Backside LG Kick + LT Wrap)</option>
+            <option value="RUN_INSIDE_ZONE">Inside Zone Duo (Interior Double-Teams)</option>
+            <option value="RUN_OUTSIDE_ZONE">Outside Zone Stretch (Lateral Reach & Cutback)</option>
+          </optgroup>
+          <optgroup label="Canonical NFL Concepts">
+            <option value="MESH">Air Raid Mesh (Rub / Pick)</option>
+            <option value="DAGGER">7-Step Dagger (High-Low Seam-Dig)</option>
+            <option value="STICK_NOD">Quick Stick-Nod (Option-Break)</option>
+            <option value="FLOOD_SAIL">3-Level Flood / Sail</option>
+            <option value="PA_YANKEE">Play-Action Yankee (Deep Over & Post)</option>
+            <option value="SMASH_DIVIDE">Smash-Divide (2-High Beater)</option>
+            <option value="MILLS_POST_DIG">Mills Post-Dig (MOFC Beater)</option>
+            <option value="HOOK_LATERAL">Hook & Lateral (Designed Pitch Package)</option>
+          </optgroup>
+          <optgroup label="🧬 AI Evolved Champions (2,000 Gens)">
+            <option value="EVO_PA_SHOT">AI: PA Yankee Divide (1st & 10 vs Cov 3)</option>
+            <option value="EVO_RUB_QUICK">AI: Quick Rub Pick (3rd & 3 vs Cov 1)</option>
+            <option value="EVO_FLAP_DIG">AI: Flap Motion Dig (3rd & 10 vs Cov 4)</option>
+            <option value="EVO_ORBIT_SHOT">AI: Orbit Post Shot (2nd & 2 vs Cov 2)</option>
+            <option value="EVO_RZ_PYLON">AI: Red Zone Pylon (2nd & 8 vs Cov 2)</option>
+          </optgroup>
+        </select>
+      </label>
+
+      <label>Personnel:
+        <select id="selPersonnel">
+          <option value="11_PERSONNEL">11 Personnel (3 WR, 1 TE, 1 RB)</option>
+          <option value="HEAVY_6OL_2INSERT">⚡ 6 OL + 2 Utility Inserts (Pet Optimum)</option>
+          <option value="12_PERSONNEL">12 Personnel (2 WR, 2 TE, 1 RB)</option>
+          <option value="21_PERSONNEL">21 Personnel (2 WR, 1 TE, 2 RB / FB)</option>
+          <option value="EMPTY_5W">Empty 5-Wide (4 WR, 1 TE)</option>
+        </select>
+      </label>
+
       <label>Formation:
         <select id="selFormation">
+          <option value="PISTOL_HEAVY_INSERT">Pistol Heavy Insert (6 OL + H/F Box)</option>
+          <option value="GUN_HEAVY_OFFSET">Shotgun Heavy Offset (6 OL + Split Inserts)</option>
           <option value="GUN_TRIPS_RIGHT">Shotgun Trips Right (3x1)</option>
           <option value="GUN_DOUBLES">Shotgun 2x2 Doubles</option>
           <option value="GUN_BUNCH_RIGHT">Shotgun Bunch Right</option>
@@ -363,11 +756,13 @@
       <label>Motion:
         <select id="selMotion">
           <option value="NONE">Static Set (No Motion)</option>
-          <option value="JET_R_TO_L">DeVonta Jet Sweep (R ➔ L)</option>
-          <option value="JET_L_TO_R">DeVonta Jet Sweep (L ➔ R)</option>
+          <option value="H_INSERT_MOTION">H-Insert Cross-Motion (Pre-Snap Tell)</option>
+          <option value="F_ORBIT_TELL">F-Insert Orbit Flow (LB Leverage Tell)</option>
+          <option value="JET_R_TO_L">Jet Sweep (R ➔ L)</option>
+          <option value="JET_L_TO_R">Jet Sweep (L ➔ R)</option>
           <option value="ORBIT_RETURN">Orbit & Return</option>
-          <option value="RB_FLAP_OUT">Saquon Flap to Empty</option>
-          <option value="TE_SIFT">Goedert TE Sift Across</option>
+          <option value="RB_FLAP_OUT">RB Flap to Empty</option>
+          <option value="TE_SIFT">TE Sift Across</option>
         </select>
       </label>
 
@@ -380,66 +775,128 @@
         </select>
       </label>
 
-      <label>Scheme:
+      <label>Blocking:
+        <select id="selBlocking">
+          <optgroup label="🛡️ Pass Protection Schemes">
+            <option value="HALF_SLIDE">Half-Slide (Pro Standard)</option>
+            <option value="FULL_SLIDE_L">Full Slide Left</option>
+            <option value="FULL_SLIDE_R">Full Slide Right</option>
+            <option value="BIG_ON_BIG">Big-on-Big (Man Lock)</option>
+            <option value="MAX_PROTECT">Max Protect (7-Man Wall)</option>
+          </optgroup>
+          <optgroup label="🚜 Run Blocking & Pulling Schemes">
+            <option value="PIN_AND_PULL">Pin-and-Pull (RG/RT Pull + Frontside Pin)</option>
+            <option value="GT_COUNTER_PULL">GT Counter (Backside LG Kick + LT Wrap)</option>
+            <option value="POWER_G_PULL">Power-G (Guard Kick-out + FB/TE Lead)</option>
+            <option value="INSIDE_ZONE_DUO">Inside Zone Duo (Vertical Double-Teams)</option>
+            <option value="OUTSIDE_ZONE_STRETCH">Outside Zone Stretch (Lateral Reach & Seal)</option>
+          </optgroup>
+        </select>
+      </label>
+
+      <label>Coverage Shell:
         <select id="selDefense">
-          <option value="MIXED">DC Meta Mix (35% C3, 25% C1, 20% C2, 12% C4, 8% Blitz)</option>
+          <option value="MIXED">DC Mixed Meta (35% C3, 25% C1, 20% C2, 12% C4, 8% Blitz)</option>
           <option value="COV3_SKY">Cover 3 Sky (Single-High, Capped Deep)</option>
           <option value="COV1_ROBBER">Cover 1 Robber (Tight Man + Hole Safety)</option>
           <option value="COV2_TAMPA">Cover 2 Tampa (2-High, MLB Deep Pole)</option>
           <option value="COV4_QUARTERS">Cover 4 Quarters (4 Deep Match)</option>
           <option value="COV6_SPLIT">Cover 6 Split (Quarter-Quarter-Half)</option>
           <option value="ZERO_BLITZ">Cover 0 Blitz (6-Man All-Out Pressure)</option>
+          <option value="FIRE_ZONE_3">Fire Zone 3 (5-Man Pressure + 3-Deep 3-Under)</option>
         </select>
       </label>
 
-      <label style="color:#f5b942; font-weight:700;">
-        <input type="checkbox" id="chkLaterals" checked /> Laterals
+      <label>D-Line Stunt:
+        <select id="selDefStunt">
+          <option value="AUTO">Auto (Situational Tendencies)</option>
+          <option value="NONE">None (Base Rush Lanes)</option>
+          <option value="TE_TWIST">T-E Twist (DT Crash / DE Loop)</option>
+          <option value="ET_TWIST">E-T Twist (DE Crash / DT Loop)</option>
+          <option value="OVERLOAD_SLANT">Overload Slant (4-Man Slant)</option>
+        </select>
       </label>
 
       <button id="btnPlayOne" class="btn-primary">▶ Sim Snap</button>
       <button id="btnRunMC" class="btn-mc">⚡ 400 MC</button>
-      <button id="btnMutate" class="btn-mutate">🧬 Mutate</button>
+      <button id="btnMutate" class="btn-mutate">🧬 Evolve Play</button>
+      <button id="btnMatrix" class="btn-matrix">📋 Call Sheet</button>
     </div>
   </header>
 
-  <!-- Pre-Snap QB Tell Bar -->
-  <div class="presnap-bar">
+  <!-- Subheader Strategic Strip -->
+  <div class="strategic-strip">
     <div style="display:flex; align-items:center; gap:8px;">
-      <span style="font-weight:700; color:var(--accent-gold);">QB PRE-SNAP RECOGNITION:</span>
-      <span id="preSnapTellBadge" class="presnap-pill">Evaluating Pre-Snap Alignment & Motion Reaction...</span>
+      <span style="font-weight:700; color:var(--chalk-gold);">PRE-SNAP:</span>
+      <span id="preSnapTellBadge" class="chalk-badge">Evaluating Defensive Alignment & Motion Response...</span>
     </div>
-    <div style="color:var(--text-muted); font-size:10.5px;">
-      Situation:
-      <select id="selSituation" style="padding:2px 6px; font-size:11px;">
-        <option value="1st_10">1st & 10 (Own 25 | Goal: +4.5y)</option>
-        <option value="3rd_3">3rd & 3 (Opp 38 | Goal: +3.0y)</option>
-        <option value="3rd_10">3rd & 10 (Own 40 | Goal: +10.0y)</option>
-      </select>
+    <div class="coordinator-pills">
+      <button id="pillModeOC" class="coord-pill active" title="Offensive Coordinator: design routes, progressions, and pass concepts">🏈 OC Mode</button>
+      <button id="pillModeDC" class="coord-pill dc-pill" title="Defensive Coordinator: set coverage shells, cushions, and fronts">🛡️ DC Mode</button>
+      <button id="pillModeCoEvo" class="coord-pill coevo-pill" title="Adversarial Co-Evolution: automated iterative game-theoretic arms race">⚔️ Tick-Tock Arms Race</button>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <label>Situation:
+        <select id="selSituation" style="padding:2px 6px;">
+          <option value="1st_10">1st & 10 (Own 25 | Script Open-Field | Goal: +4.5y)</option>
+          <option value="2nd_2">2nd & 2 (Midfield 50 | Conflict Down | Goal: +2.0y)</option>
+          <option value="2nd_8">2nd & 8 (Own 35 | Passing Tendency | Goal: +4.5y)</option>
+          <option value="3rd_3">3rd & 3 (Opp 38 | High Leverage Short | Goal: +3.0y)</option>
+          <option value="3rd_7">3rd & 7 (Opp 42 | Conversion Window | Goal: +7.0y)</option>
+          <option value="3rd_10">3rd & 10 (Own 35 | Obvious Pass Deep | Goal: +10.0y)</option>
+          <option value="RZ_2nd_8">RZ 2nd & 8 (Opp 15 | Compressed Field | Goal: +5.0y)</option>
+        </select>
+      </label>
+      <label>QB Risk:
+        <span id="lblRiskVal" style="color:var(--chalk-gold); font-weight:700; min-width:40px;">55%</span>
+        <input type="range" id="rngRisk" min="10" max="95" value="55" step="5" style="width:60px;" />
+      </label>
+      <label style="color:var(--chalk-cyan); cursor:pointer;">
+        <input type="checkbox" id="chkCoverageClouds" checked /> Coverage Clouds
+      </label>
+      <label style="color:var(--chalk-purple); cursor:pointer;">
+        <input type="checkbox" id="chkMatchCoverage" checked /> Rip/Liz Match
+      </label>
+      <label style="color:var(--chalk-gold); cursor:pointer;">
+        <input type="checkbox" id="chkBlockingOverlay" checked /> Blocking Scheme
+      </label>
+      <label style="color:var(--chalk-cyan);">
+        <input type="checkbox" id="chkLaterals" checked /> Laterals
+      </label>
     </div>
   </div>
 
   <div class="workspace">
-    <!-- Left Field Column -->
-    <div class="field-column">
-      <canvas id="fieldCanvas" width="600" height="680"></canvas>
+    <!-- Left Chalkboard Column -->
+    <div class="chalkboard-frame">
+      <canvas id="fieldCanvas" width="600" height="660"></canvas>
+      <div id="boardEvoProgress" style="display:none; padding:4px 10px; background:rgba(20,35,26,0.95); border-top:1px solid var(--chalk-border); font-size:11px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+          <span id="boardEvoLabel" style="color:var(--chalk-gold); font-weight:700;">EVOLVING PLAY: Gen 0 / 100</span>
+          <button id="btnBoardStopEvolve" style="background:#e65858; color:#fff; border:none; padding:2px 8px; border-radius:3px; font-weight:700; cursor:pointer; font-size:10px;">■ Stop</button>
+        </div>
+        <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+          <div id="boardEvoBar" style="width:0%; height:100%; background:linear-gradient(90deg, #68b6d8, #6eb079);"></div>
+        </div>
+      </div>
       <div class="canvas-footer">
         <span id="statusBanner">PHILADELPHIA EAGLES vs JACKSONVILLE JAGUARS — Ready for Snap</span>
         <span id="clockReadout">t = 0.00 s | Read #1</span>
       </div>
     </div>
 
-    <!-- Right Telemetry & Configuration Column -->
-    <div class="right-column">
+    <!-- Right War Room Console -->
+    <div class="war-room-console">
       <div class="kpi-strip">
         <div class="kpi-card">
           <div class="kpi-title">Mean EPA (μ)</div>
           <div class="kpi-val" id="kpiEpa">+0.00</div>
-          <div class="kpi-sub" id="kpiCvar">CVaR₁₀: 0.00</div>
+          <div class="kpi-sub" id="kpiCvar">Median: +0.00</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-title">EPA StdDev (σ)</div>
-          <div class="kpi-val" id="kpiStd">0.00</div>
-          <div class="kpi-sub" id="kpiVar">σ²: 0.00</div>
+          <div class="kpi-title">EPA Success %</div>
+          <div class="kpi-val" id="kpiStd">0.0%</div>
+          <div class="kpi-sub" id="kpiVar">EPA > 0</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-title">Goal Success %</div>
@@ -457,24 +914,32 @@
           <div class="kpi-sub" id="kpiThrowTime">TTT: 0.00s</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-title">INT / Turnover</div>
+          <div class="kpi-title">INT / Scramble</div>
           <div class="kpi-val" id="kpiInt">0.0%</div>
-          <div class="kpi-sub" id="kpiCheckdown">Primary: 0%</div>
+          <div class="kpi-sub" id="kpiCheckdown">Scramble: 0%</div>
+        </div>
+        <div class="kpi-card" style="border-color: rgba(229,192,123,0.35); background: rgba(30,48,36,0.85);">
+          <div class="kpi-title" style="color:var(--chalk-gold);">NFL Offense %ile</div>
+          <div class="kpi-val" id="kpiPercentile" style="color:var(--chalk-gold); font-size:15px;">50.0th %ile</div>
+          <div class="kpi-sub" id="kpiPercentileSub" style="color:#a8c4b2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Lg Avg: +0.05 EPA</div>
         </div>
       </div>
 
       <div class="tabs">
-        <button class="tab-btn active" data-tab="tabChalkboard">1. Chalkboard & Route Designer</button>
-        <button class="tab-btn" data-tab="tabPersonnel">2. Eagles / Jaguars Granular Ratings</button>
-        <button class="tab-btn" data-tab="tabAnalytics">3. EPA Distribution & Mutator</button>
+        <button class="tab-btn active" data-tab="tabChalkboard">1. Chalkboard & Progression</button>
+        <button class="tab-btn" data-tab="tabScouting">2. Scouting Dossier</button>
+        <button class="tab-btn" data-tab="tabCallSheet">3. Call-Sheet Matrix</button>
+        <button class="tab-btn" data-tab="tabAnalytics">4. EPA Mutator</button>
+        <button class="tab-btn" data-tab="tabDefensiveCoordinator">5. 🛡️ Defensive Coordinator</button>
+        <button class="tab-btn" data-tab="tabCoEvolution">6. ⚔️ Tick-Tock Co-Evolution</button>
       </div>
 
-      <!-- TAB 1: CHALKBOARD & ROUTE DESIGNER -->
+      <!-- TAB 1: CHALKBOARD & PROGRESSION TREE -->
       <div id="tabChalkboard" class="tab-content active">
         <div class="panel-box">
           <div class="panel-title">
             <span id="inspPlayerTitle">Selected: A.J. Brown (WR1)</span>
-            <span id="inspTurnPhysics" style="color:var(--accent-gold); font-size:10.5px;">Turn Radius @ 9yd/s: 2.1 yds</span>
+            <span id="inspTurnPhysics" style="color:var(--chalk-cyan); font-size:10px;">Turn Radius @ 9yd/s: 2.1 yds</span>
           </div>
           <div class="inspector-grid">
             <label>Assignment Role:
@@ -509,38 +974,95 @@
                 <option value="SWING">RB Swing Checkdown</option>
               </select>
             </label>
+            <label>Break Mechanics:
+              <select id="inspBreakStyle">
+                <option value="SHARP_PIVOT">Sharp Hard Pivot (Decelerate & Cut)</option>
+                <option value="ROUNDED_SPEED">Rounded Speed Arc (Maintain Momentum)</option>
+              </select>
+            </label>
+            <label>Option / Choice Rule:
+              <select id="inspChoiceRule">
+                <option value="NONE">Static Route (No Post-Snap Read)</option>
+                <option value="MOFC_MOFO_SEAM">MOFC/MOFO (Post vs Open, Out vs Closed)</option>
+                <option value="MAN_ZONE_WIP">Man/Zone (Whip vs Man, Hook Settle vs Zone)</option>
+                <option value="LEVERAGE_BREAK">Leverage Read (Opposite Defender Leverage)</option>
+              </select>
+            </label>
+            <div style="margin-top:6px; display:flex; gap:6px;">
+              <button id="btnAddLandmark" style="background:#2a4a35; border:1px solid #489d67; color:#c7f3d6; font-size:11px; padding:3px 7px; border-radius:3px; cursor:pointer;">+ Landmark Node</button>
+              <button id="btnRemoveLandmark" style="background:#4a2a2a; border:1px solid #9d4848; color:#f3c7c7; font-size:11px; padding:3px 7px; border-radius:3px; cursor:pointer;">- Pop Landmark</button>
+            </div>
           </div>
-          <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">
+          <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:5px;">
             <button id="btnClearNodes">Reset to Vertical</button>
-            <button id="btnLoadConceptMesh">Preset: Air Raid Mesh</button>
-            <button id="btnLoadConceptDagger">Preset: 7-Step Dagger</button>
-            <button id="btnLoadConceptStick">Preset: Quick Stick-Nod</button>
-            <button id="btnLoadConceptHookLateral" style="background:#1e3a5f; border-color:#38bdf8; color:#fff;">Preset: Hook & Lateral (Saquon Pitch)</button>
+            <button id="btnLoadConceptMesh">Preset: Mesh</button>
+            <button id="btnLoadConceptDagger">Preset: Dagger</button>
+            <button id="btnLoadConceptStick">Preset: Stick</button>
+            <button id="btnLoadConceptHookLateral" style="background:#1b3d54; border-color:#388ab8; color:#fff;">Preset: Hook & Lateral</button>
+            <button id="btnLoadConceptOrbitShot" style="background:#1e3d30; border-color:#3ca878; color:#bdf7d6;" title="AI Evolved: Orbit-Return Post vs Cover 2">🧬 Orbit Shot</button>
+            <button id="btnLoadConceptFlapDig" style="background:#3d2f1e; border-color:#c28e46; color:#fce7c8;" title="AI Evolved: Flap Motion Dig vs Cover 4">🧬 Flap Dig</button>
+            <button id="btnLoadConceptRubQuick" style="background:#3b1e3d; border-color:#b04ec4; color:#f5d0ff;" title="AI Evolved: Quick Rub Pick vs Cover 1">🧬 Quick Rub</button>
+          </div>
+        </div>
+
+        <div class="panel-box" id="qbDecisionPanel">
+          <div class="panel-title">
+            <span>Sequential QB Progression Tree</span>
+            <span id="qbDecisionBadge" style="color:var(--chalk-gold); font-size:10.5px;">Jalen Hurts (86 SPD | 55% Poise)</span>
+          </div>
+          <div id="qbReadTreeHud" style="display:flex; flex-direction:column; gap:6px;">
+            <div style="color:#8da495; font-size:10.5px;">Click "▶ Sim Snap" or press SPACE to evaluate time-explicit progression reads, throw velocity, scramble lanes, and defensive spy tracking.</div>
           </div>
         </div>
 
         <div class="panel-box">
           <div class="panel-title">
             <span>Play Telemetry & Spatial Commentary</span>
-            <span id="lastSnapOutcomeBadge" style="color:var(--accent-green);">READY</span>
+            <span id="lastSnapOutcomeBadge" style="color:var(--chalk-green);">READY</span>
           </div>
           <div id="livePlayCommentary" class="mutation-log">Click "Sim Snap" to run time-explicit 20 Hz simulation, or "400 MC" to evaluate the full distribution.</div>
         </div>
       </div>
 
-      <!-- TAB 2: GRANULAR PERSONNEL & ROSTER RATINGS -->
-      <div id="tabPersonnel" class="tab-content">
-        <div class="panel-box" style="margin-bottom:8px;">
-          <div class="panel-title">
-            <span>Philadelphia Eagles (Offense) & Jacksonville Jaguars (Defense) Ratings</span>
+      <!-- TAB 2: SCOUTING DOSSIER & RATINGS -->
+      <div id="tabScouting" class="tab-content">
+        <div id="scoutingDossierCard" class="scouting-card">
+          <div class="scouting-header">
+            <div class="scouting-name" id="scoutName">A.J. Brown (WR1)</div>
+            <div class="scouting-badge" id="scoutOvr">95 OVR | WR #11</div>
           </div>
-          <p style="color:var(--text-muted); font-size:11px;">
-            Granular player traits: <strong>PBK Anchor / Rush Power</strong> (vertical pocket push), <strong>PBK Lat / Rush Speed</strong> (lateral edge bend), <strong>Catch in Traffic (CIT) / Cov Man</strong>, and <strong>Tackle Wrap / Hit Power</strong>.
-          </p>
+          <div class="measurables-grid" id="scoutMeasurables">
+            <div>
+              <div class="meas-val" id="scoutHeight">6'1"</div>
+              <div class="meas-lbl">Height</div>
+            </div>
+            <div>
+              <div class="meas-val" id="scoutWeight">226 lbs</div>
+              <div class="meas-lbl">Weight</div>
+            </div>
+            <div>
+              <div class="meas-val" id="scoutForty">4.49s</div>
+              <div class="meas-lbl">40-Yard</div>
+            </div>
+            <div>
+              <div class="meas-val" id="scoutTen">1.54s</div>
+              <div class="meas-lbl">10-Split</div>
+            </div>
+            <div>
+              <div class="meas-val" id="scoutSpeed">21.5 mph</div>
+              <div class="meas-lbl">Peak Speed</div>
+            </div>
+          </div>
+          <div class="scouting-blurb" id="scoutReport">
+            Dominant physical X receiver. Decimates press coverage; unstoppable on 12-16yd intermediate in-breakers.
+          </div>
         </div>
 
         <div class="panel-box">
-          <div style="max-height: 440px; overflow-y: auto;">
+          <div class="panel-title">
+            <span>Complete Matchup Roster & Granular Ratings</span>
+          </div>
+          <div style="max-height: 380px; overflow-y: auto;">
             <table class="roster-table" id="rosterTable">
               <thead>
                 <tr>
@@ -564,22 +1086,323 @@
         </div>
       </div>
 
-      <!-- TAB 3: EPA DISTRIBUTION & MUTATOR -->
-      <div id="tabAnalytics" class="tab-content">
+      <!-- TAB 3: CALL-SHEET MATRIX -->
+      <div id="tabCallSheet" class="tab-content">
         <div class="panel-box">
           <div class="panel-title">
-            <span>Monte Carlo EPA Outcome Distribution</span>
+            <span>Situational Call-Sheet Matrix (8 Concepts vs 7 Coverages)</span>
+            <button id="btnRefreshMatrix" style="padding:2px 8px; font-size:10px;">Evaluate Full Matrix</button>
+          </div>
+          <p style="color:#8da495; font-size:10.5px; margin-bottom:8px;">
+            Evaluates the full playbook across Cover 3 Sky, Cover 1 Robber, Cover 2 Tampa, Cover 4 Quarters, Cover 6 Split, Fire Zone 3, and Cover 0 Blitz. Letter grades reflect Expected Points Added and Goal Conversion Rate.
+          </p>
+          <div style="max-height: 440px; overflow-y: auto;" id="matrixContainer">
+            <div style="color:#8da495; font-size:11px; padding: 12px; text-align:center;">
+              Click "Evaluate Full Matrix" or the top "📋 Call Sheet" button to generate the live 8x7 situational matrix.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: EPA ANALYTICS & MUTATOR -->
+      <div id="tabAnalytics" class="tab-content">
+        <!-- NFL League Benchmark & Whole-Offense Projection Card -->
+        <div class="panel-box" style="border: 1px solid rgba(229,192,123,0.35); background: linear-gradient(135deg, rgba(20,35,26,0.95), rgba(16,28,21,0.95)); margin-bottom: 10px;">
+          <div class="panel-title" style="color: var(--chalk-gold); display:flex; justify-content:space-between; align-items:center;">
+            <span>NFL Efficiency Benchmark & Whole-Offense Projection</span>
+            <span id="offenseTierBadge" style="background: rgba(229,192,123,0.18); color: var(--chalk-gold); padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 700;">League Average Offense</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0; text-align: center;">
+            <div style="background: rgba(0,0,0,0.3); padding: 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="font-size: 9px; color: #8da495; text-transform: uppercase; font-weight:700;">Play EPA / SR</div>
+              <div id="benchPlayEpa" style="font-size: 14px; font-weight: 800; color: #fff;">+0.00 | 0.0%</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="font-size: 9px; color: #8da495; text-transform: uppercase; font-weight:700;">NFL League Avg</div>
+              <div id="benchLeagueEpa" style="font-size: 14px; font-weight: 800; color: #8da495;">+0.05 | 46.5%</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="font-size: 9px; color: #8da495; text-transform: uppercase; font-weight:700;">Δ Over League Avg</div>
+              <div id="benchDeltaEpa" style="font-size: 14px; font-weight: 800; color: #6eb079;">+0.00 EPA (+0.0%)</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 6px; border-radius: 4px; border: 1px solid rgba(229,192,123,0.25);">
+              <div style="font-size: 9px; color: var(--chalk-gold); text-transform: uppercase; font-weight:700;">Whole Offense %ile</div>
+              <div id="benchPercentile" style="font-size: 14px; font-weight: 800; color: var(--chalk-gold);">50.0th %ile</div>
+            </div>
+          </div>
+          <div id="benchFranchiseComp" style="font-size: 11px; color: #c4d7cb; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 3px; border-left: 3px solid var(--chalk-gold); line-height: 1.4;">
+            If an NFL offense was built entirely out of this one play in this situational context over a full 17-game season, it would rank in the <strong>50.0th percentile</strong> of all NFL offenses.
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-title">
+            <span>Monte Carlo Expected Points Added (EPA) Distribution</span>
             <span id="histSummaryLabel">400 Snaps</span>
           </div>
-          <canvas id="histCanvas" width="680" height="180"></canvas>
+          <canvas id="histCanvas" width="680" height="160"></canvas>
         </div>
 
         <div class="panel-box">
           <div class="panel-title">
             <span>Evolutionary Play Mutator Log</span>
-            <span>Objective: J(θ) = μ_EPA + 0.85·P_goal − 0.22·σ_EPA</span>
+            <span>Objective: J(θ) = μ_EPA + 1.20·P_goal − 0.16·σ_EPA</span>
           </div>
-          <div id="mutationLogBox" class="mutation-log">Click "🧬 Mutate" to run evolutionary optimizations on route stems, break depths, pre-snap splits, protection chips, and read orders tailored to the Eagles roster against Jaguars coverage.</div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding:6px 10px; background:rgba(0,0,0,0.25); border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label style="font-size:11px; color:var(--chalk-gold); font-weight:700;">Target Generations:
+                <select id="selEvoGens" style="padding:2px 8px; font-size:11px;">
+                  <option value="300">300 Generations (Rapid Scan ~6s)</option>
+                  <option value="750">750 Generations (Deep Gradient ~15s)</option>
+                  <option value="1500" selected>1500 Generations (Recommended Deep Descent)</option>
+                  <option value="2500">2500 Generations (Exhaustive Convergence)</option>
+                </select>
+              </label>
+              <label style="font-size:11px; color:var(--chalk-blue); font-weight:700;">Mutation Batching:
+                <select id="selEvoBatchSize" style="padding:2px 8px; font-size:11px;">
+                  <option value="1">1 Param (Micro-Tuning)</option>
+                  <option value="2">2 Params (Paired Concept)</option>
+                  <option value="3" selected>3 Params (Standard Batch)</option>
+                  <option value="4">4+ Params (Compound Revamp)</option>
+                </select>
+              </label>
+            </div>
+            <button id="btnMutateTab" class="btn-mutate" style="padding:4px 14px; font-size:11px;">🧬 Evolve Play</button>
+          </div>
+
+          <div id="evolutionProgressWrap" style="display:none; margin-bottom:12px; background:rgba(20,35,26,0.95); border:1px solid var(--chalk-border); border-radius:4px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span id="evoProgressTitle" style="font-weight:700; color:var(--chalk-gold); font-size:12px;">EVOLVING PLAY: Generation 0 / 1500</span>
+              <button id="btnStopEvolve" style="background:#e65858; color:#fff; border:none; padding:4px 12px; border-radius:3px; font-weight:700; cursor:pointer; font-size:11px;">■ Stop Evolution</button>
+            </div>
+            <div style="width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+              <div id="evoProgressBar" style="width:0%; height:100%; background:linear-gradient(90deg, #68b6d8, #6eb079); transition:width 0.05s linear;"></div>
+            </div>
+            <div id="evoProgressStats" style="display:flex; justify-content:space-between; font-size:11px; color:var(--chalk-dim); margin-top:5px;">
+              <span id="evoStatEpa">Best EPA: +0.00</span>
+              <span id="evoStatGoal">Goal Conv: 0.0%</span>
+              <span id="evoStatPercentile" style="color:var(--chalk-gold); font-weight:700;">Percentile: 50.0%</span>
+              <span id="evoStatSack">Sack: 0.0%</span>
+              <span id="evoStatStatus">Initializing multi-parameter gradient descent...</span>
+            </div>
+          </div>
+
+          <div id="mutationLogBox" class="mutation-log">Click "🧬 Evolve Play" to run multi-objective evolutionary optimizations on route stems, break depths, pre-snap splits, protection chips, and read orders tailored to this roster against the defensive scheme.</div>
+        </div>
+      </div>
+
+      <!-- TAB 5: DEFENSIVE COORDINATOR CONSOLE -->
+      <div id="tabDefensiveCoordinator" class="tab-content">
+        <div class="panel-box" style="border: 1px solid rgba(184, 115, 237, 0.4); background: linear-gradient(135deg, rgba(28,20,38,0.95), rgba(18,14,26,0.95));">
+          <div class="panel-title" style="color: var(--chalk-purple); display:flex; justify-content:space-between; align-items:center;">
+            <span>🛡️ Defensive Coordinator Console</span>
+            <span style="font-size:10px; color:#d4b3f5;">Two-Sided Tactical Game</span>
+          </div>
+          <div style="font-size: 11px; color: #d0c4de; margin-bottom: 8px; line-height: 1.4;">
+            As Defensive Coordinator, dictate coverage shells, front techniques, pass rush twists, QB spy assignments, and pre-snap cushions. Test your defensive setup against the offensive concept, or evolve an optimal scheme counter.
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom: 10px;">
+            <button id="btnPresetFangio" class="btn-mc" style="background:#281e3a; border-color:#8452ba; font-size:10.5px; padding:3px 8px;">Fangio 2-High Quarters</button>
+            <button id="btnPresetBelichick" class="btn-mc" style="background:#281e3a; border-color:#8452ba; font-size:10.5px; padding:3px 8px;">Belichick Cover 1 Robber Press</button>
+            <button id="btnPresetTampa2" class="btn-mc" style="background:#281e3a; border-color:#8452ba; font-size:10.5px; padding:3px 8px;">Tampa 2 Deep Pole</button>
+            <button id="btnPresetSpags" class="btn-mc" style="background:#281e3a; border-color:#8452ba; font-size:10.5px; padding:3px 8px;">Spags Double A-Gap Blitz</button>
+            <button id="btnPresetLeBeau" class="btn-mc" style="background:#281e3a; border-color:#8452ba; font-size:10.5px; padding:3px 8px;">LeBeau Fire Zone 3</button>
+            <button id="btnPresetSaban" class="btn-mc" style="background:#281e3a; border-color:#8452ba; font-size:10.5px; padding:3px 8px;">Saban Cover 6 (QQH)</button>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-title">Defensive Scheme & Structural Controls</div>
+          <div class="inspector-grid" style="grid-template-columns: 1fr 1fr; gap:8px;">
+            <label>Primary Coverage:
+              <select id="selDcCall">
+                <option value="COV3_SKY">Cover 3 Sky (Single-High 3-Deep 4-Under)</option>
+                <option value="COV1_ROBBER">Cover 1 Robber (Man-Free + Hole Lurker)</option>
+                <option value="COV2_TAMPA">Cover 2 Tampa (2-High + MLB Deep Seam)</option>
+                <option value="COV4_QUARTERS">Cover 4 Quarters (4 Deep Match Quarters)</option>
+                <option value="COV6_SPLIT">Cover 6 Split (Quarter-Quarter-Half)</option>
+                <option value="ZERO_BLITZ">Cover 0 Blitz (6-Man Pressure, Zero Safety)</option>
+                <option value="FIRE_ZONE_3">Fire Zone 3 (5-Man Pressure + 3-Deep Zone)</option>
+                <option value="MIXED">DC Mixed Meta (Adaptive)</option>
+              </select>
+            </label>
+            <label>Defensive Front:
+              <select id="selDcFront">
+                <option value="OVER">Over Front (3-Tech Strong)</option>
+                <option value="UNDER">Under Front (3-Tech Weak)</option>
+                <option value="WIDE_9">Wide-9 Speed Edge</option>
+                <option value="MUG_A">Mug A-Gap Blitz Threat</option>
+              </select>
+            </label>
+            <label>D-Line Rush Stunt:
+              <select id="selDcStunt">
+                <option value="AUTO">Auto (Situational Decision)</option>
+                <option value="NONE">None (Pure Rush Lanes)</option>
+                <option value="TE_TWIST">T-E Twist (DT Crash / DE Loop)</option>
+                <option value="ET_TWIST">E-T Twist (DE Crash / DT Loop)</option>
+                <option value="OVERLOAD_SLANT">Overload Slant (4-Man Slant)</option>
+              </select>
+            </label>
+            <label>Mobile QB Spy:
+              <select id="selDcSpy">
+                <option value="NONE">None (Full Rush & Coverage)</option>
+                <option value="WLB">WLB Spy (Weakside Linebacker)</option>
+                <option value="SS">SS Spy (Strong Safety in Box)</option>
+                <option value="EDGE2">EDGE2 Spy (Contain Rusher Spies)</option>
+              </select>
+            </label>
+            <div style="grid-column: span 2; display:flex; align-items:center; gap:14px; padding-top:4px;">
+              <label style="color:var(--chalk-purple); cursor:pointer; font-weight:700;">
+                <input type="checkbox" id="chkDcMatch" checked /> Enable Pattern Match Rules (Rip/Liz & Meg/Mod)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-title">
+            <span>Pre-Snap Alignment & Cushion Calibration</span>
+            <span style="font-size:10px; color:var(--chalk-cyan);">Real-Time Chalkboard Sync</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:11px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <label style="display:flex; align-items:center; gap:8px; width:100%;">
+                <span style="min-width:140px;">CB Cushion Depth:</span>
+                <input type="range" id="rngDcCushion" min="1.5" max="8.5" step="0.5" value="5.0" style="flex:1;" />
+                <span id="lblDcCushion" class="chalk-badge" style="min-width:65px; text-align:center;">5.0 yds</span>
+              </label>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <label style="display:flex; align-items:center; gap:8px; width:100%;">
+                <span style="min-width:140px;">Safety Depth Shell:</span>
+                <input type="range" id="rngDcSafetyDepth" min="8.5" max="16.5" step="0.5" value="13.0" style="flex:1;" />
+                <span id="lblDcSafetyDepth" class="chalk-badge" style="min-width:65px; text-align:center;">13.0 yds</span>
+              </label>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <label style="display:flex; align-items:center; gap:8px; width:100%;">
+                <span style="min-width:140px;">Underneath LB Drop:</span>
+                <input type="range" id="rngDcUnderDepth" min="3.5" max="9.5" step="0.5" value="6.5" style="flex:1;" />
+                <span id="lblDcUnderDepth" class="chalk-badge" style="min-width:65px; text-align:center;">6.5 yds</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-title">
+            <span>Defensive Evolutionary Optimizer</span>
+            <span>Objective: Min μ_EPA + 0.40·Sack + 0.30·Press + 0.45·Int</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding:6px 10px; background:rgba(0,0,0,0.25); border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label style="font-size:11px; color:var(--chalk-purple); font-weight:700;">Target Generations:
+                <select id="selDcEvoGens" style="padding:2px 8px; font-size:11px;">
+                  <option value="150">150 Generations (Rapid Defensive Counter ~3s)</option>
+                  <option value="300" selected>300 Generations (Balanced Defensive Scheme ~7s)</option>
+                  <option value="600">600 Generations (Deep Stunt & Shell Optimization ~14s)</option>
+                </select>
+              </label>
+            </div>
+            <button id="btnMutateDef" class="btn-matrix" style="padding:4px 14px; font-size:11px; background:#472461; border-color:#8e48c2;">🧬 Evolve Defense</button>
+          </div>
+
+          <div id="defEvoProgressWrap" style="display:none; margin-bottom:12px; background:rgba(28,20,38,0.95); border:1px solid var(--chalk-border); border-radius:4px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span id="defEvoProgressTitle" style="font-weight:700; color:var(--chalk-purple); font-size:12px;">EVOLVING DEFENSE: Generation 0 / 300</span>
+              <button id="btnStopDefEvolve" style="background:#e65858; color:#fff; border:none; padding:4px 12px; border-radius:3px; font-weight:700; cursor:pointer; font-size:11px;">■ Stop Defense Evolution</button>
+            </div>
+            <div style="width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+              <div id="defEvoProgressBar" style="width:0%; height:100%; background:linear-gradient(90deg, #b062eb, #68b6d8); transition:width 0.05s linear;"></div>
+            </div>
+            <div id="defEvoProgressStats" style="display:flex; justify-content:space-between; font-size:11px; color:var(--chalk-dim); margin-top:5px;">
+              <span id="defEvoStatEpa">Offense EPA: +0.00</span>
+              <span id="defEvoStatGoal">Goal Conv: 0.0%</span>
+              <span id="defEvoStatSack">Sack: 0.0%</span>
+              <span id="defEvoStatPressure">Pressure: 0.0%</span>
+              <span id="defEvoStatInt">INT: 0.0%</span>
+            </div>
+          </div>
+
+          <div id="defMutationLogBox" class="mutation-log">Click "🧬 Evolve Defense" to optimize coverage calls, defensive fronts, stunts, and player cushion depths against the current offensive design.</div>
+        </div>
+      </div>
+
+      <!-- TAB 6: TICK-TOCK CO-EVOLUTION WAR ROOM -->
+      <div id="tabCoEvolution" class="tab-content">
+        <div class="panel-box" style="border: 1px solid rgba(246, 196, 69, 0.4); background: linear-gradient(135deg, rgba(38,28,18,0.95), rgba(24,18,12,0.95));">
+          <div class="panel-title" style="color: var(--chalk-gold); display:flex; justify-content:space-between; align-items:center;">
+            <span>⚔️ Tick-Tock Adversarial Co-Evolution War Room</span>
+            <span id="nashBadge" class="chalk-badge" style="border-color:var(--chalk-cyan); color:var(--chalk-cyan);">Nash Search Ready</span>
+          </div>
+          <div style="font-size: 11px; color: #eeddc3; margin-bottom: 8px; line-height: 1.4;">
+            <strong>Iterative Game-Theoretic Minimax Dynamics:</strong> The Offense and Defense engage in an adversarial arms race. In the <em>Tick phase</em>, the Offense adapts route stems and pre-snap motions to exploit the fixed Defense. In the <em>Tock phase</em>, the Defense counter-adapts coverage shells, pass rush stunts, and cushion depths to neutralize the Offense. The cycle repeats until finding Nash Equilibrium or a mixed-strategy orbit.
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:4px;">
+            <div style="display:flex; align-items:center; gap:12px; font-size:11px;">
+              <label>Target Rounds:
+                <select id="selCoEvoRounds" style="padding:2px 8px; font-size:11px;">
+                  <option value="2">2 Rounds (4 Phases - Quick Scan)</option>
+                  <option value="3" selected>3 Rounds (6 Phases - Recommended)</option>
+                  <option value="4">4 Rounds (8 Phases - Deep Arms Race)</option>
+                  <option value="5">5 Rounds (10 Phases - Exhaustive Orbit)</option>
+                  <option value="10">10 Rounds (20 Phases - Full Stability Scan)</option>
+                </select>
+              </label>
+              <label>Gens / Phase:
+                <select id="selCoEvoPhaseGens" style="padding:2px 8px; font-size:11px;">
+                  <option value="35">35 Gens (Rapid)</option>
+                  <option value="60" selected>60 Gens (Standard)</option>
+                  <option value="90">90 Gens (Deep Gradient)</option>
+                </select>
+              </label>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="btnStartCoEvo" class="btn-coevo" style="padding:5px 16px; font-size:11px;">⚔️ Start Tick-Tock Co-Evolution</button>
+              <button id="btnStopCoEvo" style="display:none; background:#e65858; color:#fff; border:none; padding:5px 14px; border-radius:3px; font-weight:700; cursor:pointer; font-size:11px;">■ Abort</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="coevoProgressWrap" style="display:none; margin-bottom:10px; background:rgba(30,22,14,0.95); border:1px solid var(--chalk-border); border-radius:4px; padding:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span id="coevoPhaseTitle" style="font-weight:700; color:var(--chalk-gold); font-size:12px;">ACTIVE PHASE: Initializing...</span>
+            <span id="coevoPctBadge" class="chalk-badge">0%</span>
+          </div>
+          <div style="width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+            <div id="coevoProgressBar" style="width:0%; height:100%; background:linear-gradient(90deg, #f6c445, #e65858, #4eba6f); transition:width 0.1s linear;"></div>
+          </div>
+          <div id="coevoPhaseStatus" style="font-size:11px; color:var(--chalk-dim); margin-top:5px;">Simulating first adversarial exchange...</div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-title">
+            <span>Co-Evolution Adversarial Timeline & Adaptation Log</span>
+            <span style="font-size:10px; color:var(--chalk-dim);">Click row to inspect on chalkboard</span>
+          </div>
+          <div style="overflow-x:auto; max-height:360px;">
+            <table class="coevo-table">
+              <thead>
+                <tr>
+                  <th>Phase</th>
+                  <th>Offense Adaptation</th>
+                  <th>Defense Counter</th>
+                  <th>Mean EPA</th>
+                  <th>Goal %</th>
+                  <th>Sack %</th>
+                  <th>Δ EPA</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="coevoTableBody">
+                <tr>
+                  <td colspan="8" style="text-align:center; color:var(--chalk-dim); padding:16px;">
+                    Click "⚔️ Start Tick-Tock Co-Evolution" to initiate the adversarial arms race between Offense and Defense.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -1,14 +1,22 @@
 {
-  "name": "retro-oc-sim",
+  "name": "all22_chess",
   "version": "1.0.0",
+  "description": "High-Speed Continuous Game-Theoretic Football Simulation & Adversarial Co-Evolution Lab",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "simulate:optimum": "tsx src/simulate_pet_optimum.ts",
+    "benchmark": "tsx src/benchmark_audit.ts",
+    "evolve:schemes": "tsx src/evolve_running_schemes.ts",
+    "analyze:counters": "tsx src/analyze_defensive_counters.ts",
+    "analyze:personnel": "tsx src/analyze_personnel_sensitivity.ts"
   },
   "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
     "typescript": "^5.6.2",
     "vite": "^5.4.8"
   }

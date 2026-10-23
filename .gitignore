@@ -1,4 +1,35 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build Output
+dist/
+build/
+
+# Testing & Scratch
+scratch/
+coverage/
+
+# Logs & Temporary files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.system_generated/
+
+# Environment & Local Secrets
+.env
+.env.local
+.env.*.local
+
+# IDE & OS Cruft
 .DS_Store
-*.local
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
