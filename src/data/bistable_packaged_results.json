@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-11-08T00:06:13.201Z",
+  "conceptTested": "KBC_PACKAGED_CONTINUUM_OMEGA",
+  "trialsPerCell": 50,
+  "staticAlpha": {
+    "snaps": 200,
+    "meanYds": 11.72,
+    "meanEpa": -0.299,
+    "successRatePct": 41.5,
+    "explosiveRatePct": 41.5,
+    "turnoverRatePct": 0
+  },
+  "reactiveAlpha": {
+    "snaps": 200,
+    "meanYds": 13.26,
+    "meanEpa": 0.691,
+    "successRatePct": 81.5,
+    "explosiveRatePct": 66,
+    "turnoverRatePct": 0
+  },
+  "staticBeta": {
+    "snaps": 200,
+    "meanYds": 10.42,
+    "meanEpa": -0.262,
+    "successRatePct": 36.5,
+    "explosiveRatePct": 36.5,
+    "turnoverRatePct": 0
+  },
+  "reactiveBeta": {
+    "snaps": 200,
+    "meanYds": 5.28,
+    "meanEpa": 0.103,
+    "successRatePct": 82,
+    "explosiveRatePct": 4.5,
+    "turnoverRatePct": 0
+  },
+  "staticBlendedEpa": -0.28,
+  "reactiveBlendedEpa": 0.397,
+  "netSurplusEpa": 0.677
+}

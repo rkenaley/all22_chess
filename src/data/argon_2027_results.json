@@ -1,0 +1,643 @@
+{
+  "generatedAt": "2026-11-05T01:28:46.570Z",
+  "rosterCapM": 81.1,
+  "rosterPlayers": [
+    {
+      "slotKey": "QB",
+      "name": "Anthony Richardson",
+      "pos": "QB",
+      "jersey": 5,
+      "capHitM": 10.8,
+      "archetype": "6'4\" 244-lb 10.00-RAS Power-Speed Trigger & Chiral Direct-Snap Hammer",
+      "inefficiencyThesis": "Discounted (~$47M below supermax pocket QBs) for 5-step full-field touch variance, yet possesses Cam Newton mass (244 lbs, PWR 89) + 4.43 speed (SPD 92) + elite raw velocity — thriving in direct-snap 11-on-11 runs behind 256-lb/250-lb TEs, binary RPOs, and half-roll boundary lasers.",
+      "throwerRating": 84,
+      "blockRating": 50,
+      "ratings": {
+        "speed": 92,
+        "accel": 93,
+        "power": 89,
+        "finesse": 84,
+        "awareness": 78
+      }
+    },
+    {
+      "slotKey": "RB",
+      "name": "Joe Milton III",
+      "pos": "RB",
+      "jersey": 19,
+      "capHitM": 3.2,
+      "archetype": "6'5\" 246-lb Split-Reactor QB2 / Displaced Node Passer & Option-Boot Freeze",
+      "inefficiencyThesis": "Backup-QB wage ($3.2M) puts a 246-lb dual-threat athlete with an 80-yard cannon (ARM 84, PWR 86, SPD 88) in the backfield simultaneously — serving as mug-immune perimeter passer on displaced launch nodes and high-speed weakside option-boot freeze on direct QB1 runs.",
+      "throwerRating": 84,
+      "blockRating": 52,
+      "ratings": {
+        "speed": 88,
+        "accel": 89,
+        "power": 86,
+        "finesse": 83,
+        "awareness": 78
+      }
+    },
+    {
+      "slotKey": "WR1",
+      "name": "Khalil Shakir",
+      "pos": "WR",
+      "jersey": 10,
+      "capHitM": 12.5,
+      "archetype": "Former Wildcat Option QB / High-IQ Jet Passer & Zone-Void Separator",
+      "inefficiencyThesis": "Former high-school Wildcat QB with >85% NFL catch reliability, elite contact balance, and crisp perimeter option-pass decision-making at less than half of $32M+ WR1 contracts.",
+      "throwerRating": 79,
+      "blockRating": 68,
+      "ratings": {
+        "speed": 91,
+        "accel": 92,
+        "power": 72,
+        "finesse": 90,
+        "awareness": 89
+      }
+    },
+    {
+      "slotKey": "WR2",
+      "name": "Xavier Worthy",
+      "pos": "WR",
+      "jersey": 1,
+      "capHitM": 4.5,
+      "archetype": "4.21 Combine-Record Lid-Lifter & Untouched Kinetic Relay Trailer",
+      "inefficiencyThesis": "Year-4 rookie scale ($4.5M) unlocks all-time NFL Combine 4.21 speed (SPD 98, ACC 97) — backing Quarters safeties to 17 yards pre-snap and receiving disciplined downfield backward pitches (>=3.25y separation) at 9.5 yd/s.",
+      "throwerRating": 52,
+      "blockRating": 50,
+      "ratings": {
+        "speed": 98,
+        "accel": 97,
+        "power": 60,
+        "finesse": 87,
+        "awareness": 85
+      }
+    },
+    {
+      "slotKey": "SL",
+      "name": "Curtis Samuel",
+      "pos": "SL",
+      "jersey": 4,
+      "capHitM": 7.5,
+      "archetype": "4.31 RB/WR Hybrid Wing / Boundary Void Cutter & Perimeter DB Stalker",
+      "inefficiencyThesis": "College RB/WR hybrid with 4.31 speed (SPD 95) and running-back lower-body mass (BLK 74) — attacks Quarters boundary voids and stalks nickel/corner DBs in 11-on-11 sweeps at a mid-tier gadget cap hit.",
+      "throwerRating": 62,
+      "blockRating": 74,
+      "ratings": {
+        "speed": 95,
+        "accel": 95,
+        "power": 74,
+        "finesse": 88,
+        "awareness": 86
+      }
+    },
+    {
+      "slotKey": "TE",
+      "name": "Tyler Warren",
+      "pos": "TE",
+      "jersey": 84,
+      "capHitM": 4.4,
+      "archetype": "6'6\" 256-lb Wildcat-QB Tight End / Kinetic Relay Hub & H-Back Lead Eraser",
+      "inefficiencyThesis": "Rookie wage-scale Mackey winner ($4.4M vs $18M TE1 market) who played Wildcat QB, FB, TE, and slot — giving Argon a 4th live passer (ARM 81), elite C-gap/alley lead blocking (BLK 88), zone-void YAC, and direct-snap Wildcat power.",
+      "throwerRating": 81,
+      "blockRating": 88,
+      "ratings": {
+        "speed": 85,
+        "accel": 87,
+        "power": 88,
+        "finesse": 86,
+        "awareness": 86
+      }
+    },
+    {
+      "slotKey": "TE2",
+      "name": "Tommy Tremble",
+      "pos": "TE",
+      "jersey": 82,
+      "capHitM": 5.5,
+      "archetype": "4.59-Speed 250-lb Fullback/Move-TE / Zero-Sub Edge & Alley Lead Blocker",
+      "inefficiencyThesis": "Undervalued in reception-driven TE free agency; 4.59 speed (SPD 86) + ferocious point-of-attack punch (BLK 86) erases DEs, LBs, and safeties as a lead H-Back/Fullback on chiral 11-on-11 runs without ever asking a QB to block.",
+      "throwerRating": 50,
+      "blockRating": 86,
+      "ratings": {
+        "speed": 86,
+        "accel": 87,
+        "power": 86,
+        "finesse": 81,
+        "awareness": 84
+      }
+    },
+    {
+      "slotKey": "LT",
+      "name": "Rasheed Walker",
+      "pos": "LT",
+      "jersey": 63,
+      "capHitM": 12.5,
+      "archetype": "Former 7th-Round Pass-Set & Pin-Pull Blindside Tackle",
+      "inefficiencyThesis": "Late-round development surplus (~$14M below top-market LT resets) combining long-arm pass-set anchor (BLK 87) with 77-speed lateral reach on chiral left sweeps.",
+      "throwerRating": 40,
+      "blockRating": 87,
+      "ratings": {
+        "speed": 77,
+        "accel": 82,
+        "power": 87,
+        "finesse": 87,
+        "awareness": 86
+      }
+    },
+    {
+      "slotKey": "LG",
+      "name": "Evan Brown",
+      "pos": "LG",
+      "jersey": 64,
+      "capHitM": 6.2,
+      "archetype": "Converted-Center High-Speed Pulling Left Guard",
+      "inefficiencyThesis": "Veteran center-guard swing value ($6.2M vs $21M Pro Bowl guards) delivering center-grade stunt recognition (BLK 87) and 77-speed open-field pull accuracy.",
+      "throwerRating": 40,
+      "blockRating": 87,
+      "ratings": {
+        "speed": 77,
+        "accel": 83,
+        "power": 87,
+        "finesse": 86,
+        "awareness": 86
+      }
+    },
+    {
+      "slotKey": "C",
+      "name": "Graham Barton",
+      "pos": "C",
+      "jersey": 62,
+      "capHitM": 4.2,
+      "archetype": "4.85-Speed / 9.98-RAS Tackle-to-Center Bilateral Pull Engine",
+      "inefficiencyThesis": "Year-4 rookie contract ($4.2M) for a former college Left Tackle with 99th-percentile Center athleticism (SPD 79, ACC 85, BLK 88) capable of outrunning ILBs to either sideline.",
+      "throwerRating": 40,
+      "blockRating": 88,
+      "ratings": {
+        "speed": 79,
+        "accel": 85,
+        "power": 87,
+        "finesse": 88,
+        "awareness": 87
+      }
+    },
+    {
+      "slotKey": "RG",
+      "name": "Tanor Bortolini",
+      "pos": "RG",
+      "jersey": 60,
+      "capHitM": 1.3,
+      "archetype": "9.87-RAS / 4.94-Speed Day-3 Rookie-Contract Pull Guard",
+      "inefficiencyThesis": "Extreme rookie-scale OL arbitrage ($1.3M vs $20M veteran RG market): 4.28 short-shuttle agility (faster than most NFL WRs!) pairs with Barton to form dual sub-4.95 interior pullers (BLK 86).",
+      "throwerRating": 40,
+      "blockRating": 86,
+      "ratings": {
+        "speed": 79,
+        "accel": 85,
+        "power": 85,
+        "finesse": 86,
+        "awareness": 85
+      }
+    },
+    {
+      "slotKey": "RT",
+      "name": "Zach Tom",
+      "pos": "RT",
+      "jersey": 50,
+      "capHitM": 13,
+      "archetype": "5-Position Technician Strongside Anchor & Reach Tackle",
+      "inefficiencyThesis": "Former 4th-round technician ($13.0M) with elite mirror feet (FIN 89, SPD 78, BLK 89) and leverage who anchors 5-man slide protections and seals strongside C-gaps.",
+      "throwerRating": 40,
+      "blockRating": 89,
+      "ratings": {
+        "speed": 78,
+        "accel": 84,
+        "power": 87,
+        "finesse": 89,
+        "awareness": 88
+      }
+    }
+  ],
+  "legalityAudit": {
+    "snapsAudited": 5845,
+    "legal7OnLosPct": 100,
+    "legalUncoveredEndsPct": 100,
+    "legalIneligibleBufferPct": 100,
+    "strictlyBackwardLateralsPct": 100
+  },
+  "argonPlayTelemetry": {
+    "ARGON_CHIRAL_JET_LEFT": {
+      "name": "ARGON // CHIRAL JET-LEFT OPTION CONTINUUM (SHAKIR THROW/SWEEP)",
+      "meanYds": 10.53,
+      "meanEpa": 0.251,
+      "explosivePct": 29.8,
+      "negativePlayPct": 0.7,
+      "sackPct": 0,
+      "fumbleTotalPct": 0.22,
+      "fumbleLostPct": 0,
+      "branchText": "Displaced Option Pass: 98.7% (+10.7y) | Convoy Tuck: 1.1% (+1.7y)",
+      "branchStats": {
+        "passRate": 98.7,
+        "passYds": 10.7,
+        "keepRate": 1.1,
+        "keepYds": 1.7
+      },
+      "perFrontEpa": {
+        "NICKEL_OVER_C3": 0.308,
+        "NICKEL_UNDER_C1": 0.322,
+        "NICKEL_SIM_C2": 0.454,
+        "BASE_34_BEAR_C4": 0.169,
+        "BASE_43_OVER_C1": 0.213,
+        "DIME_MUG_C0": 0.137,
+        "DIME_QUARTERS_MATCH": 0.374,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.061,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.341
+      }
+    },
+    "ARGON_REACTOR_SWEEP_RIGHT": {
+      "name": "ARGON // 11-ON-11 RIGHT REACTOR SWEEP (244-LB RICHARDSON + TREMBLE LEAD)",
+      "meanYds": 10.81,
+      "meanEpa": 0.5,
+      "explosivePct": 25.8,
+      "negativePlayPct": 1.3,
+      "sackPct": 0,
+      "fumbleTotalPct": 0,
+      "fumbleLostPct": 0,
+      "branchText": "11-on-11 Direct 244-lb QB Run (Stuff Rate 7.1%, 0.0% Incomp/Sack)",
+      "branchStats": {
+        "unstuffedPct": 92.9,
+        "stuffPct": 7.1
+      },
+      "perFrontEpa": {
+        "NICKEL_OVER_C3": 0.665,
+        "NICKEL_UNDER_C1": 0.66,
+        "NICKEL_SIM_C2": 0.625,
+        "BASE_34_BEAR_C4": 0.185,
+        "BASE_43_OVER_C1": -0.024,
+        "DIME_MUG_C0": 0.35,
+        "DIME_QUARTERS_MATCH": 0.167,
+        "VIKINGS_MUG_CROSSDOG_C0": 1.331,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.543
+      }
+    },
+    "ARGON_NOBLE_KINETIC_RELAY": {
+      "name": "ARGON // NOBLE KINETIC RELAY (WARREN ZONE-VOID -> 4.21 WORTHY PITCH)",
+      "meanYds": 15.32,
+      "meanEpa": 0.295,
+      "explosivePct": 40.7,
+      "negativePlayPct": 6.2,
+      "sackPct": 5.8,
+      "fumbleTotalPct": 0.44,
+      "fumbleLostPct": 0.44,
+      "branchText": "Comp: 45.6% | Pitch to 4.21 Worthy: 33.7% (+34.0y) | Warren Keep: 66.3% (+34.5y)",
+      "branchStats": {
+        "compPct": 45.6,
+        "pitchRateOnCatch": 33.7,
+        "latMeanYds": 34,
+        "keepMeanYds": 34.5
+      },
+      "perFrontEpa": {
+        "NICKEL_OVER_C3": -0.252,
+        "NICKEL_UNDER_C1": 1.027,
+        "NICKEL_SIM_C2": 0.761,
+        "BASE_34_BEAR_C4": -0.34,
+        "BASE_43_OVER_C1": 0.731,
+        "DIME_MUG_C0": 0.158,
+        "DIME_QUARTERS_MATCH": -0.204,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.093,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.678
+      }
+    },
+    "ARGON_DISPLACED_NODE_LASER": {
+      "name": "ARGON // DISPLACED NODE DOUBLE-PASS LASER (RICHARDSON -> MILTON -> WORTHY)",
+      "meanYds": 12.32,
+      "meanEpa": 0.296,
+      "explosivePct": 73.3,
+      "negativePlayPct": 2,
+      "sackPct": 0,
+      "fumbleTotalPct": 2,
+      "fumbleLostPct": 0.67,
+      "branchText": "Displaced Option Pass: 98.0% (+12.7y) | Convoy Tuck: 0.0% (+0.0y)",
+      "branchStats": {
+        "passRate": 98,
+        "passYds": 12.7,
+        "keepRate": 0,
+        "keepYds": 0
+      },
+      "perFrontEpa": {
+        "NICKEL_OVER_C3": 0.296,
+        "NICKEL_UNDER_C1": 0.44,
+        "NICKEL_SIM_C2": 0.44,
+        "BASE_34_BEAR_C4": 0.329,
+        "BASE_43_OVER_C1": 0.196,
+        "DIME_MUG_C0": 0.384,
+        "DIME_QUARTERS_MATCH": 0.088,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.085,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.404
+      }
+    },
+    "ARGON_WILDCAT_TRIPLE_PITCH": {
+      "name": "ARGON // 256-LB WILDCAT-TE DIRECT SNAP & 4.21 SPEED-OPTION PITCH (WARREN -> WORTHY)",
+      "meanYds": 7.74,
+      "meanEpa": 0.172,
+      "explosivePct": 15.1,
+      "negativePlayPct": 17.1,
+      "sackPct": 0,
+      "fumbleTotalPct": 0.22,
+      "fumbleLostPct": 0.22,
+      "branchText": "Speed-Option Pitch to Worthy: 8.2% (+36.1y) | 256-lb Warren Keep: 91.8% (+5.2y)",
+      "branchStats": {
+        "pitchRate": 8.2,
+        "pitchYds": 36.1,
+        "keepRate": 91.8,
+        "keepYds": 5.2
+      },
+      "perFrontEpa": {
+        "NICKEL_OVER_C3": -0.17,
+        "NICKEL_UNDER_C1": 0.69,
+        "NICKEL_SIM_C2": 0.682,
+        "BASE_34_BEAR_C4": 0.06,
+        "BASE_43_OVER_C1": 0.133,
+        "DIME_MUG_C0": -0.807,
+        "DIME_QUARTERS_MATCH": -0.044,
+        "VIKINGS_MUG_CROSSDOG_C0": 1.02,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.015
+      }
+    },
+    "ARGON_2MIN_BOUNDARY_LASER": {
+      "name": "ARGON 2-MIN // DIRECT-SNAP SPRINT-OUT BOUNDARY LASER & OOB CLOCK-STOPPER",
+      "meanYds": 9.2,
+      "meanEpa": 0.148,
+      "explosivePct": 9.6,
+      "negativePlayPct": 0,
+      "sackPct": 0,
+      "fumbleTotalPct": 0,
+      "fumbleLostPct": 0,
+      "branchText": "Displaced Option Pass: 100.0% (+9.2y) | Convoy Tuck: 0.0% (+0.0y)",
+      "branchStats": {
+        "passRate": 100,
+        "passYds": 9.2,
+        "keepRate": 0,
+        "keepYds": 0
+      },
+      "perFrontEpa": {
+        "NICKEL_OVER_C3": -0.387,
+        "NICKEL_UNDER_C1": 0.299,
+        "NICKEL_SIM_C2": -0.348,
+        "BASE_34_BEAR_C4": -0.194,
+        "BASE_43_OVER_C1": 0.299,
+        "DIME_MUG_C0": 0.278,
+        "DIME_QUARTERS_MATCH": 0.534,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.404,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.446
+      }
+    },
+    "ARGON_4MIN_LEFT_MONOLITH": {
+      "name": "ARGON 4-MIN // 11-ON-11 CHIRAL LEFT MONOLITH SWEEP (BARTON + BORTOLINI + WARREN)",
+      "meanYds": 12.21,
+      "meanEpa": 0.589,
+      "explosivePct": 36,
+      "negativePlayPct": 1.8,
+      "sackPct": 0,
+      "fumbleTotalPct": 0,
+      "fumbleLostPct": 0,
+      "branchText": "11-on-11 Direct 244-lb QB Run (Stuff Rate 3.1%, 0.0% Incomp/Sack)",
+      "branchStats": {
+        "unstuffedPct": 96.9,
+        "stuffPct": 3.1
+      },
+      "perFrontEpa": {
+        "NICKEL_OVER_C3": -0.044,
+        "NICKEL_UNDER_C1": 0.713,
+        "NICKEL_SIM_C2": 1.173,
+        "BASE_34_BEAR_C4": 0.282,
+        "BASE_43_OVER_C1": 0.658,
+        "DIME_MUG_C0": 1.202,
+        "DIME_QUARTERS_MATCH": 0.019,
+        "VIKINGS_MUG_CROSSDOG_C0": 1.154,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.148
+      }
+    },
+    "ARGON_GOALLINE_CYCLOTRON": {
+      "name": "ARGON GOAL-LINE // +4.0y 2-QB PYLON CYCLOTRON & 256-LB WARREN POP-PASS",
+      "meanYds": 2.75,
+      "meanEpa": 0.133,
+      "explosivePct": 72.7,
+      "negativePlayPct": 2.7,
+      "sackPct": 0,
+      "fumbleTotalPct": 1.33,
+      "fumbleLostPct": 1.33,
+      "branchText": "Displaced Option Pass: 97.3% (+3.0y) | Convoy Tuck: 1.3% (+-3.1y)",
+      "branchStats": {
+        "passRate": 97.3,
+        "passYds": 3,
+        "keepRate": 1.3,
+        "keepYds": -3.1
+      },
+      "perFrontEpa": {
+        "GOAL_LINE_62_PINCH": 0.039,
+        "BASE_43_OVER_C1": 0.232,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.126
+      }
+    }
+  },
+  "nashEquilibrium": {
+    "argonNashEpa": 0.2315,
+    "argonMix": {
+      "ARGON_CHIRAL_JET_LEFT": 49.79,
+      "ARGON_REACTOR_SWEEP_RIGHT": 9.67,
+      "ARGON_NOBLE_KINETIC_RELAY": 0,
+      "ARGON_DISPLACED_NODE_LASER": 29.99,
+      "ARGON_WILDCAT_TRIPLE_PITCH": 0,
+      "ARGON_2MIN_BOUNDARY_LASER": 0.01,
+      "ARGON_4MIN_LEFT_MONOLITH": 10.54
+    },
+    "adversarialDcCounterMix": {
+      "NICKEL_OVER_C3": 0.02,
+      "NICKEL_UNDER_C1": 0,
+      "NICKEL_SIM_C2": 0,
+      "BASE_34_BEAR_C4": 59.12,
+      "BASE_43_OVER_C1": 0.59,
+      "DIME_MUG_C0": 0,
+      "DIME_QUARTERS_MATCH": 35.58,
+      "VIKINGS_MUG_CROSSDOG_C0": 4.69,
+      "VIKINGS_SAFETY_BLITZ_C1": 0
+    },
+    "hydraNashEpa": -0.0975,
+    "baselinesNashEpa": {
+      "CONV_11_SPREAD": -0.19,
+      "SHANAHAN_12_PA": 0.1533,
+      "SUPERMAX_STARS": -0.4257
+    }
+  },
+  "fullGameBenchmarks": [
+    {
+      "philosophyName": "2027 Google Argon Continuum ($81.1M Moneyball)",
+      "offCapM": 81.1,
+      "ppgStandardDc": 56.08,
+      "ppgAdversarialNashDc": 48.8,
+      "ppdStandard": 5.1,
+      "tdDrivePct": 70.2,
+      "fgDrivePct": 7.1,
+      "turnoverDrivePct": 9.2,
+      "explosiveRatePct": 32.9,
+      "ppgPer10MCap": 6.92,
+      "projectedTeamNetDiffPerGame": 37.78
+    },
+    {
+      "philosophyName": "2027 Hydra Vanguard ($85.5M Moneyball)",
+      "offCapM": 85.5,
+      "ppgStandardDc": 18.14,
+      "ppgAdversarialNashDc": 10.33,
+      "ppdStandard": 1.65,
+      "tdDrivePct": 18,
+      "fgDrivePct": 13.3,
+      "turnoverDrivePct": 15.3,
+      "explosiveRatePct": 15.5,
+      "ppgPer10MCap": 2.12,
+      "projectedTeamNetDiffPerGame": -0.46
+    },
+    {
+      "philosophyName": "Conventional 11-Pers Dropback Spread ($138.5M Cap)",
+      "offCapM": 138.5,
+      "ppgStandardDc": 12.97,
+      "ppgAdversarialNashDc": 9.46,
+      "ppdStandard": 1.18,
+      "tdDrivePct": 11.1,
+      "fgDrivePct": 13.5,
+      "turnoverDrivePct": 18,
+      "explosiveRatePct": 7.2,
+      "ppgPer10MCap": 0.94,
+      "projectedTeamNetDiffPerGame": -9.03
+    },
+    {
+      "philosophyName": "Shanahan/McVay 12-Pers Play-Action ($146.0M Cap)",
+      "offCapM": 146,
+      "ppgStandardDc": 28.34,
+      "ppgAdversarialNashDc": 21.83,
+      "ppdStandard": 2.58,
+      "tdDrivePct": 31,
+      "fgDrivePct": 14,
+      "turnoverDrivePct": 17.7,
+      "explosiveRatePct": 12.5,
+      "ppgPer10MCap": 1.94,
+      "projectedTeamNetDiffPerGame": 5.94
+    },
+    {
+      "philosophyName": "Top-Heavy Supermax Stars / Cap-Starved OL ($172.0M Cap)",
+      "offCapM": 172,
+      "ppgStandardDc": 8.39,
+      "ppgAdversarialNashDc": 5.94,
+      "ppdStandard": 0.76,
+      "tdDrivePct": 6.3,
+      "fgDrivePct": 10.8,
+      "turnoverDrivePct": 15.9,
+      "explosiveRatePct": 10.3,
+      "ppgPer10MCap": 0.49,
+      "projectedTeamNetDiffPerGame": -16.11
+    }
+  ],
+  "situationalDrills": {
+    "twoMinute": {
+      "argon": {
+        "tdWinPct": 64,
+        "ydsPerClockSec": 1.94,
+        "oobStopsPerDrive": 3.42,
+        "sackRatePct": 0.1
+      },
+      "hydra": {
+        "tdWinPct": 4.9,
+        "ydsPerClockSec": 0.83,
+        "oobStopsPerDrive": 1.37,
+        "sackRatePct": 0.6
+      },
+      "conv11": {
+        "tdWinPct": 15.7,
+        "ydsPerClockSec": 0.72,
+        "oobStopsPerDrive": 0.05,
+        "sackRatePct": 9.7
+      },
+      "supermax": {
+        "tdWinPct": 20.6,
+        "ydsPerClockSec": 0.79,
+        "oobStopsPerDrive": 0.16,
+        "sackRatePct": 9.5
+      }
+    },
+    "fourMinute": {
+      "argon": {
+        "gameSealPct": 67.1,
+        "meanClockBledSec": 186.7,
+        "firstDownsPerDrive": 2.3,
+        "clockGiftMistakePct": 0
+      },
+      "hydra": {
+        "gameSealPct": 77.1,
+        "meanClockBledSec": 203.8,
+        "firstDownsPerDrive": 2.81,
+        "clockGiftMistakePct": 0.5
+      },
+      "shanahan12": {
+        "gameSealPct": 48.2,
+        "meanClockBledSec": 169.1,
+        "firstDownsPerDrive": 1.95,
+        "clockGiftMistakePct": 0
+      },
+      "conv11": {
+        "gameSealPct": 15.9,
+        "meanClockBledSec": 109.5,
+        "firstDownsPerDrive": 0.79,
+        "clockGiftMistakePct": 0
+      }
+    },
+    "goalLine": {
+      "argon": {
+        "fourDownTdPct": 97.1,
+        "singleSnapTdPct": 68.1,
+        "expectedGoalLinePts": 6.76
+      },
+      "hydra": {
+        "fourDownTdPct": 94.9,
+        "singleSnapTdPct": 71.5,
+        "expectedGoalLinePts": 6.61
+      },
+      "shanahan12": {
+        "fourDownTdPct": 61.9,
+        "singleSnapTdPct": 26.1,
+        "expectedGoalLinePts": 5.14
+      },
+      "conv11": {
+        "fourDownTdPct": 37,
+        "singleSnapTdPct": 13.7,
+        "expectedGoalLinePts": 4.02
+      }
+    },
+    "thirdAndNine": {
+      "argon": {
+        "conversionPct": 56.7,
+        "explosive18Pct": 16.1,
+        "sackPct": 0,
+        "meanEpa": 0.239
+      },
+      "hydra": {
+        "conversionPct": 31.1,
+        "explosive18Pct": 31.1,
+        "sackPct": 0,
+        "meanEpa": -0.094
+      },
+      "conv11": {
+        "conversionPct": 19.8,
+        "explosive18Pct": 17.5,
+        "sackPct": 19.2,
+        "meanEpa": -0.592
+      },
+      "supermax": {
+        "conversionPct": 27.4,
+        "explosive18Pct": 24.2,
+        "sackPct": 22,
+        "meanEpa": -0.528
+      }
+    }
+  }
+}

@@ -8,11 +8,16 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "simulate:optimum": "tsx src/simulate_pet_optimum.ts",
-    "benchmark": "tsx src/benchmark_audit.ts",
-    "evolve:schemes": "tsx src/evolve_running_schemes.ts",
-    "analyze:counters": "tsx src/analyze_defensive_counters.ts",
-    "analyze:personnel": "tsx src/analyze_personnel_sensitivity.ts"
+    "simulate:optimum": "npx tsx src/simulate_pet_optimum.ts",
+    "benchmark": "npx tsx src/benchmark_audit.ts",
+    "evolve:schemes": "npx tsx src/evolve_running_schemes.ts",
+    "analyze:counters": "npx tsx src/analyze_defensive_counters.ts",
+    "analyze:personnel": "npx tsx src/analyze_personnel_sensitivity.ts",
+    "simulate:vanguard2027": "npx tsx src/vanguard_2027_playtest.ts",
+    "generate:cards": "npx tsx src/generate_twitter_cards.ts",
+    "simulate:argon2027": "npx tsx src/argon_2027_playtest.ts",
+    "generate:argon-cards": "npx tsx src/generate_argon_cards.ts",
+    "generate:gifs": "npx tsx src/generate_play_gifs.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

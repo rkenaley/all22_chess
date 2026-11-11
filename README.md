@@ -92,6 +92,9 @@ npm run analyze:counters
 
 # 5. Evaluate offensive personnel groupings against defensive responses
 npm run analyze:personnel
+
+# 6. Generate 20 Hz animated All-22 GIFs for Google Argon & Hydra Vanguard
+npm run generate:gifs
 ```
 
 ---
@@ -108,6 +111,11 @@ For a rigorous, mathematical treatment of the underlying kinematic equations, PR
 
 ```
 all22-chess-oc-simulator/
+├── docs/
+│   ├── argon_gifs/              # 20 Hz animated play simulation GIFs for Google Argon
+│   ├── hydra_gifs/              # 20 Hz animated play simulation GIFs for Hydra Vanguard
+│   ├── argon_cards/             # High-res 1600x900 infographics for Google Argon
+│   └── twitter_cards/           # High-res 1600x900 infographics for Hydra Vanguard
 ├── index.html                   # Tactile All-22 chalkboard UI & control panels
 ├── package.json                 # Project configuration, scripts & dependencies
 ├── tsconfig.json                # Strict TypeScript configuration

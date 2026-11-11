@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All-22 Chess — Tactical Kinematic Simulator // User Explainer Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080c14;
+      --bg-panel: #0f1726;
+      --bg-surface: #152033;
+      --border-hairline: #1e2c44;
+      --border-focus: #00f0ff;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --cyan: #00f0ff;
+      --amber: #f59e0b;
+      --green: #10b981;
+      --rose: #ef4444;
+      --purple: #a855f7;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    /* Top Navigation */
+    .nav-bar {
+      position: sticky;
+      top: 0;
+      background: rgba(8, 12, 20, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-hairline);
+      z-index: 100;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-tag {
+      background: var(--cyan);
+      color: #05080e;
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-size: 11px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      transition: color 0.15s;
+    }
+
+    .nav-link:hover {
+      color: var(--cyan);
+    }
+
+    .btn-return {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 3px;
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      transition: all 0.15s;
+    }
+
+    .btn-return:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Content Layout */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .hero-section {
+      margin-bottom: 50px;
+      border-bottom: 1px solid var(--border-hairline);
+      padding-bottom: 40px;
+    }
+
+    .hero-title {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title span {
+      color: var(--cyan);
+    }
+
+    .hero-lead {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 820px;
+      line-height: 1.6;
+    }
+
+    /* Feature Block */
+    .feature-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
+
+    .feature-header {
+      padding: 16px 20px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .feature-number {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--cyan);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .feature-title {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 4px;
+    }
+
+    .feature-content {
+      padding: 24px;
+    }
+
+    .feature-desc {
+      color: var(--text-muted);
+      font-size: 14.5px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .feature-desc strong {
+      color: var(--text-main);
+    }
+
+    .diagram-container {
+      background: #060910;
+      border: 1px solid var(--border-hairline);
+      border-radius: 4px;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .diagram-container svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .pro-tips {
+      background: rgba(0, 240, 255, 0.05);
+      border-left: 3px solid var(--cyan);
+      padding: 12px 16px;
+      border-radius: 0 4px 4px 0;
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .pro-tips strong {
+      color: var(--cyan);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      margin-right: 6px;
+    }
+
+    /* KBD styling */
+    kbd {
+      background: #090e17;
+      border: 1px solid #2d3e5e;
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--cyan);
+      font-weight: 700;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.5);
+    }
+
+    /* Shortcut Table */
+    .shortcut-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      margin-top: 16px;
+    }
+
+    .shortcut-table th {
+      background: var(--bg-surface);
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--cyan);
+      border-bottom: 1px solid var(--border-hairline);
+    }
+
+    .shortcut-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-hairline);
+      color: var(--text-main);
+    }
+
+    .shortcut-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* 4-Step Quickstart Grid */
+    .quickstart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+      margin: 24px 0 40px 0;
+    }
+
+    .step-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 4px;
+      padding: 20px;
+    }
+
+    .step-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--cyan);
+      background: rgba(0, 240, 255, 0.1);
+      padding: 2px 8px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+
+    .step-title {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation Strip -->
+  <nav class="nav-bar">
+    <div class="brand">
+      <span class="brand-tag">ALL-22</span>
+      <span>CHESS WORKSTATION // EXPLAINER GUIDE</span>
+    </div>
+    <div class="nav-links">
+      <a href="#quickstart" class="nav-link">QUICKSTART</a>
+      <a href="#all22-field" class="nav-link">TACTICAL FIELD</a>
+      <a href="#situational-callsheet" class="nav-link">CALL SHEET</a>
+      <a href="#motion-intel" class="nav-link">MOTION &amp; INTEL</a>
+      <a href="#mike-id" class="nav-link">MIKE ID &amp; PROTECTIONS</a>
+      <a href="#customizer" class="nav-link">WAYPOINTS &amp; ROLES</a>
+      <a href="#monte-carlo" class="nav-link">MONTE CARLO</a>
+      <a href="index.html" class="btn-return">&larr; LAUNCH SIMULATOR</a>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- Hero Introduction -->
+    <header class="hero-section">
+      <h1 class="hero-title">Welcome to <span>All-22 Chess</span></h1>
+      <p class="hero-lead">
+        The All-22 Chess Tactical Kinematic Simulator is an authentic NFL offensive coordinator workstation. 
+        Unlike arcade video games or static play diagrams, this simulator computes continuous 20 Hz explicit physics 
+        (50 millisecond timesteps), pad-on-pad trench collisions, cleat-turf traction steering limits (&le; 1.60 Gs), 
+        dynamic zone route squeezing, pre-snap motion velocity, and 3D pigskin ball trajectories.
+      </p>
+
+      <!-- 4-Step Quickstart Grid -->
+      <div id="quickstart" class="quickstart-grid">
+        <div class="step-card">
+          <span class="step-badge">STEP 1</span>
+          <h3 class="step-title">PICK CALL &amp; FRONT</h3>
+          <p class="step-desc">Select an offensive concept from the Situational Call Sheet and match against an NFL defensive shell (e.g., Cover 3, Quarters, Dime Mug).</p>
+        </div>
+        <div class="step-card">
+          <span class="step-badge">STEP 2</span>
+          <h3 class="step-title">GATHER QB INTEL</h3>
+          <p class="step-desc">Trigger Jet Motion with <kbd>J</kbd>. Watch whether the defense trails in Man or bumps in Zone, and check the Box Count.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-badge">STEP 3</span>
+          <h3 class="step-title">ID THE MIKE</h3>
+          <p class="step-desc">Press <kbd>I</kbd> to declare the Mike LB. The 5-man line automatically sets its half-slide, and the RB locks his dual-read scan.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-badge">STEP 4</span>
+          <h3 class="step-title">RUN &amp; SCRUB</h3>
+          <p class="step-desc">Press <kbd>Space</kbd> to execute at 20 Hz, or step frame-by-frame with <kbd>S</kbd> to analyze pad contact and route breaks.</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION 1: Tactical Canvas & 20Hz Controls -->
+    <section id="all22-field" class="feature-card">
+      <div class="feature-header">
+        <div>
+          <div class="feature-number">FUNCTIONALITY 01</div>
+          <h2 class="feature-title">The All-22 Tactical Field &amp; 20 Hz Timeline</h2>
+        </div>
+        <span class="brand-tag">PHYSICS ENGINE</span>
+      </div>
+      <div class="feature-content">
+        <p class="feature-desc">
+          The main viewport renders the field from an overhead "All-22" camera angle. 
+          Offensive players are represented as cyan discs, and defensive players as crimson/red discs. 
+          The live engine evaluates true physical collisions every 50 milliseconds (80 ticks = 4.0 seconds per play).
+        </p>
+
+        <!-- Pictorial Diagram 1 -->
+        <div class="diagram-container">
+          <svg width="780" height="260" viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg">
+            <rect width="780" height="260" fill="#0d1420" rx="4"/>
+            <!-- Yardlines -->
+            <line x1="50" y1="40" x2="730" y2="40" stroke="#1f2d45" stroke-width="1"/>
+            <line x1="50" y1="100" x2="730" y2="100" stroke="#ffeb3b" stroke-width="2" stroke-dasharray="6 4"/>
+            <text x="735" y="104" fill="#ffeb3b" font-family="'JetBrains Mono'" font-size="9" font-weight="700">1ST DOWN (+10Y)</text>
+            <line x1="50" y1="160" x2="730" y2="160" stroke="#00f0ff" stroke-width="2"/>
+            <text x="735" y="164" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="9" font-weight="700">LOS (0.0Y)</text>
+            <line x1="50" y1="220" x2="730" y2="220" stroke="#1f2d45" stroke-width="1"/>
+
+            <!-- Pocket Polygon -->
+            <polygon points="340,165 370,165 410,165 440,165 415,225 365,225" fill="rgba(0, 240, 255, 0.08)" stroke="#00f0ff" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <text x="390" y="200" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="9" text-anchor="middle" font-weight="700">POCKET INTEGRITY: 92%</text>
+
+            <!-- Offensive Line -->
+            <circle cx="340" cy="165" r="10" fill="#00f0ff" stroke="#ffffff" stroke-width="1.5"/><text x="340" y="168" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">LT</text>
+            <circle cx="365" cy="165" r="10" fill="#00f0ff" stroke="#ffffff" stroke-width="1.5"/><text x="365" y="168" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">LG</text>
+            <circle cx="390" cy="165" r="10" fill="#00f0ff" stroke="#ffffff" stroke-width="1.5"/><text x="390" y="168" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">C</text>
+            <circle cx="415" cy="165" r="10" fill="#00f0ff" stroke="#ffffff" stroke-width="1.5"/><text x="415" y="168" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">RG</text>
+            <circle cx="440" cy="165" r="10" fill="#00f0ff" stroke="#ffffff" stroke-width="1.5"/><text x="440" y="168" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">RT</text>
+
+            <!-- QB & RB -->
+            <circle cx="390" cy="210" r="10" fill="#00f0ff" stroke="#ffffff" stroke-width="1.5"/><text x="390" y="213" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">QB</text>
+            <circle cx="420" cy="212" r="10" fill="#00f0ff" stroke="#ffffff" stroke-width="1.5"/><text x="420" y="215" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">RB</text>
+
+            <!-- Defensive Front -->
+            <circle cx="335" cy="148" r="10" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/><text x="335" y="151" fill="#ffffff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">RDE</text>
+            <circle cx="375" cy="150" r="10" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/><text x="375" y="153" fill="#ffffff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">NT</text>
+            <circle cx="405" cy="150" r="10" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/><text x="405" y="153" fill="#ffffff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">3T</text>
+            <circle cx="445" cy="148" r="10" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/><text x="445" y="151" fill="#ffffff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">LDE</text>
+
+            <!-- Linebackers -->
+            <circle cx="365" cy="115" r="10" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/><text x="365" y="118" fill="#ffffff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">WILL</text>
+            <circle cx="410" cy="115" r="10" fill="#ef4444" stroke="#f59e0b" stroke-width="2"/><text x="410" y="118" fill="#ffffff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">MIKE</text>
+            <text x="410" y="100" fill="#f59e0b" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">MIKE [ID]</text>
+
+            <!-- Velocity / Force Vectors -->
+            <line x1="335" y1="148" x2="350" y2="175" stroke="#ef4444" stroke-width="2" marker-end="url(#arrow)"/>
+            <line x1="445" y1="148" x2="430" y2="175" stroke="#ef4444" stroke-width="2"/>
+
+            <!-- Timeline Scrubber Preview at bottom -->
+            <rect x="50" y="240" width="680" height="10" fill="#141c2b" rx="2"/>
+            <rect x="50" y="240" width="220" height="10" fill="#00f0ff" rx="2"/>
+            <circle cx="270" cy="245" r="7" fill="#ffffff" stroke="#00f0ff" stroke-width="2"/>
+            <text x="290" y="248" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="9">T = 1.30s (TICK 26 / 80)</text>
+          </svg>
+        </div>
+
+        <div class="pro-tips">
+          <strong>PRO TIP:</strong> Use <kbd>Space</kbd> to toggle playback. Use <kbd>S</kbd> to step forward 50ms at a time to examine who wins initial pad-level hand leverage at the line of scrimmage.
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Situational Call Sheet -->
+    <section id="situational-callsheet" class="feature-card">
+      <div class="feature-header">
+        <div>
+          <div class="feature-number">FUNCTIONALITY 02</div>
+          <h2 class="feature-title">Situational Call Sheet (Down &amp; Distance Curation)</h2>
+        </div>
+        <span class="brand-tag">TACTICAL PLAYBOOK</span>
+      </div>
+      <div class="feature-content">
+        <p class="feature-desc">
+          Real NFL play-callers don't scroll through an unorganized 200-play list. 
+          The Call Sheet groups plays into high-leverage situational buckets:
+          <strong>1ST &amp; 10</strong> (Base Down), <strong>3RD &amp; SHORT</strong> (2–4 yards), 
+          <strong>3RD &amp; LONG</strong> (7+ yards), and <strong>RED ZONE</strong> (inside 20).
+        </p>
+
+        <!-- Pictorial Diagram 2 -->
+        <div class="diagram-container">
+          <svg width="780" height="190" viewBox="0 0 780 190" xmlns="http://www.w3.org/2000/svg">
+            <rect width="780" height="190" fill="#0d1420" rx="4"/>
+            <!-- Call Sheet Tabs -->
+            <g transform="translate(40, 20)">
+              <rect x="0" y="0" width="130" height="30" fill="#152033" stroke="#1e2c44" rx="3"/>
+              <text x="65" y="19" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="11" font-weight="700" text-anchor="middle">ALL (18)</text>
+
+              <rect x="140" y="0" width="130" height="30" fill="#152033" stroke="#1e2c44" rx="3"/>
+              <text x="205" y="19" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="11" font-weight="700" text-anchor="middle">1ST &amp; 10</text>
+
+              <!-- Active Tab -->
+              <rect x="280" y="0" width="130" height="30" fill="#00f0ff" stroke="#00f0ff" rx="3"/>
+              <text x="345" y="19" fill="#05080e" font-family="'JetBrains Mono'" font-size="11" font-weight="800" text-anchor="middle">3RD &amp; SHORT</text>
+
+              <rect x="420" y="0" width="130" height="30" fill="#152033" stroke="#1e2c44" rx="3"/>
+              <text x="485" y="19" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="11" font-weight="700" text-anchor="middle">3RD &amp; LONG</text>
+
+              <rect x="560" y="0" width="130" height="30" fill="#152033" stroke="#1e2c44" rx="3"/>
+              <text x="625" y="19" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="11" font-weight="700" text-anchor="middle">RED ZONE</text>
+            </g>
+
+            <!-- Filtered Concept Cards -->
+            <g transform="translate(40, 70)">
+              <!-- Card 1 -->
+              <rect x="0" y="0" width="340" height="46" fill="#152033" stroke="#1e2c44" rx="3"/>
+              <text x="14" y="24" fill="#ffffff" font-family="'JetBrains Mono'" font-size="11" font-weight="700">GUN SPREAD // QUICK SLANT-FLAT</text>
+              <rect x="14" y="28" width="85" height="14" fill="#10b981" rx="2"/>
+              <text x="56" y="38" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">3-STEP QUICK</text>
+              <text x="325" y="28" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="10" font-weight="700" text-anchor="end">PASS</text>
+
+              <!-- Card 2 -->
+              <rect x="360" y="0" width="340" height="46" fill="#152033" stroke="#1e2c44" rx="3"/>
+              <text x="374" y="24" fill="#ffffff" font-family="'JetBrains Mono'" font-size="11" font-weight="700">SINGLEBACK ACE // DUO DOUBLE-CLIMB</text>
+              <rect x="374" y="28" width="75" height="14" fill="#10b981" rx="2"/>
+              <text x="411" y="38" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">POWER DUO</text>
+              <text x="685" y="28" fill="#10b981" font-family="'JetBrains Mono'" font-size="10" font-weight="700" text-anchor="end">RUN</text>
+
+              <!-- Card 3 -->
+              <rect x="0" y="55" width="340" height="46" fill="#152033" stroke="#1e2c44" rx="3"/>
+              <text x="14" y="79" fill="#ffffff" font-family="'JetBrains Mono'" font-size="11" font-weight="700">I-FORM HEAVY // POWER O (LG PULL)</text>
+              <rect x="14" y="83" width="75" height="14" fill="#10b981" rx="2"/>
+              <text x="51" y="93" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">PULL/KICK</text>
+              <text x="325" y="83" fill="#10b981" font-family="'JetBrains Mono'" font-size="10" font-weight="700" text-anchor="end">RUN</text>
+
+              <!-- Card 4 -->
+              <rect x="360" y="55" width="340" height="46" fill="#152033" stroke="#1e2c44" rx="3"/>
+              <text x="374" y="79" fill="#ffffff" font-family="'JetBrains Mono'" font-size="11" font-weight="700">GUN EMPTY // SHALLOW MESH + WHEEL</text>
+              <rect x="374" y="83" width="75" height="14" fill="#10b981" rx="2"/>
+              <text x="411" y="93" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">RUB/WHEEL</text>
+              <text x="685" y="83" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="10" font-weight="700" text-anchor="end">PASS</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="pro-tips">
+          <strong>PRO TIP:</strong> Clicking any situational tab automatically updates the yellow 1st-down line on the canvas (e.g. +3y on 3rd &amp; Short, +8y on 3rd &amp; Long), testing whether route cut depths actually clear the sticks.
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Motion & Pre-Snap Intel -->
+    <section id="motion-intel" class="feature-card">
+      <div class="feature-header">
+        <div>
+          <div class="feature-number">FUNCTIONALITY 03</div>
+          <h2 class="feature-title">Pre-Snap Motion Timing &amp; QB Intel Reads</h2>
+        </div>
+        <span class="brand-tag">SHANAHAN / MCVAY MECHANICS</span>
+      </div>
+      <div class="feature-content">
+        <p class="feature-desc">
+          In elite NFL offenses, motion does not jump into a static position. The ball is snapped while the slot receiver 
+          is at a full horizontal sprint (<strong>5.8 yd/s</strong>). 
+          Simultaneously, the Quarterback reads the defense’s reaction to confirm <strong>Man vs Zone</strong> coverage 
+          and counts the box before the snap.
+        </p>
+
+        <!-- Pictorial Diagram 3 -->
+        <div class="diagram-container">
+          <svg width="780" height="230" viewBox="0 0 780 230" xmlns="http://www.w3.org/2000/svg">
+            <rect width="780" height="230" fill="#0d1420" rx="4"/>
+
+            <!-- HUD Bar -->
+            <rect x="40" y="16" width="700" height="34" fill="#152033" stroke="#1e2c44" rx="3"/>
+            <text x="56" y="37" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="10" font-weight="700">QB PRE-SNAP INTEL:</text>
+            <rect x="180" y="22" width="160" height="22" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" rx="2"/>
+            <text x="260" y="36" fill="#38bdf8" font-family="'JetBrains Mono'" font-size="9" font-weight="800" text-anchor="middle">READ: MOFC / 1-HIGH (C1/C3)</text>
+            <rect x="350" y="22" width="190" height="22" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" rx="2"/>
+            <text x="445" y="36" fill="#f59e0b" font-family="'JetBrains Mono'" font-size="9" font-weight="800" text-anchor="middle">MOTION TELL: MAN (NI TRAILS)</text>
+            <rect x="550" y="22" width="180" height="22" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" rx="2"/>
+            <text x="640" y="36" fill="#10b981" font-family="'JetBrains Mono'" font-size="9" font-weight="800" text-anchor="middle">BOX: 6-MAN (BALANCED 6v6)</text>
+
+            <!-- Motion Field Trajectory -->
+            <g transform="translate(0, 30)">
+              <line x1="100" y1="130" x2="680" y2="130" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <text x="700" y="133" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="8">LOS</text>
+
+              <!-- Motion Start Ghost -->
+              <circle cx="200" cy="155" r="9" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <text x="200" y="175" fill="#f59e0b" font-family="'JetBrains Mono'" font-size="8" font-weight="700" text-anchor="middle">MOTION ORIGIN (-8.5Y)</text>
+
+              <!-- Trajectory Flight Vector -->
+              <line x1="210" y1="155" x2="380" y2="155" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 3"/>
+              <text x="300" y="148" fill="#f59e0b" font-family="'JetBrains Mono'" font-size="8.5" font-weight="800" text-anchor="middle">JET SPRINT &gt;&gt;&gt; (5.8 yd/s)</text>
+
+              <!-- Ball Snap Point -->
+              <circle cx="390" cy="155" r="10" fill="#00f0ff" stroke="#f59e0b" stroke-width="2.5"/>
+              <text x="390" y="158" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">SL</text>
+              <text x="390" y="175" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="8.5" font-weight="800" text-anchor="middle">SNAP POINT (T=0.00s)</text>
+
+              <!-- Trajectory after snap -->
+              <path d="M 400 155 Q 520 150 560 85" fill="none" stroke="#00f0ff" stroke-width="2"/>
+              <text x="540" y="105" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="8">PERIMETER FLAT OUTLET</text>
+
+              <!-- Trailing Defender -->
+              <circle cx="280" cy="110" r="10" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
+              <text x="280" y="113" fill="#ffffff" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">NI</text>
+              <line x1="290" y1="110" x2="360" y2="110" stroke="#ef4444" stroke-width="2"/>
+              <text x="325" y="102" fill="#ef4444" font-family="'JetBrains Mono'" font-size="8" font-weight="700" text-anchor="middle">TRAILING CHASE (4.1 yd/s)</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="pro-tips">
+          <strong>PRO TIP:</strong> Press <kbd>J</kbd> to cycle motion: <strong>JET RIGHT</strong> &rarr; <strong>JET LEFT</strong> &rarr; <strong>ORBIT BEHIND QB</strong> &rarr; <strong>OFF</strong>. Look at the QB Intel strip: if the nickel corner trails across, the defense is in MAN. If they hand off, it's ZONE!
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Pre-Snap Mike ID & Protection -->
+    <section id="mike-id" class="feature-card">
+      <div class="feature-header">
+        <div>
+          <div class="feature-number">FUNCTIONALITY 04</div>
+          <h2 class="feature-title">Pre-Snap "Mike" ID &amp; Line Protection Rules</h2>
+        </div>
+        <span class="brand-tag">PASS PROTECTION</span>
+      </div>
+      <div class="feature-content">
+        <p class="feature-desc">
+          When the quarterback calls <em>"54 is the Mike!"</em>, it locks the line of scrimmage protection count:
+          The 3-man <strong>Half-Slide</strong> slides toward the declared Mike to seal interior A/B gaps. 
+          The opposite side plays <strong>Big-on-Big (BOB)</strong> man protection. 
+          The Running Back executes a <strong>Dual-Read Scan</strong>: if the declared Mike blitzes, the RB stones him; 
+          if Mike drops and Will blitzes, the RB crosses face to pick up Will; if neither blitzes, the RB check-releases.
+        </p>
+
+        <!-- Pictorial Diagram 4 -->
+        <div class="diagram-container">
+          <svg width="780" height="230" viewBox="0 0 780 230" xmlns="http://www.w3.org/2000/svg">
+            <rect width="780" height="230" fill="#0d1420" rx="4"/>
+
+            <g transform="translate(40, 20)">
+              <!-- Slide Left Zone Box -->
+              <rect x="120" y="80" width="180" height="85" fill="rgba(0, 240, 255, 0.08)" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>
+              <text x="210" y="74" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="9" font-weight="800" text-anchor="middle">&larr; 50 HALF-SLIDE (ZONE CUP)</text>
+
+              <!-- Man Right BOB Box -->
+              <rect x="330" y="80" width="140" height="85" fill="rgba(16, 185, 129, 0.08)" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>
+              <text x="400" y="74" fill="#10b981" font-family="'JetBrains Mono'" font-size="9" font-weight="800" text-anchor="middle">BOB MAN (1-on-1) &rarr;</text>
+
+              <!-- Offensive Linemen -->
+              <circle cx="150" cy="130" r="10" fill="#00f0ff" stroke="#fff"/><text x="150" y="133" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">LT</text>
+              <circle cx="200" cy="130" r="10" fill="#00f0ff" stroke="#fff"/><text x="200" y="133" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">LG</text>
+              <circle cx="260" cy="130" r="10" fill="#00f0ff" stroke="#fff"/><text x="260" y="133" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">C</text>
+              <circle cx="360" cy="130" r="10" fill="#00f0ff" stroke="#fff"/><text x="360" y="133" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">RG</text>
+              <circle cx="430" cy="130" r="10" fill="#00f0ff" stroke="#fff"/><text x="430" y="133" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">RT</text>
+
+              <!-- Running Back & Dual-Read Scan Lines -->
+              <circle cx="380" cy="180" r="10" fill="#00f0ff" stroke="#fff"/><text x="380" y="183" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">RB</text>
+              <!-- Scan Line 1 to Mike -->
+              <path d="M 370 175 L 260 40" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3 3"/>
+              <text x="300" y="110" fill="#f59e0b" font-family="'JetBrains Mono'" font-size="8" font-weight="800">READ 1: MIKE</text>
+              <!-- Scan Line 2 to Will -->
+              <path d="M 390 175 L 470 50" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="3 3"/>
+              <text x="450" y="125" fill="#38bdf8" font-family="'JetBrains Mono'" font-size="8" font-weight="800">READ 2: OVERHANG</text>
+
+              <!-- Defenders -->
+              <circle cx="150" cy="100" r="10" fill="#ef4444"/><text x="150" y="103" fill="#fff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">RDE</text>
+              <circle cx="210" cy="100" r="10" fill="#ef4444"/><text x="210" y="103" fill="#fff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">NT</text>
+              <circle cx="360" cy="100" r="10" fill="#ef4444"/><text x="360" y="103" fill="#fff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">3T</text>
+              <circle cx="430" cy="100" r="10" fill="#ef4444"/><text x="430" y="103" fill="#fff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">LDE</text>
+
+              <!-- Declared Mike -->
+              <circle cx="260" cy="35" r="11" fill="#ef4444" stroke="#f59e0b" stroke-width="2.5"/>
+              <text x="260" y="38" fill="#fff" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">MIKE</text>
+              <rect x="230" y="10" width="60" height="15" fill="#f59e0b" rx="2"/>
+              <text x="260" y="21" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">MIKE [ID]</text>
+
+              <!-- Overhang Will -->
+              <circle cx="470" cy="45" r="10" fill="#ef4444"/><text x="470" y="48" fill="#fff" font-family="'JetBrains Mono'" font-size="7.5" font-weight="800" text-anchor="middle">WILL</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="pro-tips">
+          <strong>PRO TIP:</strong> Press <kbd>I</kbd> to cycle the declared Mike. If the defense shows an exotic Double A-gap blitz, re-declaring the blitzing linebacker automatically re-indexes the protection count!
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Route & Blocker Customization -->
+    <section id="customizer" class="feature-card">
+      <div class="feature-header">
+        <div>
+          <div class="feature-number">FUNCTIONALITY 05</div>
+          <h2 class="feature-title">Route Waypoints &amp; Blocker Customization</h2>
+        </div>
+        <span class="brand-tag">TACTICAL PLAY DESIGN</span>
+      </div>
+      <div class="feature-content">
+        <p class="feature-desc">
+          Click any player on the field to open their detailed Inspector in the right dock. 
+          You can select from <strong>10 Route Tree Presets</strong> (Slant, Dig, Corner, Post, Wheel), 
+          <strong>4 Pulling Schemes</strong> (Pull Kick, Pull Wrap, Pin &amp; Pull), or click and drag landmark nodes 
+          (<strong>L1, L2</strong>) directly on the turf with your mouse!
+        </p>
+
+        <!-- Pictorial Diagram 5 -->
+        <div class="diagram-container">
+          <svg width="780" height="200" viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="780" height="200" fill="#0d1420" rx="4"/>
+
+            <!-- Route Stem Example (Dig Route) -->
+            <g transform="translate(60, 20)">
+              <text x="100" y="15" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="11" font-weight="800">RECEIVER ROUTE STEM (12Y DIG)</text>
+              <circle cx="100" cy="150" r="10" fill="#00f0ff" stroke="#fff"/><text x="100" y="153" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">WR</text>
+              
+              <!-- Vertical Stem to L1 -->
+              <line x1="100" y1="140" x2="100" y2="60" stroke="#00f0ff" stroke-width="2"/>
+              <!-- Landmark Node L1 -->
+              <circle cx="100" cy="60" r="5" fill="#ffffff" stroke="#00f0ff" stroke-width="2"/>
+              <text x="100" y="50" fill="#ffffff" font-family="'JetBrains Mono'" font-size="8" font-weight="700" text-anchor="middle">L1 (DRAGGABLE)</text>
+
+              <!-- In-cut Break to L2 -->
+              <line x1="100" y1="60" x2="220" y2="60" stroke="#00f0ff" stroke-width="2"/>
+              <!-- Landmark Node L2 -->
+              <circle cx="220" cy="60" r="5" fill="#ffffff" stroke="#00f0ff" stroke-width="2"/>
+              <polygon points="225,60 215,55 215,65" fill="#00f0ff"/>
+              <text x="220" y="50" fill="#ffffff" font-family="'JetBrains Mono'" font-size="8" font-weight="700" text-anchor="middle">L2 (DIG IN-BREAK)</text>
+            </g>
+
+            <!-- Pulling Scheme Example (Power O Kick) -->
+            <g transform="translate(420, 20)">
+              <text x="120" y="15" fill="#f59e0b" font-family="'JetBrains Mono'" font-size="11" font-weight="800">GUARD PULL &amp; KICK (POWER O)</text>
+              <circle cx="50" cy="130" r="10" fill="#00f0ff" stroke="#fff"/><text x="50" y="133" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">LG</text>
+              <circle cx="110" cy="130" r="10" fill="#00f0ff" stroke="#fff"/><text x="110" y="133" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">C</text>
+              <circle cx="170" cy="130" r="10" fill="#00f0ff" stroke="#fff"/><text x="170" y="133" fill="#060910" font-family="'JetBrains Mono'" font-size="8" font-weight="800" text-anchor="middle">RG</text>
+
+              <!-- Pull Path around Center -->
+              <path d="M 50 142 Q 60 165 130 160 Q 210 155 230 90" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+              <circle cx="130" cy="160" r="4" fill="#ffffff"/>
+              <text x="130" y="175" fill="#ffffff" font-family="'JetBrains Mono'" font-size="7.5" text-anchor="middle">PULL DEPTH</text>
+
+              <!-- Kickout Block Bar -->
+              <line x1="220" y1="85" x2="240" y2="95" stroke="#f59e0b" stroke-width="4"/>
+              <text x="240" y="75" fill="#f59e0b" font-family="'JetBrains Mono'" font-size="8" font-weight="800">KICKOUT BLOCK</text>
+              <circle cx="240" cy="85" r="9" fill="#ef4444"/><text x="240" y="88" fill="#fff" font-family="'JetBrains Mono'" font-size="7" font-weight="800" text-anchor="middle">EDGE</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="pro-tips">
+          <strong>PRO TIP:</strong> Switch to Route Draw mode (<kbd>R</kbd>) or click <strong>DRAW ROUTE</strong> in the Inspector. Click anywhere on the grass to add new waypoints. Drag existing nodes to alter route stems in real time!
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: Monte Carlo Batch Simulation -->
+    <section id="monte-carlo" class="feature-card">
+      <div class="feature-header">
+        <div>
+          <div class="feature-number">FUNCTIONALITY 06</div>
+          <h2 class="feature-title">100-Iteration Monte Carlo Batch Simulation</h2>
+        </div>
+        <span class="brand-tag">STOCHASTIC NFL TELEMETRY</span>
+      </div>
+      <div class="feature-content">
+        <p class="feature-desc">
+          Football has inherent variance (snap jumps, hand placement, shed timing). 
+          Pressing <kbd>M</kbd> executes <strong>100 full simulations</strong> with calibrated Gaussian stochastic noise 
+          in under 300 milliseconds, outputting true NFL Next Gen Stats: Expected EPA, Success Rate %, Pressure %, and Sack %.
+        </p>
+
+        <!-- Pictorial Diagram 6 -->
+        <div class="diagram-container">
+          <svg width="780" height="150" viewBox="0 0 780 150" xmlns="http://www.w3.org/2000/svg">
+            <rect width="780" height="150" fill="#0d1420" rx="4"/>
+
+            <g transform="translate(40, 20)">
+              <!-- Metric Box 1 -->
+              <rect x="0" y="0" width="105" height="105" fill="#152033" stroke="#1e2c44" rx="4"/>
+              <text x="12" y="24" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8.5" font-weight="700">EXPECTED EPA</text>
+              <text x="12" y="60" fill="#10b981" font-family="'JetBrains Mono'" font-size="22" font-weight="800">+0.32</text>
+              <text x="12" y="85" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8">N=100 MEAN</text>
+
+              <!-- Metric Box 2 -->
+              <rect x="120" y="0" width="105" height="105" fill="#152033" stroke="#1e2c44" rx="4"/>
+              <text x="132" y="24" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8.5" font-weight="700">SUCCESS RATE</text>
+              <text x="132" y="60" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="22" font-weight="800">58.0%</text>
+              <text x="132" y="85" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8">TARGET: 45-55%</text>
+
+              <!-- Metric Box 3 -->
+              <rect x="240" y="0" width="105" height="105" fill="#152033" stroke="#1e2c44" rx="4"/>
+              <text x="252" y="24" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8.5" font-weight="700">PRESSURE RATE</text>
+              <text x="252" y="60" fill="#f59e0b" font-family="'JetBrains Mono'" font-size="22" font-weight="800">31.0%</text>
+              <text x="252" y="85" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8">NFL AVG: 33.5%</text>
+
+              <!-- Metric Box 4 -->
+              <rect x="360" y="0" width="105" height="105" fill="#152033" stroke="#1e2c44" rx="4"/>
+              <text x="372" y="24" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8.5" font-weight="700">SACK RATE</text>
+              <text x="372" y="60" fill="#10b981" font-family="'JetBrains Mono'" font-size="22" font-weight="800">6.0%</text>
+              <text x="372" y="85" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8">NFL AVG: 6.5%</text>
+
+              <!-- Metric Box 5 -->
+              <rect x="480" y="0" width="105" height="105" fill="#152033" stroke="#1e2c44" rx="4"/>
+              <text x="492" y="24" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8.5" font-weight="700">TIME TO THROW</text>
+              <text x="492" y="60" fill="#00f0ff" font-family="'JetBrains Mono'" font-size="22" font-weight="800">2.62s</text>
+              <text x="492" y="85" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8">POCKET CLEAN</text>
+
+              <!-- Metric Box 6 -->
+              <rect x="600" y="0" width="105" height="105" fill="#152033" stroke="#1e2c44" rx="4"/>
+              <text x="612" y="24" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8.5" font-weight="700">COMPLETION</text>
+              <text x="612" y="60" fill="#10b981" font-family="'JetBrains Mono'" font-size="22" font-weight="800">66.0%</text>
+              <text x="612" y="85" fill="#94a3b8" font-family="'JetBrains Mono'" font-size="8">NEXT GEN STATS</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="pro-tips">
+          <strong>PRO TIP:</strong> If your pressure rate spikes above 45% against Double A-Gap Mug blitzes, try calling <strong>MAX PROT</strong> or shifting the slide towards the overloaded A-gap!
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: Complete Keyboard Reference -->
+    <section class="feature-card">
+      <div class="feature-header">
+        <div>
+          <div class="feature-number">APPENDIX</div>
+          <h2 class="feature-title">Keyboard Shortcuts Quick Reference</h2>
+        </div>
+        <span class="brand-tag">HOTKEYS</span>
+      </div>
+      <div class="feature-content">
+        <table class="shortcut-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">HOTKEY</th>
+              <th style="width: 220px;">ACTION</th>
+              <th>OPERATIONAL PURPOSE</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Space</kbd></td>
+              <td>Run / Pause Playback</td>
+              <td>Toggles real-time 20 Hz simulation physics loop.</td>
+            </tr>
+            <tr>
+              <td><kbd>S</kbd></td>
+              <td>Step +50ms Tick</td>
+              <td>Advances 1 single physics frame for micro-trench inspection.</td>
+            </tr>
+            <tr>
+              <td><kbd>J</kbd></td>
+              <td>Pre-Snap Jet Motion</td>
+              <td>Cycles continuous motion (Jet Right, Jet Left, Orbit Flat, Off).</td>
+            </tr>
+            <tr>
+              <td><kbd>I</kbd></td>
+              <td>ID the Mike LB</td>
+              <td>Cycles declared Mike LB to dynamically re-index slide protection.</td>
+            </tr>
+            <tr>
+              <td><kbd>X</kbd></td>
+              <td>Flip Play Left/Right</td>
+              <td>Mirrors offensive formation, route stems, and run blocking gaps.</td>
+            </tr>
+            <tr>
+              <td><kbd>M</kbd></td>
+              <td>Monte Carlo x100</td>
+              <td>Runs 100 stochastic trials to compute aggregate NFL Next Gen Stats.</td>
+            </tr>
+            <tr>
+              <td><kbd>V</kbd></td>
+              <td>Select Mode</td>
+              <td>Allows inspecting players and dragging pre-snap alignments.</td>
+            </tr>
+            <tr>
+              <td><kbd>B</kbd></td>
+              <td>Block Assign Mode</td>
+              <td>Drag from any blocker to assign man/combo/pull assignments.</td>
+            </tr>
+            <tr>
+              <td><kbd>R</kbd></td>
+              <td>Route Draw Mode</td>
+              <td>Click on grass to place receiver route and pull trajectory waypoints.</td>
+            </tr>
+            <tr>
+              <td><kbd>D</kbd></td>
+              <td>Toggle Def Shell</td>
+              <td>Shows defensive zone shells, match brackets, and blitz arrows.</td>
+            </tr>
+            <tr>
+              <td><kbd>F</kbd></td>
+              <td>Toggle Force Vectors</td>
+              <td>Renders real-time player velocity and trench leverage vectors.</td>
+            </tr>
+            <tr>
+              <td><kbd>P</kbd></td>
+              <td>Toggle Pocket Poly</td>
+              <td>Draws the geometric pass protection cup and integrity %.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>
