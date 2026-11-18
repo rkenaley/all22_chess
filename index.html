@@ -873,17 +873,31 @@
         <div class="field-row" id="row-route-preset">
           <span class="field-label">ROUTE TREE</span>
           <select id="insp-route-preset" class="select-input">
-            <option value="">-- Apply Route Tree Stem --</option>
-            <option value="SLANT">Quick 3-Step Slant (3.5y stem -> 45° in)</option>
-            <option value="OUT_5">Quick 5-Yard Out (5.0y stem -> 90° out)</option>
-            <option value="CURL_6">6-Yard Hitch / Curl (6.0y settle)</option>
-            <option value="DIG_12">12-Yard Hard Dig (12.0y stem -> 90° in)</option>
-            <option value="CORNER_10">10-Yard Corner / Flag (10.0y stem -> 45° out)</option>
-            <option value="POST_14">14-Yard Deep Post (13.5y stem -> 45° in)</option>
-            <option value="GO">9-Route Vertical Seam (Go to +25y)</option>
-            <option value="DRAG">Shallow Underneath Drag / Cross</option>
-            <option value="WHEEL">Wheel Route (Flat -> up sideline)</option>
-            <option value="SWING">RB Swing Checkdown (wide boundary arc)</option>
+            <option value="">-- Apply Route Tree Stem (16 Seeds) --</option>
+            <optgroup label="Quick / Underneath">
+              <option value="SLANT">Slant (3.5y stem -> 45° inside)</option>
+              <option value="SHALLOW">Shallow (curved drag across middle)</option>
+              <option value="HITCH">Hitch (5.5y stop -> hook back in)</option>
+              <option value="OUT">Out (5.0y stem -> 90° out)</option>
+              <option value="WHIP">Whip (outside jab -> whip inside)</option>
+            </optgroup>
+            <optgroup label="Intermediate / Vertical">
+              <option value="POST">Post (13.0y stem -> 45° to MOF)</option>
+              <option value="CORNER">Corner (10.0y stem -> 45° out)</option>
+              <option value="WHEEL">Wheel (flat outside -> up sideline)</option>
+              <option value="GO">Go (9-route vertical seam -> +25.5y)</option>
+              <option value="DIG">Dig (12.0y stem -> 90° hard inside)</option>
+            </optgroup>
+            <optgroup label="Double-Moves / Breaks Back / RPO">
+              <option value="COMEBACK">Comeback (14.0y -> 45° back outside)</option>
+              <option value="CURL">Curl (10.5y -> hook back inside)</option>
+              <option value="ZIG">Zig (inside jab -> whip outside)</option>
+              <option value="FADE">Fade (outside arc release -> vertical)</option>
+              <option value="GLANCE">Glance (6.0y RPO skinny post inside)</option>
+            </optgroup>
+            <optgroup label="Backfield Checkdown">
+              <option value="SWING">Swing (RB wide boundary arc)</option>
+            </optgroup>
           </select>
         </div>
 

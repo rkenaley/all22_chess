@@ -397,7 +397,12 @@ export function runNflBenchmarkTrial() {
         const epa = finalSnap.expectedEpa;
         scenarioEpaSum += epa;
         totalPassEpa += epa;
-        if (epa > 0 && !isSack && termSnap?.terminationReason !== 'INCOMPLETE') {
+        if (
+          epa > 0 &&
+          !isSack &&
+          termSnap?.terminationReason !== 'INCOMPLETE' &&
+          termSnap?.terminationReason !== 'INTERCEPTION'
+        ) {
           scenarioPositiveEpa++;
           positivePassEpaCount++;
         }

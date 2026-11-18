@@ -23,6 +23,7 @@
     "src/main.ts",
     "src/engine.ts",
     "src/renderer.ts",
-    "src/theme.ts"
+    "src/theme.ts",
+    "src/route_presets.ts"
   ]
 }

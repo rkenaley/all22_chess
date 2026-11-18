@@ -6,8 +6,16 @@ import {
   Waypoint2D,
   evaluateMacroMatchup,
 } from './engine.js';
-import { ARGON_2027_ROSTER } from './argon_2027_playbook.js';
-import { HYDRA_2027_ROSTER } from './vanguard_2027_playbook.js';
+import { ARGON_2027_ROSTER, ARGON_2027_PLAYBOOK } from './argon_2027_playbook.js';
+import { HYDRA_2027_ROSTER, HYDRA_2027_PLAYBOOK } from './vanguard_2027_playbook.js';
+
+function buildPackagedPlayById(playId: string): SimAgent[] {
+  const argon = ARGON_2027_PLAYBOOK.find((p) => p.id === playId);
+  if (argon) return argon.buildOffense();
+  const hydra = HYDRA_2027_PLAYBOOK.find((p) => p.id === playId);
+  if (hydra) return hydra.buildOffense();
+  return ARGON_2027_PLAYBOOK[0].buildOffense();
+}
 
 export type BistableAttractor = 'ATTRACTOR_ALPHA_MAN_BLITZ' | 'ATTRACTOR_BETA_ZONE_VORONOI' | 'ATTRACTOR_GAMMA_GOALLINE_PINCH';
 
@@ -149,53 +157,43 @@ function buildKBCOffensiveLine(): SimAgent[] {
 // ============================================================================
 // 3. PRE-SNAP BISTABLE AUDIBLE RESOLVER (THE PEYTON MANNING EFFECT)
 // ============================================================================
-export function detectDefensiveAttractor(agents: SimAgent[], defCall?: string): {
+export function detectDefensiveAttractor(agents: SimAgent[], _defCall?: string): {
   attractor: BistableAttractor;
   reason: string;
 } {
   const defs = agents.filter((a) => a.side === 'DEF');
-  const offs = agents.filter((a) => a.side === 'OFF');
 
-  // Check 1: Goal line or short yardage pinch
-  const isGoalLinePinch =
-    defCall === 'GOAL_LINE_62_PINCH' ||
-    (defs.length >= 8 && defs.filter((d) => d.startY <= 2.2).length >= 6);
-  if (isGoalLinePinch) {
+  // Strictly observable pre-snap alignment geometry (no defCall string peeking or hidden manTargetId oracle!)
+  const deepSafeties = defs.filter((d) => d.startY >= 7.0);
+  const losWall = defs.filter((d) => d.startY <= 2.2);
+  const losMuggers = defs.filter((d) => Math.abs(d.startX) <= 2.4 && d.startY >= 0.8 && d.startY <= 2.6);
+  const pressedCorners = defs.filter((d) => ['CB', 'CB1', 'CB2', 'NI'].includes(d.pos) && d.startY <= 3.2);
+
+  // Check 1: Heavy Goal-Line / Short-Yardage Pinch front (6+ defenders jammed at LOS without deep safety help)
+  if (losWall.length >= 6 && deepSafeties.length === 0) {
     return {
       attractor: 'ATTRACTOR_GAMMA_GOALLINE_PINCH',
-      reason: 'HEAVY GOAL-LINE 6-2 PINCH: 8+ defenders jammed within 2.2y of LOS',
+      reason: `OBSERVABLE GOAL-LINE PINCH: ${losWall.length} defenders within 2.2y of LOS, 0 deep safeties`,
     };
   }
 
-  // Check 2: Pre-snap motion reaction (The Man/Zone Probe)
-  const motionAgent = offs.find((o) => o.preSnapMotion?.enabled);
-  if (motionAgent) {
-    const trailingDb = defs.find((d) => d.defAssignment?.manTargetId === motionAgent.id);
-    if (trailingDb) {
-      return {
-        attractor: 'ATTRACTOR_ALPHA_MAN_BLITZ',
-        reason: `MOTION PROBE CONFIRMED: MAN COVERAGE (#${trailingDb.jersey ?? ''} ${trailingDb.label} trails across formation)`,
-      };
-    }
-  }
+  // Check 2: Observable Pressure / Man-Heavy Shell (0-high shell, mugged A/B-gap backers, or 1-high + pressed corners)
+  const observableManOrBlitzLook =
+    deepSafeties.length === 0 ||
+    losMuggers.length >= 2 ||
+    (deepSafeties.length === 1 && pressedCorners.length >= 2);
 
-  // Check 3: Safety depth & blitz indicators
-  const deepSafeties = defs.filter((d) => d.startY >= 7.0);
-  const isZeroOrOneHighBlitz =
-    deepSafeties.length <= 1 &&
-    (defCall?.includes('MUG') || defCall?.includes('C0') || defCall?.includes('CROSSDOG') || defCall?.includes('BLITZ'));
-
-  if (isZeroOrOneHighBlitz) {
+  if (observableManOrBlitzLook) {
     return {
       attractor: 'ATTRACTOR_ALPHA_MAN_BLITZ',
-      reason: `SAFETY TELL: 0-HIGH / 1-HIGH PRESSURE DETECTED (${deepSafeties.length} deep safety)`,
+      reason: `OBSERVABLE PRESSURE/MAN LOOK (${deepSafeties.length} deep safety, ${losMuggers.length} mugged LBs, ${pressedCorners.length} press DBs — disguise risk remains)`,
     };
   }
 
-  // Check 4: Voronoi Complete / 2-High Quarters / Drop-7 Shell
+  // Check 3: Two-High / Off-Coverage Zone Shell (subject to post-snap rotation!)
   return {
     attractor: 'ATTRACTOR_BETA_ZONE_VORONOI',
-    reason: `VORONOI ZONE MATCH DETECTED: 2-High safety shell (${deepSafeties.length} deep safeties) with spatial tessellation`,
+    reason: `OBSERVABLE 2-HIGH / ZONE ALIGNMENT (${deepSafeties.length} deep safeties, ${pressedCorners.length} press DBs — disguise risk remains)`,
   };
 }
 
@@ -395,10 +393,13 @@ export const KBC_2027_PLAYBOOK: BistablePackagedPlay[] = [
       },
     },
     buildBaseOffense: () => {
-      return KBC_2027_PLAYBOOK[0].buildAuditedOffense('ATTRACTOR_ALPHA_MAN_BLITZ');
+      return buildPackagedPlayById('ARGON_DISPLACED_NODE_LASER');
     },
     buildAuditedOffense: (attractor: BistableAttractor) => {
-      return KBC_2027_PLAYBOOK[0].buildAuditedOffense(attractor);
+      if (attractor === 'ATTRACTOR_ALPHA_MAN_BLITZ') {
+        return buildPackagedPlayById('ARGON_DISPLACED_NODE_LASER');
+      }
+      return buildPackagedPlayById('ARGON_REACTOR_SWEEP_RIGHT');
     },
   },
 
@@ -430,10 +431,13 @@ export const KBC_2027_PLAYBOOK: BistablePackagedPlay[] = [
       },
     },
     buildBaseOffense: () => {
-      return KBC_2027_PLAYBOOK[0].buildAuditedOffense('ATTRACTOR_BETA_ZONE_VORONOI');
+      return buildPackagedPlayById('HYDRA_4MIN_BULLDOZER_SWEEP');
     },
     buildAuditedOffense: (attractor: BistableAttractor) => {
-      return KBC_2027_PLAYBOOK[0].buildAuditedOffense(attractor);
+      if (attractor === 'ATTRACTOR_ALPHA_MAN_BLITZ' || attractor === 'ATTRACTOR_GAMMA_GOALLINE_PINCH') {
+        return buildPackagedPlayById('ARGON_4MIN_LEFT_MONOLITH');
+      }
+      return buildPackagedPlayById('HYDRA_4MIN_BULLDOZER_SWEEP');
     },
   },
 
@@ -465,10 +469,13 @@ export const KBC_2027_PLAYBOOK: BistablePackagedPlay[] = [
       },
     },
     buildBaseOffense: () => {
-      return KBC_2027_PLAYBOOK[0].buildAuditedOffense('ATTRACTOR_BETA_ZONE_VORONOI');
+      return buildPackagedPlayById('HYDRA_4MIN_BULLDOZER_SWEEP');
     },
     buildAuditedOffense: (attractor: BistableAttractor) => {
-      return KBC_2027_PLAYBOOK[0].buildAuditedOffense(attractor);
+      if (attractor === 'ATTRACTOR_ALPHA_MAN_BLITZ' || attractor === 'ATTRACTOR_GAMMA_GOALLINE_PINCH') {
+        return buildPackagedPlayById('ARGON_4MIN_LEFT_MONOLITH');
+      }
+      return buildPackagedPlayById('HYDRA_4MIN_BULLDOZER_SWEEP');
     },
   },
 
@@ -500,10 +507,13 @@ export const KBC_2027_PLAYBOOK: BistablePackagedPlay[] = [
       },
     },
     buildBaseOffense: () => {
-      return KBC_2027_PLAYBOOK[0].buildAuditedOffense('ATTRACTOR_ALPHA_MAN_BLITZ');
+      return buildPackagedPlayById('ARGON_2MIN_BOUNDARY_LASER');
     },
     buildAuditedOffense: (attractor: BistableAttractor) => {
-      return KBC_2027_PLAYBOOK[0].buildAuditedOffense(attractor);
+      if (attractor === 'ATTRACTOR_ALPHA_MAN_BLITZ') {
+        return buildPackagedPlayById('ARGON_2MIN_BOUNDARY_LASER');
+      }
+      return buildPackagedPlayById('ARGON_CHIRAL_JET_LEFT');
     },
   },
 ];

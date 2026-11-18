@@ -1,0 +1,704 @@
+{
+  "generatedAt": "2026-11-15T17:03:29.995Z",
+  "capSummary": {
+    "elevenPersCapM": 122.9,
+    "twelvePersCapM": 120.2,
+    "twentyOnePersCapM": 122.5,
+    "savingsVsConv11M": 15.6,
+    "savingsVsShanahan12M": 23.1,
+    "defReinvestedSuppressionPpg": 1.5
+  },
+  "rosterPlayers": [
+    {
+      "slotKey": "QB",
+      "name": "M. Willis-Archetype QB1",
+      "pos": "QB",
+      "jersey": 7,
+      "capHitM": 14.5,
+      "archetype": "Mid-Market Dual-Threat Trigger (6'1\" 225 lbs, 4.49 40)",
+      "scoutingNotes": "Athletic edge/counter runner (SPD 88, PWR 85), live off-platform arm (THA 84), but slower full-field 4-read processor (AWR 83).",
+      "howieValueThesis": "Saves ~$40M/yr over static $55M pocket surgeons. APEX narrows progressions to binary triangle reads, shortens PA boot meshes (0.68s), and weaponizes 11-on-11 QB counter geometry.",
+      "throwerRating": 84,
+      "blockRating": 50,
+      "ratings": {
+        "speed": 88,
+        "accel": 89,
+        "power": 85,
+        "finesse": 84,
+        "awareness": 83
+      }
+    },
+    {
+      "slotKey": "RB",
+      "name": "Day-2 One-Cut RB1",
+      "pos": "RB",
+      "jersey": 24,
+      "capHitM": 3.8,
+      "archetype": "Round-2 Explosive One-Cut RB (5'11\" 210 lbs, 4.42 40)",
+      "scoutingNotes": "Elite burst (SPD 91, ACC 92) and downhill slash vision, but light pass-protector (BLK 66, PWR 82) who struggles anchoring A-gap muggers 1v1.",
+      "howieValueThesis": "Drafted Rd 2 instead of paying $14M+ vet RB. APEX deploys him on pin-pull edges and fast swing/flat outlets so blitzers cannot isolate his BLK 66 in static 5-man protection.",
+      "throwerRating": 45,
+      "blockRating": 66,
+      "ratings": {
+        "speed": 91,
+        "accel": 92,
+        "power": 82,
+        "finesse": 86,
+        "awareness": 82
+      }
+    },
+    {
+      "slotKey": "WR1",
+      "name": "Franchise X-Separator WR1",
+      "pos": "WR",
+      "jersey": 6,
+      "capHitM": 22.5,
+      "archetype": "Marquee Route Technician (WR1 Cornerstone #2 of 2)",
+      "scoutingNotes": "Elite suddenness (ACC 92, FIN 92, AWR 90) vs press-man & Quarters; modest 185-lb frame limits inline crack-blocking (BLK 56).",
+      "howieValueThesis": "One of only two $20M+ offensive pillars. Feeds 11.5y Glance, 12.8y Sticks-Fin, and 13.8y 2-Minute Boundary Outs as the high-confidence read-1 chains mover.",
+      "throwerRating": 50,
+      "blockRating": 56,
+      "ratings": {
+        "speed": 91,
+        "accel": 92,
+        "power": 72,
+        "finesse": 92,
+        "awareness": 90
+      }
+    },
+    {
+      "slotKey": "WR2",
+      "name": "Day-2 Vertical Z-WR2",
+      "pos": "WR",
+      "jersey": 83,
+      "capHitM": 5.2,
+      "archetype": "Raw 4.35 Lid-Lifter (6'2\" 192 lbs)",
+      "scoutingNotes": "True field-stretching top speed (SPD 95, ACC 94), but narrow route tree (FIN 83, AWR 81) and non-factor blocking (BLK 54).",
+      "howieValueThesis": "Cheap rookie-scale speed taxes 2-high safeties vertically so WR1, SL, and TE1 operate inside spacious intermediate voids without paying $28M for dual alpha WRs.",
+      "throwerRating": 45,
+      "blockRating": 54,
+      "ratings": {
+        "speed": 95,
+        "accel": 94,
+        "power": 65,
+        "finesse": 83,
+        "awareness": 81
+      }
+    },
+    {
+      "slotKey": "SL",
+      "name": "Orbit / Wing Slot SL",
+      "pos": "SL",
+      "jersey": 18,
+      "capHitM": 7.5,
+      "archetype": "Former College QB / Motion Multiplier (5'11\" 198 lbs)",
+      "scoutingNotes": "Crisp short-area quickness (SPD 92, ACC 93), tough perimeter stalker (BLK 72), and credible wing-option passer (throwerRating 75 — non-All-Pro).",
+      "howieValueThesis": "Mid-tier $7.5M Swiss-Army slot. Forces pre-snap defense rock-and-roll declarations via orbit motion while serving as an automatic <= 6.5y blitz-hot valve.",
+      "throwerRating": 75,
+      "blockRating": 72,
+      "ratings": {
+        "speed": 92,
+        "accel": 93,
+        "power": 71,
+        "finesse": 86,
+        "awareness": 86
+      }
+    },
+    {
+      "slotKey": "TE",
+      "name": "Two-Way Move Y-TE1",
+      "pos": "TE",
+      "jersey": 88,
+      "capHitM": 11.5,
+      "archetype": "Complete In-Line / Seam Y-TE (6'5\" 256 lbs)",
+      "scoutingNotes": "Clears NFL edge-sealing threshold (BLK 85, PWR 85) with reliable seam/flat hands (SPD 82, AWR 86). Solid all-around pro, not an outlier blazer.",
+      "howieValueThesis": "Worth $11.5M because BLK 85 stops free Edge-rush whiffs in 11/12-pers chip-and-release protections and seals C-gaps on 11-on-11 Rhino Counters.",
+      "throwerRating": 55,
+      "blockRating": 85,
+      "ratings": {
+        "speed": 82,
+        "accel": 84,
+        "power": 85,
+        "finesse": 84,
+        "awareness": 86
+      }
+    },
+    {
+      "slotKey": "TE2",
+      "name": "Heavy Wing / Sniffer TE2",
+      "pos": "TE",
+      "jersey": 84,
+      "capHitM": 4.8,
+      "archetype": "264-lb H-Wing / Edge Bulldozer (6'4\" 264 lbs)",
+      "scoutingNotes": "Dominant split-flow and pin-pull lead blocker (BLK 87, PWR 87) who swaps into 12-pers (replacing SL -> $120.2M) or 21-pers (replacing WR2 -> $122.5M).",
+      "howieValueThesis": "Low-cost TE market arbitrage: gives Howie sixth-OL run/boot sealing force at $4.8M while remaining an eligible red-zone leak receiver.",
+      "throwerRating": 58,
+      "blockRating": 87,
+      "ratings": {
+        "speed": 81,
+        "accel": 83,
+        "power": 87,
+        "finesse": 80,
+        "awareness": 85
+      }
+    },
+    {
+      "slotKey": "LT",
+      "name": "Franchise Blindside LT",
+      "pos": "LT",
+      "jersey": 68,
+      "capHitM": 24,
+      "archetype": "All-Pro Blindside Anchor (OL Cornerstone #1 of 2)",
+      "scoutingNotes": "Long-armed technician (BLK 91, FIN 91, PWR 89, AWR 89) trusted on true 1-on-1 weakside islands.",
+      "howieValueThesis": "Second of only two $20M+ contracts. Owning a true island LT lets APEX slide protection toward the developmental RG on every dropback.",
+      "throwerRating": 30,
+      "blockRating": 91,
+      "ratings": {
+        "speed": 75,
+        "accel": 81,
+        "power": 89,
+        "finesse": 91,
+        "awareness": 89
+      }
+    },
+    {
+      "slotKey": "LG",
+      "name": "Core Interior Mauler LG",
+      "pos": "LG",
+      "jersey": 69,
+      "capHitM": 14.5,
+      "archetype": "Pro-Bowl Power Guard (6'5\" 328 lbs)",
+      "scoutingNotes": "Heavy-handed anchor (PWR 90, BLK 89, AWR 87) who stabilizes young Center on zero-tech NTs and caves C-gaps on left sweeps.",
+      "howieValueThesis": "Extended one cycle early at $14.5M. Anchors the A-left/B-left interior pocket so our lighter C doesn't collapse against Bear fronts.",
+      "throwerRating": 30,
+      "blockRating": 89,
+      "ratings": {
+        "speed": 73,
+        "accel": 79,
+        "power": 90,
+        "finesse": 84,
+        "awareness": 87
+      }
+    },
+    {
+      "slotKey": "C",
+      "name": "Athletic Pull-Center C",
+      "pos": "C",
+      "jersey": 51,
+      "capHitM": 5.5,
+      "archetype": "Undersized Reach/Pull Center (6'3\" 295 lbs)",
+      "scoutingNotes": "Elite lateral pull mobility (SPD 79, ACC 85, FIN 86, AWR 87) for pin-pull edges, but modest bull-rush anchor (PWR 82) vs 335-lb NTs 1v1.",
+      "howieValueThesis": "Bridge/extension value at $5.5M. Needs LG/RG combo-climb leverage vs heavy 3-4 Bear NTs while turning into a missile on outside sweeps.",
+      "throwerRating": 30,
+      "blockRating": 86,
+      "ratings": {
+        "speed": 79,
+        "accel": 85,
+        "power": 82,
+        "finesse": 86,
+        "awareness": 87
+      }
+    },
+    {
+      "slotKey": "RG",
+      "name": "Day-3 Developmental RG",
+      "pos": "RG",
+      "jersey": 65,
+      "capHitM": 3.4,
+      "archetype": "Raw Second-Year Starting RG (6'4\" 316 lbs)",
+      "scoutingNotes": "Adequate size/strength (PWR 84, BLK 83), but lower blitz-pickup processing (AWR 82, FIN 82) vulnerable to simulated A/B-gap pressures.",
+      "howieValueThesis": "Rookie-scale Day-3 pick saves $13M+ over vet guards. Protected intentionally by C-right slides, TE1 chips, half-roll boots, and <= 6.5y quick hots.",
+      "throwerRating": 30,
+      "blockRating": 83,
+      "ratings": {
+        "speed": 74,
+        "accel": 80,
+        "power": 84,
+        "finesse": 82,
+        "awareness": 82
+      }
+    },
+    {
+      "slotKey": "RT",
+      "name": "Ascending Right Tackle RT",
+      "pos": "RT",
+      "jersey": 66,
+      "capHitM": 10.5,
+      "archetype": "Balanced Year-4 Right Tackle (6'6\" 312 lbs)",
+      "scoutingNotes": "Reliable edge protector and down-blocker (BLK 87, PWR 87, FIN 85, AWR 85). Good starter, not top-3 reset money.",
+      "howieValueThesis": "Secures frontside edges cleanly when paired with TE1/TE2 wing help without breaking the $123M active cap ceiling.",
+      "throwerRating": 30,
+      "blockRating": 87,
+      "ratings": {
+        "speed": 75,
+        "accel": 81,
+        "power": 87,
+        "finesse": 85,
+        "awareness": 85
+      }
+    }
+  ],
+  "legalityAndBiomechanicsAudit": {
+    "snapsAudited": 6025,
+    "legal7OnLosPct": 100,
+    "legalUncoveredEndsPct": 100,
+    "legalIneligibleBufferPct": 100,
+    "strictlyBackwardLateralsPct": 100,
+    "unengagedGForceViolations": 0,
+    "peakUnengagedGForce": 1.455,
+    "overlapViolationsUnder020y": 0,
+    "minPlayerSeparationYds": 0.31
+  },
+  "apexPlayTelemetry": [
+    {
+      "id": "APEX_ORBIT_GLANCE_FLOOD",
+      "name": "APEX // ORBIT GLANCE-SAIL TRIANGLE (HOT RELIEF)",
+      "personnel": "11 APEX",
+      "category": "PASS",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "TWO_MINUTE"
+      ],
+      "featuredDefense": "NICKEL_OVER_C3",
+      "overallMeanYards": 8.22,
+      "overallMeanEpa": -0.023,
+      "successRatePct": 64.4,
+      "explosiveRatePct": 13.3,
+      "sackRatePct": 3.6,
+      "turnoverRatePct": 1.3,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.46,
+        "NICKEL_UNDER_C1": -0.546,
+        "NICKEL_SIM_C2": -0.18,
+        "BASE_34_BEAR_C4": 0.228,
+        "BASE_43_OVER_C1": -0.148,
+        "DIME_MUG_C0": 0.124,
+        "DIME_QUARTERS_MATCH": -0.461,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.046,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.271,
+        "GOAL_LINE_62_PINCH": -1.237
+      }
+    },
+    {
+      "id": "APEX_DUO_WING_PIN_PULL",
+      "name": "APEX // 12-PERS WING PIN-AND-PULL EDGE",
+      "personnel": "12 APEX",
+      "category": "RUN",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "FOUR_MINUTE"
+      ],
+      "featuredDefense": "BASE_34_BEAR_C4",
+      "overallMeanYards": 5.38,
+      "overallMeanEpa": 0.031,
+      "successRatePct": 68.2,
+      "explosiveRatePct": 0.7,
+      "sackRatePct": 0,
+      "turnoverRatePct": 0,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.186,
+        "NICKEL_UNDER_C1": 0.424,
+        "NICKEL_SIM_C2": 0.354,
+        "BASE_34_BEAR_C4": 0.251,
+        "BASE_43_OVER_C1": -0.391,
+        "DIME_MUG_C0": -0.783,
+        "DIME_QUARTERS_MATCH": 0.085,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.055,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.102,
+        "GOAL_LINE_62_PINCH": 0.661
+      }
+    },
+    {
+      "id": "APEX_SHORT_MESH_PA_BOOT",
+      "name": "APEX // 0.68s HALF-ROLL PA BOOT FLOOD",
+      "personnel": "12 APEX",
+      "category": "PASS",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "FOUR_MINUTE"
+      ],
+      "featuredDefense": "BASE_43_OVER_C1",
+      "overallMeanYards": 8.62,
+      "overallMeanEpa": -0.097,
+      "successRatePct": 70,
+      "explosiveRatePct": 28.2,
+      "sackRatePct": 10.4,
+      "turnoverRatePct": 0.4,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.531,
+        "NICKEL_UNDER_C1": -0.506,
+        "NICKEL_SIM_C2": 0.235,
+        "BASE_34_BEAR_C4": -0.098,
+        "BASE_43_OVER_C1": -0.117,
+        "DIME_MUG_C0": -0.755,
+        "DIME_QUARTERS_MATCH": 0.516,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.697,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.022,
+        "GOAL_LINE_62_PINCH": 0.254
+      }
+    },
+    {
+      "id": "APEX_SWITCH_MESH_STICKS",
+      "name": "APEX // 3RD & 9 SWITCH-MESH & STICKS FIN",
+      "personnel": "11 APEX",
+      "category": "PASS",
+      "menuBuckets": [
+        "THIRD_LONG",
+        "OPEN_FIELD"
+      ],
+      "featuredDefense": "VIKINGS_MUG_CROSSDOG_C0",
+      "overallMeanYards": 6.55,
+      "overallMeanEpa": -0.199,
+      "successRatePct": 57.1,
+      "explosiveRatePct": 5.3,
+      "sackRatePct": 2,
+      "turnoverRatePct": 3.6,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.252,
+        "NICKEL_UNDER_C1": 0.097,
+        "NICKEL_SIM_C2": 0.209,
+        "BASE_34_BEAR_C4": -0.192,
+        "BASE_43_OVER_C1": 0.254,
+        "DIME_MUG_C0": -0.497,
+        "DIME_QUARTERS_MATCH": -0.595,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.768,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.553,
+        "GOAL_LINE_62_PINCH": -0.771
+      }
+    },
+    {
+      "id": "APEX_TWOMIN_BOUNDARY_OOB",
+      "name": "APEX // 2-MIN BOUNDARY OUT-STRETCH (OOB STOP)",
+      "personnel": "11 APEX",
+      "category": "PASS",
+      "menuBuckets": [
+        "TWO_MINUTE",
+        "THIRD_LONG"
+      ],
+      "featuredDefense": "DIME_QUARTERS_MATCH",
+      "overallMeanYards": 4.89,
+      "overallMeanEpa": -0.272,
+      "successRatePct": 66.9,
+      "explosiveRatePct": 10,
+      "sackRatePct": 2,
+      "turnoverRatePct": 2.2,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.287,
+        "NICKEL_UNDER_C1": -0.43,
+        "NICKEL_SIM_C2": -0.261,
+        "BASE_34_BEAR_C4": -0.124,
+        "BASE_43_OVER_C1": -0.606,
+        "DIME_MUG_C0": -0.277,
+        "DIME_QUARTERS_MATCH": -0.555,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.246,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.232,
+        "GOAL_LINE_62_PINCH": -2.072
+      }
+    },
+    {
+      "id": "APEX_DISPLACED_WING_OPTION",
+      "name": "APEX // DISPLACED WING OPTION-PASS CONTINUUM",
+      "personnel": "21 APEX",
+      "category": "RUN",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "TWO_MINUTE"
+      ],
+      "featuredDefense": "NICKEL_SIM_C2",
+      "overallMeanYards": 9.26,
+      "overallMeanEpa": 0.127,
+      "successRatePct": 64.4,
+      "explosiveRatePct": 26,
+      "sackRatePct": 0,
+      "turnoverRatePct": 1.1,
+      "optPassRatePct": 49.3,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.279,
+        "NICKEL_UNDER_C1": 0.45,
+        "NICKEL_SIM_C2": 0.332,
+        "BASE_34_BEAR_C4": 0.177,
+        "BASE_43_OVER_C1": 0.203,
+        "DIME_MUG_C0": -0.322,
+        "DIME_QUARTERS_MATCH": 0.328,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.198,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.103,
+        "GOAL_LINE_62_PINCH": -0.331
+      }
+    },
+    {
+      "id": "APEX_EAGLES_RHINO_COUNTER",
+      "name": "APEX // 11v11 EAGLES RHINO QB SWEEP LEFT",
+      "personnel": "12 APEX",
+      "category": "RUN",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "FOUR_MINUTE"
+      ],
+      "featuredDefense": "VIKINGS_SAFETY_BLITZ_C1",
+      "overallMeanYards": 9.06,
+      "overallMeanEpa": 0.305,
+      "successRatePct": 71.1,
+      "explosiveRatePct": 39.8,
+      "sackRatePct": 0,
+      "turnoverRatePct": 0,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": -0.241,
+        "NICKEL_UNDER_C1": 0.485,
+        "NICKEL_SIM_C2": 0.899,
+        "BASE_34_BEAR_C4": 0.277,
+        "BASE_43_OVER_C1": 0.474,
+        "DIME_MUG_C0": 0.795,
+        "DIME_QUARTERS_MATCH": -0.397,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.807,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.349,
+        "GOAL_LINE_62_PINCH": 0.242
+      }
+    },
+    {
+      "id": "APEX_GOALLINE_SPRINT_SMASH",
+      "name": "APEX // GL +4y SPRINT-BOOT OPTION POP",
+      "personnel": "12 APEX",
+      "category": "PASS",
+      "menuBuckets": [
+        "GOAL_LINE"
+      ],
+      "featuredDefense": "GOAL_LINE_62_PINCH",
+      "overallMeanYards": 2.99,
+      "overallMeanEpa": 0.19,
+      "successRatePct": 70,
+      "explosiveRatePct": 0,
+      "sackRatePct": 0,
+      "turnoverRatePct": 0,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.391,
+        "NICKEL_UNDER_C1": -0.441,
+        "NICKEL_SIM_C2": 0.252,
+        "BASE_34_BEAR_C4": -0.297,
+        "BASE_43_OVER_C1": 0.351,
+        "DIME_MUG_C0": -0.54,
+        "DIME_QUARTERS_MATCH": -0.119,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.132,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.292,
+        "GOAL_LINE_62_PINCH": 0.351
+      }
+    }
+  ],
+  "nashEquilibrium": {
+    "apexNashEpa": -0.0223,
+    "apexMix": {
+      "APEX_ORBIT_GLANCE_FLOOD": 30.81,
+      "APEX_DUO_WING_PIN_PULL": 0.12,
+      "APEX_SHORT_MESH_PA_BOOT": 1.27,
+      "APEX_SWITCH_MESH_STICKS": 0,
+      "APEX_DISPLACED_WING_OPTION": 52.71,
+      "APEX_EAGLES_RHINO_COUNTER": 15.08
+    },
+    "adversarialDcCounterMix": {
+      "NICKEL_OVER_C3": 0.01,
+      "NICKEL_UNDER_C1": 0.1,
+      "NICKEL_SIM_C2": 0,
+      "BASE_34_BEAR_C4": 0,
+      "BASE_43_OVER_C1": 0,
+      "DIME_MUG_C0": 29.47,
+      "DIME_QUARTERS_MATCH": 33.84,
+      "VIKINGS_MUG_CROSSDOG_C0": 0.44,
+      "VIKINGS_SAFETY_BLITZ_C1": 36.14
+    },
+    "argonNashEpa": 0.1638,
+    "hydraNashEpa": -0.0081,
+    "baselinesNashEpa": {
+      "CONV_11_SPREAD": -0.3831,
+      "SHANAHAN_12_PA": 0.0259,
+      "SUPERMAX_STARS": -0.4207
+    }
+  },
+  "fullGameBenchmarks": [
+    {
+      "philosophyName": "2027 Philadelphia APEX ($122.9M Realistic Non-All-Star)",
+      "offCapM": 122.9,
+      "ppgStandardDc": 41.86,
+      "ppgAdversarialNashDc": 25.44,
+      "ppdStandard": 3.81,
+      "tdDrivePct": 48.8,
+      "fgDrivePct": 13.7,
+      "turnoverDrivePct": 10.9,
+      "explosiveRatePct": 21.1,
+      "ppgPer10MCap": 3.41,
+      "projectedTeamNetDiffPerGame": 20.96
+    },
+    {
+      "philosophyName": "2027 Google Argon Continuum ($81.1M Moneyball)",
+      "offCapM": 81.1,
+      "ppgStandardDc": 55.44,
+      "ppgAdversarialNashDc": 50.16,
+      "ppdStandard": 5.04,
+      "tdDrivePct": 67.9,
+      "fgDrivePct": 10.5,
+      "turnoverDrivePct": 6.6,
+      "explosiveRatePct": 24.1,
+      "ppgPer10MCap": 6.84,
+      "projectedTeamNetDiffPerGame": 37.14
+    },
+    {
+      "philosophyName": "2027 Hydra Vanguard ($85.5M Moneyball)",
+      "offCapM": 85.5,
+      "ppgStandardDc": 31.3,
+      "ppgAdversarialNashDc": 13.96,
+      "ppdStandard": 2.85,
+      "tdDrivePct": 34.7,
+      "fgDrivePct": 14.4,
+      "turnoverDrivePct": 11.7,
+      "explosiveRatePct": 9.7,
+      "ppgPer10MCap": 3.66,
+      "projectedTeamNetDiffPerGame": 12.7
+    },
+    {
+      "philosophyName": "Conventional 11-Pers Dropback Spread ($138.5M Cap)",
+      "offCapM": 138.5,
+      "ppgStandardDc": 17.9,
+      "ppgAdversarialNashDc": 12.25,
+      "ppdStandard": 1.63,
+      "tdDrivePct": 17,
+      "fgDrivePct": 14.8,
+      "turnoverDrivePct": 17.1,
+      "explosiveRatePct": 13.8,
+      "ppgPer10MCap": 1.29,
+      "projectedTeamNetDiffPerGame": -4.1
+    },
+    {
+      "philosophyName": "Shanahan/McVay 12-Pers Play-Action ($146.0M Cap)",
+      "offCapM": 146,
+      "ppgStandardDc": 36.72,
+      "ppgAdversarialNashDc": 21.03,
+      "ppdStandard": 3.34,
+      "tdDrivePct": 41.8,
+      "fgDrivePct": 14.4,
+      "turnoverDrivePct": 13.4,
+      "explosiveRatePct": 12.6,
+      "ppgPer10MCap": 2.52,
+      "projectedTeamNetDiffPerGame": 14.32
+    },
+    {
+      "philosophyName": "Top-Heavy Supermax Stars / Cap-Starved OL ($172.0M Cap)",
+      "offCapM": 172,
+      "ppgStandardDc": 18.72,
+      "ppgAdversarialNashDc": 7.58,
+      "ppdStandard": 1.7,
+      "tdDrivePct": 18,
+      "fgDrivePct": 14.9,
+      "turnoverDrivePct": 16.7,
+      "explosiveRatePct": 18.4,
+      "ppgPer10MCap": 1.09,
+      "projectedTeamNetDiffPerGame": -5.78
+    }
+  ],
+  "situationalDrills": {
+    "twoMinute": {
+      "apex": {
+        "tdWinPct": 64.8,
+        "ydsPerClockSec": 0.79,
+        "oobStopsPerDrive": 1.84,
+        "sackRatePct": 0.9
+      },
+      "argon": {
+        "tdWinPct": 76.5,
+        "ydsPerClockSec": 1.48,
+        "oobStopsPerDrive": 3.2,
+        "sackRatePct": 0
+      },
+      "conv11": {
+        "tdWinPct": 33.1,
+        "ydsPerClockSec": 0.66,
+        "oobStopsPerDrive": 0,
+        "sackRatePct": 5.2
+      },
+      "supermax": {
+        "tdWinPct": 31.6,
+        "ydsPerClockSec": 0.69,
+        "oobStopsPerDrive": 0,
+        "sackRatePct": 6.5
+      }
+    },
+    "fourMinute": {
+      "apex": {
+        "gameSealPct": 81.5,
+        "meanClockBledSec": 195.6,
+        "firstDownsPerDrive": 3.02,
+        "clockGiftMistakePct": 0
+      },
+      "argon": {
+        "gameSealPct": 83.4,
+        "meanClockBledSec": 173.2,
+        "firstDownsPerDrive": 2.4,
+        "clockGiftMistakePct": 0
+      },
+      "shanahan12": {
+        "gameSealPct": 53.9,
+        "meanClockBledSec": 173,
+        "firstDownsPerDrive": 2.37,
+        "clockGiftMistakePct": 0
+      },
+      "conv11": {
+        "gameSealPct": 10.8,
+        "meanClockBledSec": 96.2,
+        "firstDownsPerDrive": 0.7,
+        "clockGiftMistakePct": 0
+      }
+    },
+    "goalLine": {
+      "apex": {
+        "fourDownTdPct": 98.1,
+        "singleSnapTdPct": 66.4,
+        "expectedGoalLinePts": 6.83
+      },
+      "argon": {
+        "fourDownTdPct": 99.4,
+        "singleSnapTdPct": 81,
+        "expectedGoalLinePts": 6.92
+      },
+      "shanahan12": {
+        "fourDownTdPct": 76.7,
+        "singleSnapTdPct": 32,
+        "expectedGoalLinePts": 5.82
+      },
+      "conv11": {
+        "fourDownTdPct": 74.6,
+        "singleSnapTdPct": 39.3,
+        "expectedGoalLinePts": 5.83
+      }
+    },
+    "thirdAndNine": {
+      "apex": {
+        "conversionPct": 19.4,
+        "explosive18Pct": 0,
+        "sackPct": 1.4,
+        "meanEpa": -0.374
+      },
+      "argon": {
+        "conversionPct": 55.4,
+        "explosive18Pct": 15.2,
+        "sackPct": 0,
+        "meanEpa": 0.362
+      },
+      "conv11": {
+        "conversionPct": 30.5,
+        "explosive18Pct": 22.2,
+        "sackPct": 2.7,
+        "meanEpa": -0.214
+      },
+      "supermax": {
+        "conversionPct": 31,
+        "explosive18Pct": 23.5,
+        "sackPct": 7.8,
+        "meanEpa": -0.346
+      }
+    }
+  }
+}

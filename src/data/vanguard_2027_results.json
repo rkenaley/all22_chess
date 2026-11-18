@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T01:20:52.915Z",
+  "generatedAt": "2026-11-13T17:38:50.744Z",
   "rosterCapM": 85.5,
   "rosterPlayers": [
     {
@@ -227,166 +227,173 @@
   },
   "physicsDiagnostics": {
     "suicidalQbOnDeBlock": {
-      "meanYds": 1.13,
-      "meanEpa": -0.432,
-      "stuffPct": 66.7
+      "meanYds": 0.54,
+      "meanEpa": -0.512,
+      "stuffPct": 67.2
     },
     "phillyHybridStowersPayton": {
-      "meanYds": 8.2,
-      "meanEpa": 0.331,
-      "stuffPct": 12.8
+      "meanYds": 8.19,
+      "meanEpa": 0.334,
+      "stuffPct": 9.4
     },
     "recklessForcedLaterals": {
-      "pitchRatePct": 9.8,
-      "fumbleTotalPct": 0.3,
-      "fumbleLostPct": 0.3,
-      "meanEpa": -0.285
+      "pitchRatePct": 34.3,
+      "fumbleTotalPct": 4.8,
+      "fumbleLostPct": 3.2,
+      "meanEpa": -0.148
     },
     "disciplinedCatchPitchOption": {
-      "pitchRatePct": 1.6,
+      "pitchRatePct": 7,
       "fumbleTotalPct": 0,
       "fumbleLostPct": 0,
-      "meanEpa": -0.314
+      "meanEpa": -0.086
     }
   },
   "hydraPlayTelemetry": {
     "HYDRA_JET_DOUBLE_OPTION": {
       "name": "HYDRA // WR JET SWEEP DOUBLE OPTION (MEYERS THROW/KEEP)",
-      "meanYds": 5.43,
-      "meanEpa": -0.227,
-      "explosivePct": 32,
-      "negativePlayPct": 26.9,
-      "fumbleTotalPct": 1.11,
-      "fumbleLostPct": 0.67,
-      "branchText": "Option Pass: 70.9% (+8.4y) | Tuck & Run: 29.1% (+-1.8y)",
-      "nashWeightPct": 1.4,
-      "epaVsNashDc": -0.026,
+      "meanYds": 8.67,
+      "meanEpa": 0.012,
+      "explosivePct": 41.3,
+      "negativePlayPct": 23.8,
+      "fumbleTotalPct": 1.56,
+      "fumbleLostPct": 0,
+      "branchText": "Option Pass: 74.2% (+12.1y) | Tuck & Run: 25.8% (+-1.1y)",
+      "nashWeightPct": 0,
+      "epaVsNashDc": -0.338,
       "bestMatchup": {
-        "def": "VIKINGS_SAFETY_BLITZ_C1",
-        "epa": 0.324,
-        "yds": 11.75
+        "def": "BASE_43_OVER_C1",
+        "epa": 0.435,
+        "yds": 13.74
       },
       "worstCounter": {
-        "def": "BASE_34_BEAR_C4",
-        "epa": -1.213,
-        "yds": -2.91
+        "def": "NICKEL_OVER_C3",
+        "epa": -0.639,
+        "yds": 0.05
       },
-      "bestResponseAgainst": [
-        "BASE_43_OVER_C1"
-      ]
+      "bestResponseAgainst": []
     },
     "HYDRA_HOOK_AND_LATERAL": {
       "name": "HYDRA // HOOK & LATERAL CATCH-PITCH OPTION (MEYERS -> SHAHEED)",
-      "meanYds": 3.01,
-      "meanEpa": -0.396,
-      "explosivePct": 12.2,
-      "negativePlayPct": 4.7,
-      "fumbleTotalPct": 0.22,
-      "fumbleLostPct": 0,
-      "branchText": "Pitch on Catch: 10.0% (+29.1y) | Hook Keep: 90.0% (+24.0y)",
+      "meanYds": 7.59,
+      "meanEpa": -0.205,
+      "explosivePct": 31.3,
+      "negativePlayPct": 8.9,
+      "fumbleTotalPct": 0.44,
+      "fumbleLostPct": 0.22,
+      "branchText": "Pitch on Catch: 11.9% (+13.7y) | Hook Keep: 88.1% (+14.7y)",
       "nashWeightPct": 0,
-      "epaVsNashDc": -0.326,
+      "epaVsNashDc": -0.598,
       "bestMatchup": {
         "def": "VIKINGS_SAFETY_BLITZ_C1",
-        "epa": -0.094,
-        "yds": 6.31
+        "epa": 0.357,
+        "yds": 14.51
       },
       "worstCounter": {
-        "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": -0.832,
-        "yds": -0.41
+        "def": "DIME_QUARTERS_MATCH",
+        "epa": -0.745,
+        "yds": 3.04
       },
       "bestResponseAgainst": []
     },
     "HYDRA_PONY_SPLIT_BASH": {
       "name": "HYDRA // 2-QB SPLIT-PONY PIN-PULL & OPTION (FIELDS + PAYTON + STOWERS)",
-      "meanYds": 6.62,
-      "meanEpa": -0.146,
-      "explosivePct": 0,
-      "negativePlayPct": 12.9,
-      "fumbleTotalPct": 3.78,
-      "fumbleLostPct": 1.56,
-      "branchText": "Option Pass: 86.9% (+8.1y) | Tuck & Run: 13.1% (+-2.9y)",
-      "nashWeightPct": 4.7,
-      "epaVsNashDc": -0.016,
+      "meanYds": 9.99,
+      "meanEpa": 0.191,
+      "explosivePct": 1.6,
+      "negativePlayPct": 8.9,
+      "fumbleTotalPct": 0.67,
+      "fumbleLostPct": 0.22,
+      "branchText": "Option Pass: 80.4% (+11.7y) | Tuck & Run: 19.6% (+3.0y)",
+      "nashWeightPct": 0,
+      "epaVsNashDc": 0.019,
       "bestMatchup": {
-        "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": 0.234,
-        "yds": 10.67
+        "def": "BASE_43_OVER_C1",
+        "epa": 0.498,
+        "yds": 13.87
       },
       "worstCounter": {
-        "def": "NICKEL_OVER_C3",
-        "epa": -0.78,
-        "yds": -0.03
+        "def": "BASE_34_BEAR_C4",
+        "epa": -0.346,
+        "yds": 3.72
       },
-      "bestResponseAgainst": []
+      "bestResponseAgainst": [
+        "BASE_43_OVER_C1"
+      ]
     },
     "HYDRA_BACKWARD_DOUBLE_PASS": {
       "name": "HYDRA // BACKWARD LATERAL SCREEN DOUBLE PASS (FIELDS -> MEYERS -> SHAHEED)",
-      "meanYds": 6.32,
-      "meanEpa": -0.196,
-      "explosivePct": 33.6,
-      "negativePlayPct": 4.9,
-      "fumbleTotalPct": 4.89,
-      "fumbleLostPct": 1.11,
-      "branchText": "Option Pass: 95.1% (+7.1y) | Tuck & Run: 4.9% (+-8.4y)",
-      "nashWeightPct": 0,
-      "epaVsNashDc": -0.181,
+      "meanYds": 14.56,
+      "meanEpa": 0.299,
+      "explosivePct": 77.1,
+      "negativePlayPct": 6.7,
+      "fumbleTotalPct": 6.44,
+      "fumbleLostPct": 2.44,
+      "branchText": "Option Pass: 93.6% (+16.1y) | Tuck & Run: 6.4% (+-8.4y)",
+      "nashWeightPct": 7.9,
+      "epaVsNashDc": 0.057,
       "bestMatchup": {
-        "def": "NICKEL_UNDER_C1",
-        "epa": 0.27,
-        "yds": 13
+        "def": "VIKINGS_MUG_CROSSDOG_C0",
+        "epa": 0.502,
+        "yds": 16.35
       },
       "worstCounter": {
         "def": "NICKEL_OVER_C3",
-        "epa": -0.757,
-        "yds": -0.06
+        "epa": -0.24,
+        "yds": 8.5
       },
-      "bestResponseAgainst": []
+      "bestResponseAgainst": [
+        "NICKEL_SIM_C2",
+        "DIME_MUG_C0",
+        "DIME_QUARTERS_MATCH",
+        "VIKINGS_SAFETY_BLITZ_C1"
+      ]
     },
     "HYDRA_6OL_ELIGIBLE_SEAM": {
       "name": "HYDRA // 6th-OL ELIGIBLE SEAM LEAK (275-LB WASHINGTON + STOWERS PA)",
-      "meanYds": 2.84,
-      "meanEpa": -0.571,
-      "explosivePct": 15.8,
-      "negativePlayPct": 17.6,
+      "meanYds": 7.29,
+      "meanEpa": -0.308,
+      "explosivePct": 33.8,
+      "negativePlayPct": 16.7,
       "fumbleTotalPct": 0,
       "fumbleLostPct": 0,
       "branchText": "Direct Execution / Built-in Multi-Level Progression",
-      "nashWeightPct": 0,
-      "epaVsNashDc": -0.294,
+      "nashWeightPct": 0.4,
+      "epaVsNashDc": -0.028,
       "bestMatchup": {
-        "def": "DIME_QUARTERS_MATCH",
-        "epa": -0.117,
-        "yds": 5.75
+        "def": "NICKEL_OVER_C3",
+        "epa": 0.228,
+        "yds": 10.85
       },
       "worstCounter": {
         "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": -2.014,
-        "yds": -4.34
+        "epa": -1.661,
+        "yds": -2.23
       },
-      "bestResponseAgainst": []
+      "bestResponseAgainst": [
+        "NICKEL_OVER_C3"
+      ]
     },
     "HYDRA_2MIN_SIDELINE_CHOICE": {
       "name": "HYDRA 2-MIN // TEMPO SIDELINE SPEED-OUT & FLAT CLOCK-STOPPER",
-      "meanYds": 4.05,
-      "meanEpa": -0.24,
-      "explosivePct": 0,
-      "negativePlayPct": 2.4,
+      "meanYds": 8.25,
+      "meanEpa": 0.056,
+      "explosivePct": 1.1,
+      "negativePlayPct": 3.8,
       "fumbleTotalPct": 0,
       "fumbleLostPct": 0,
       "branchText": "Direct Execution / Built-in Multi-Level Progression",
-      "nashWeightPct": 0,
-      "epaVsNashDc": -0.319,
+      "nashWeightPct": 55.9,
+      "epaVsNashDc": 0.058,
       "bestMatchup": {
         "def": "NICKEL_SIM_C2",
-        "epa": 0.333,
-        "yds": 11.41
+        "epa": 0.416,
+        "yds": 12.53
       },
       "worstCounter": {
         "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": -0.525,
-        "yds": 3.73
+        "epa": -0.28,
+        "yds": 6.88
       },
       "bestResponseAgainst": [
         "BASE_34_BEAR_C4"
@@ -394,553 +401,550 @@
     },
     "HYDRA_4MIN_BULLDOZER_SWEEP": {
       "name": "HYDRA 4-MIN // DIRECT-SNAP FIELDS BULLDOZER (STOWERS LEAD + PAYTON FREEZE)",
-      "meanYds": 8.84,
-      "meanEpa": 0.365,
-      "explosivePct": 23.6,
-      "negativePlayPct": 1.8,
+      "meanYds": 7.58,
+      "meanEpa": 0.29,
+      "explosivePct": 2.2,
+      "negativePlayPct": 0.9,
       "fumbleTotalPct": 0,
       "fumbleLostPct": 0,
-      "branchText": "Stowers (BLK 82) Lead + Payton Freeze (Stuff 7.6%, 0% Incomp)",
-      "nashWeightPct": 93.9,
-      "epaVsNashDc": -0.016,
+      "branchText": "Stowers (BLK 82) Lead + Payton Freeze (Stuff 4.4%, 0% Incomp)",
+      "nashWeightPct": 35.8,
+      "epaVsNashDc": 0.058,
       "bestMatchup": {
         "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": 1.063,
-        "yds": 18.38
+        "epa": 0.506,
+        "yds": 10.38
       },
       "worstCounter": {
-        "def": "BASE_43_OVER_C1",
-        "epa": -0.032,
-        "yds": 4.26
+        "def": "NICKEL_OVER_C3",
+        "epa": 0.014,
+        "yds": 4.14
       },
       "bestResponseAgainst": [
-        "NICKEL_OVER_C3",
         "NICKEL_UNDER_C1",
-        "NICKEL_SIM_C2",
-        "DIME_MUG_C0",
-        "DIME_QUARTERS_MATCH",
         "VIKINGS_MUG_CROSSDOG_C0",
-        "VIKINGS_SAFETY_BLITZ_C1",
         "GOAL_LINE_62_PINCH"
       ]
     },
     "HYDRA_GOALLINE_PHILLY_SPECIAL": {
       "name": "HYDRA GOAL-LINE // HEAVY 2-QB PYLON SWEEP & POP-PASS SPECIAL",
-      "meanYds": 3.01,
-      "meanEpa": 0.226,
-      "explosivePct": 75.3,
-      "negativePlayPct": 0,
-      "fumbleTotalPct": 0,
-      "fumbleLostPct": 0,
-      "branchText": "Option Pass: 100.0% (+3.0y) | Tuck & Run: 0.0% (+0.0y)",
+      "meanYds": 3.14,
+      "meanEpa": 0.176,
+      "explosivePct": 81.3,
+      "negativePlayPct": 2.7,
+      "fumbleTotalPct": 1.33,
+      "fumbleLostPct": 1.33,
+      "branchText": "Option Pass: 98.7% (+3.3y) | Tuck & Run: 1.3% (+-8.2y)",
       "nashWeightPct": 0,
-      "epaVsNashDc": 0.292,
+      "epaVsNashDc": 0.195,
       "bestMatchup": {
-        "def": "GOAL_LINE_62_PINCH",
-        "epa": 0.292,
-        "yds": 3.28
+        "def": "BASE_43_OVER_C1",
+        "epa": 0.284,
+        "yds": 3.44
       },
       "worstCounter": {
         "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": 0.114,
-        "yds": 2.56
+        "epa": 0.049,
+        "yds": 2.8
       },
       "bestResponseAgainst": []
     }
   },
   "playMatchupAudit": {
     "HYDRA_JET_DOUBLE_OPTION": {
-      "nashWeightPct": 1.4,
-      "epaVsNashDc": -0.026,
-      "allFrontMeanEpa": -0.227,
+      "nashWeightPct": 0,
+      "epaVsNashDc": -0.338,
+      "allFrontMeanEpa": 0.012,
+      "bestMatchup": {
+        "def": "BASE_43_OVER_C1",
+        "epa": 0.435,
+        "yds": 13.74
+      },
+      "worstCounter": {
+        "def": "NICKEL_OVER_C3",
+        "epa": -0.639,
+        "yds": 0.05
+      },
+      "bestResponseAgainst": [],
+      "byDefenseEpa": {
+        "NICKEL_OVER_C3": -0.639,
+        "NICKEL_UNDER_C1": 0.273,
+        "NICKEL_SIM_C2": -0.126,
+        "BASE_34_BEAR_C4": -0.474,
+        "BASE_43_OVER_C1": 0.435,
+        "DIME_MUG_C0": 0.342,
+        "DIME_QUARTERS_MATCH": -0.212,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.167,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.342,
+        "GOAL_LINE_62_PINCH": -1.099
+      },
+      "byDefenseYds": {
+        "NICKEL_OVER_C3": 0.05,
+        "NICKEL_UNDER_C1": 12.03,
+        "NICKEL_SIM_C2": 6.22,
+        "BASE_34_BEAR_C4": 4.06,
+        "BASE_43_OVER_C1": 13.74,
+        "DIME_MUG_C0": 12.91,
+        "DIME_QUARTERS_MATCH": 4.23,
+        "VIKINGS_MUG_CROSSDOG_C0": 11.34,
+        "VIKINGS_SAFETY_BLITZ_C1": 13.44,
+        "GOAL_LINE_62_PINCH": -2.03
+      }
+    },
+    "HYDRA_HOOK_AND_LATERAL": {
+      "nashWeightPct": 0,
+      "epaVsNashDc": -0.598,
+      "allFrontMeanEpa": -0.205,
       "bestMatchup": {
         "def": "VIKINGS_SAFETY_BLITZ_C1",
-        "epa": 0.324,
-        "yds": 11.75
+        "epa": 0.357,
+        "yds": 14.51
+      },
+      "worstCounter": {
+        "def": "DIME_QUARTERS_MATCH",
+        "epa": -0.745,
+        "yds": 3.04
+      },
+      "bestResponseAgainst": [],
+      "byDefenseEpa": {
+        "NICKEL_OVER_C3": -0.378,
+        "NICKEL_UNDER_C1": -0.328,
+        "NICKEL_SIM_C2": 0.102,
+        "BASE_34_BEAR_C4": -0.183,
+        "BASE_43_OVER_C1": -0.287,
+        "DIME_MUG_C0": 0.234,
+        "DIME_QUARTERS_MATCH": -0.745,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.619,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.357,
+        "GOAL_LINE_62_PINCH": -1.514
+      },
+      "byDefenseYds": {
+        "NICKEL_OVER_C3": 4.7,
+        "NICKEL_UNDER_C1": 5.84,
+        "NICKEL_SIM_C2": 10.63,
+        "BASE_34_BEAR_C4": 6.31,
+        "BASE_43_OVER_C1": 7.14,
+        "DIME_MUG_C0": 12.22,
+        "DIME_QUARTERS_MATCH": 3.04,
+        "VIKINGS_MUG_CROSSDOG_C0": 3.91,
+        "VIKINGS_SAFETY_BLITZ_C1": 14.51,
+        "GOAL_LINE_62_PINCH": -1.08
+      }
+    },
+    "HYDRA_PONY_SPLIT_BASH": {
+      "nashWeightPct": 0,
+      "epaVsNashDc": 0.019,
+      "allFrontMeanEpa": 0.191,
+      "bestMatchup": {
+        "def": "BASE_43_OVER_C1",
+        "epa": 0.498,
+        "yds": 13.87
       },
       "worstCounter": {
         "def": "BASE_34_BEAR_C4",
-        "epa": -1.213,
-        "yds": -2.91
+        "epa": -0.346,
+        "yds": 3.72
       },
       "bestResponseAgainst": [
         "BASE_43_OVER_C1"
       ],
       "byDefenseEpa": {
-        "NICKEL_OVER_C3": -0.728,
-        "NICKEL_UNDER_C1": 0.242,
-        "NICKEL_SIM_C2": -0.68,
-        "BASE_34_BEAR_C4": -1.213,
-        "BASE_43_OVER_C1": 0.235,
-        "DIME_MUG_C0": 0.193,
-        "DIME_QUARTERS_MATCH": -0.405,
-        "VIKINGS_MUG_CROSSDOG_C0": -0.006,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.324,
-        "GOAL_LINE_62_PINCH": -1.255
+        "NICKEL_OVER_C3": 0.125,
+        "NICKEL_UNDER_C1": 0.342,
+        "NICKEL_SIM_C2": 0.019,
+        "BASE_34_BEAR_C4": -0.346,
+        "BASE_43_OVER_C1": 0.498,
+        "DIME_MUG_C0": 0.455,
+        "DIME_QUARTERS_MATCH": -0.113,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.392,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.347,
+        "GOAL_LINE_62_PINCH": 0.336
       },
       "byDefenseYds": {
-        "NICKEL_OVER_C3": -0.77,
-        "NICKEL_UNDER_C1": 10.59,
-        "NICKEL_SIM_C2": -0.24,
-        "BASE_34_BEAR_C4": -2.91,
-        "BASE_43_OVER_C1": 10.96,
-        "DIME_MUG_C0": 10.9,
-        "DIME_QUARTERS_MATCH": 1.6,
-        "VIKINGS_MUG_CROSSDOG_C0": 7.02,
-        "VIKINGS_SAFETY_BLITZ_C1": 11.75,
-        "GOAL_LINE_62_PINCH": -2.98
-      }
-    },
-    "HYDRA_HOOK_AND_LATERAL": {
-      "nashWeightPct": 0,
-      "epaVsNashDc": -0.326,
-      "allFrontMeanEpa": -0.396,
-      "bestMatchup": {
-        "def": "VIKINGS_SAFETY_BLITZ_C1",
-        "epa": -0.094,
-        "yds": 6.31
-      },
-      "worstCounter": {
-        "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": -0.832,
-        "yds": -0.41
-      },
-      "bestResponseAgainst": [],
-      "byDefenseEpa": {
-        "NICKEL_OVER_C3": -0.338,
-        "NICKEL_UNDER_C1": -0.437,
-        "NICKEL_SIM_C2": -0.356,
-        "BASE_34_BEAR_C4": -0.547,
-        "BASE_43_OVER_C1": -0.409,
-        "DIME_MUG_C0": -0.344,
-        "DIME_QUARTERS_MATCH": -0.204,
-        "VIKINGS_MUG_CROSSDOG_C0": -0.832,
-        "VIKINGS_SAFETY_BLITZ_C1": -0.094,
-        "GOAL_LINE_62_PINCH": -1.704
-      },
-      "byDefenseYds": {
-        "NICKEL_OVER_C3": 3.11,
-        "NICKEL_UNDER_C1": 1.51,
-        "NICKEL_SIM_C2": 2.74,
-        "BASE_34_BEAR_C4": 3.08,
-        "BASE_43_OVER_C1": 2.36,
-        "DIME_MUG_C0": 3.04,
-        "DIME_QUARTERS_MATCH": 5.38,
-        "VIKINGS_MUG_CROSSDOG_C0": -0.41,
-        "VIKINGS_SAFETY_BLITZ_C1": 6.31,
-        "GOAL_LINE_62_PINCH": -2.74
-      }
-    },
-    "HYDRA_PONY_SPLIT_BASH": {
-      "nashWeightPct": 4.7,
-      "epaVsNashDc": -0.016,
-      "allFrontMeanEpa": -0.146,
-      "bestMatchup": {
-        "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": 0.234,
-        "yds": 10.67
-      },
-      "worstCounter": {
-        "def": "NICKEL_OVER_C3",
-        "epa": -0.78,
-        "yds": -0.03
-      },
-      "bestResponseAgainst": [],
-      "byDefenseEpa": {
-        "NICKEL_OVER_C3": -0.78,
-        "NICKEL_UNDER_C1": 0.107,
-        "NICKEL_SIM_C2": -0.291,
-        "BASE_34_BEAR_C4": -0.733,
-        "BASE_43_OVER_C1": 0.232,
-        "DIME_MUG_C0": 0.126,
-        "DIME_QUARTERS_MATCH": -0.377,
-        "VIKINGS_MUG_CROSSDOG_C0": 0.234,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.169,
-        "GOAL_LINE_62_PINCH": 0.178
-      },
-      "byDefenseYds": {
-        "NICKEL_OVER_C3": -0.03,
-        "NICKEL_UNDER_C1": 9.54,
-        "NICKEL_SIM_C2": 5.04,
-        "BASE_34_BEAR_C4": -0.25,
-        "BASE_43_OVER_C1": 11.63,
-        "DIME_MUG_C0": 10.05,
-        "DIME_QUARTERS_MATCH": 2.15,
-        "VIKINGS_MUG_CROSSDOG_C0": 10.67,
-        "VIKINGS_SAFETY_BLITZ_C1": 10.78,
-        "GOAL_LINE_62_PINCH": 9.88
+        "NICKEL_OVER_C3": 5.89,
+        "NICKEL_UNDER_C1": 12.73,
+        "NICKEL_SIM_C2": 8.49,
+        "BASE_34_BEAR_C4": 3.72,
+        "BASE_43_OVER_C1": 13.87,
+        "DIME_MUG_C0": 13.29,
+        "DIME_QUARTERS_MATCH": 6.67,
+        "VIKINGS_MUG_CROSSDOG_C0": 12.43,
+        "VIKINGS_SAFETY_BLITZ_C1": 12.84,
+        "GOAL_LINE_62_PINCH": 11.65
       }
     },
     "HYDRA_BACKWARD_DOUBLE_PASS": {
-      "nashWeightPct": 0,
-      "epaVsNashDc": -0.181,
-      "allFrontMeanEpa": -0.196,
+      "nashWeightPct": 7.9,
+      "epaVsNashDc": 0.057,
+      "allFrontMeanEpa": 0.299,
       "bestMatchup": {
-        "def": "NICKEL_UNDER_C1",
-        "epa": 0.27,
-        "yds": 13
+        "def": "VIKINGS_MUG_CROSSDOG_C0",
+        "epa": 0.502,
+        "yds": 16.35
       },
       "worstCounter": {
         "def": "NICKEL_OVER_C3",
-        "epa": -0.757,
-        "yds": -0.06
+        "epa": -0.24,
+        "yds": 8.5
       },
-      "bestResponseAgainst": [],
+      "bestResponseAgainst": [
+        "NICKEL_SIM_C2",
+        "DIME_MUG_C0",
+        "DIME_QUARTERS_MATCH",
+        "VIKINGS_SAFETY_BLITZ_C1"
+      ],
       "byDefenseEpa": {
-        "NICKEL_OVER_C3": -0.757,
-        "NICKEL_UNDER_C1": 0.27,
-        "NICKEL_SIM_C2": -0.508,
-        "BASE_34_BEAR_C4": -0.475,
-        "BASE_43_OVER_C1": -0.013,
-        "DIME_MUG_C0": -0.119,
-        "DIME_QUARTERS_MATCH": -0.425,
-        "VIKINGS_MUG_CROSSDOG_C0": 0.123,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.138,
-        "GOAL_LINE_62_PINCH": 0.076
+        "NICKEL_OVER_C3": -0.24,
+        "NICKEL_UNDER_C1": 0.262,
+        "NICKEL_SIM_C2": 0.496,
+        "BASE_34_BEAR_C4": 0.256,
+        "BASE_43_OVER_C1": 0.37,
+        "DIME_MUG_C0": 0.501,
+        "DIME_QUARTERS_MATCH": 0.19,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.502,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.358,
+        "GOAL_LINE_62_PINCH": 0.399
       },
       "byDefenseYds": {
-        "NICKEL_OVER_C3": -0.06,
-        "NICKEL_UNDER_C1": 13,
-        "NICKEL_SIM_C2": 2,
-        "BASE_34_BEAR_C4": 0.63,
-        "BASE_43_OVER_C1": 8.68,
-        "DIME_MUG_C0": 10.04,
-        "DIME_QUARTERS_MATCH": 2.23,
-        "VIKINGS_MUG_CROSSDOG_C0": 10.04,
-        "VIKINGS_SAFETY_BLITZ_C1": 10.29,
-        "GOAL_LINE_62_PINCH": 9.23
+        "NICKEL_OVER_C3": 8.5,
+        "NICKEL_UNDER_C1": 16.17,
+        "NICKEL_SIM_C2": 16.04,
+        "BASE_34_BEAR_C4": 13.32,
+        "BASE_43_OVER_C1": 15.99,
+        "DIME_MUG_C0": 16.73,
+        "DIME_QUARTERS_MATCH": 12.93,
+        "VIKINGS_MUG_CROSSDOG_C0": 16.35,
+        "VIKINGS_SAFETY_BLITZ_C1": 15.02,
+        "GOAL_LINE_62_PINCH": 14.42
       }
     },
     "HYDRA_6OL_ELIGIBLE_SEAM": {
-      "nashWeightPct": 0,
-      "epaVsNashDc": -0.294,
-      "allFrontMeanEpa": -0.571,
+      "nashWeightPct": 0.4,
+      "epaVsNashDc": -0.028,
+      "allFrontMeanEpa": -0.308,
       "bestMatchup": {
-        "def": "DIME_QUARTERS_MATCH",
-        "epa": -0.117,
-        "yds": 5.75
+        "def": "NICKEL_OVER_C3",
+        "epa": 0.228,
+        "yds": 10.85
       },
       "worstCounter": {
         "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": -2.014,
-        "yds": -4.34
+        "epa": -1.661,
+        "yds": -2.23
       },
-      "bestResponseAgainst": [],
+      "bestResponseAgainst": [
+        "NICKEL_OVER_C3"
+      ],
       "byDefenseEpa": {
-        "NICKEL_OVER_C3": -0.325,
-        "NICKEL_UNDER_C1": -0.408,
-        "NICKEL_SIM_C2": -0.443,
-        "BASE_34_BEAR_C4": -0.331,
-        "BASE_43_OVER_C1": -0.415,
-        "DIME_MUG_C0": -0.588,
-        "DIME_QUARTERS_MATCH": -0.117,
-        "VIKINGS_MUG_CROSSDOG_C0": -2.014,
-        "VIKINGS_SAFETY_BLITZ_C1": -0.501,
-        "GOAL_LINE_62_PINCH": -0.624
+        "NICKEL_OVER_C3": 0.228,
+        "NICKEL_UNDER_C1": -0.277,
+        "NICKEL_SIM_C2": -0.044,
+        "BASE_34_BEAR_C4": -0.049,
+        "BASE_43_OVER_C1": -0.234,
+        "DIME_MUG_C0": -0.41,
+        "DIME_QUARTERS_MATCH": 0.058,
+        "VIKINGS_MUG_CROSSDOG_C0": -1.661,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.385,
+        "GOAL_LINE_62_PINCH": -0.902
       },
       "byDefenseYds": {
-        "NICKEL_OVER_C3": 2.78,
-        "NICKEL_UNDER_C1": 4.67,
-        "NICKEL_SIM_C2": 3.17,
-        "BASE_34_BEAR_C4": 4.26,
-        "BASE_43_OVER_C1": 1.54,
-        "DIME_MUG_C0": 4.08,
-        "DIME_QUARTERS_MATCH": 5.75,
-        "VIKINGS_MUG_CROSSDOG_C0": -4.34,
-        "VIKINGS_SAFETY_BLITZ_C1": 3.67,
-        "GOAL_LINE_62_PINCH": 1.45
+        "NICKEL_OVER_C3": 10.85,
+        "NICKEL_UNDER_C1": 8.67,
+        "NICKEL_SIM_C2": 9.14,
+        "BASE_34_BEAR_C4": 7.58,
+        "BASE_43_OVER_C1": 7.34,
+        "DIME_MUG_C0": 8.06,
+        "DIME_QUARTERS_MATCH": 10.35,
+        "VIKINGS_MUG_CROSSDOG_C0": -2.23,
+        "VIKINGS_SAFETY_BLITZ_C1": 5.87,
+        "GOAL_LINE_62_PINCH": 5.18
       }
     },
     "HYDRA_2MIN_SIDELINE_CHOICE": {
-      "nashWeightPct": 0,
-      "epaVsNashDc": -0.319,
-      "allFrontMeanEpa": -0.24,
+      "nashWeightPct": 55.9,
+      "epaVsNashDc": 0.058,
+      "allFrontMeanEpa": 0.056,
       "bestMatchup": {
         "def": "NICKEL_SIM_C2",
-        "epa": 0.333,
-        "yds": 11.41
+        "epa": 0.416,
+        "yds": 12.53
       },
       "worstCounter": {
         "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": -0.525,
-        "yds": 3.73
+        "epa": -0.28,
+        "yds": 6.88
       },
       "bestResponseAgainst": [
         "BASE_34_BEAR_C4"
       ],
       "byDefenseEpa": {
-        "NICKEL_OVER_C3": -0.369,
-        "NICKEL_UNDER_C1": -0.379,
-        "NICKEL_SIM_C2": 0.333,
-        "BASE_34_BEAR_C4": 0.207,
-        "BASE_43_OVER_C1": -0.322,
-        "DIME_MUG_C0": -0.412,
-        "DIME_QUARTERS_MATCH": -0.316,
-        "VIKINGS_MUG_CROSSDOG_C0": -0.525,
-        "VIKINGS_SAFETY_BLITZ_C1": -0.376,
-        "GOAL_LINE_62_PINCH": -0.027
+        "NICKEL_OVER_C3": 0.126,
+        "NICKEL_UNDER_C1": -0.045,
+        "NICKEL_SIM_C2": 0.416,
+        "BASE_34_BEAR_C4": 0.372,
+        "BASE_43_OVER_C1": -0.069,
+        "DIME_MUG_C0": -0.085,
+        "DIME_QUARTERS_MATCH": 0.065,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.28,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.002,
+        "GOAL_LINE_62_PINCH": 0.102
       },
       "byDefenseYds": {
-        "NICKEL_OVER_C3": 1.82,
-        "NICKEL_UNDER_C1": 1.74,
-        "NICKEL_SIM_C2": 11.41,
-        "BASE_34_BEAR_C4": 9.68,
-        "BASE_43_OVER_C1": 2.47,
-        "DIME_MUG_C0": 1.34,
-        "DIME_QUARTERS_MATCH": 2.46,
-        "VIKINGS_MUG_CROSSDOG_C0": 3.73,
-        "VIKINGS_SAFETY_BLITZ_C1": 1.79,
-        "GOAL_LINE_62_PINCH": 7.03
+        "NICKEL_OVER_C3": 7.72,
+        "NICKEL_UNDER_C1": 7.06,
+        "NICKEL_SIM_C2": 12.53,
+        "BASE_34_BEAR_C4": 12.88,
+        "BASE_43_OVER_C1": 6.5,
+        "DIME_MUG_C0": 7.14,
+        "DIME_QUARTERS_MATCH": 7,
+        "VIKINGS_MUG_CROSSDOG_C0": 6.88,
+        "VIKINGS_SAFETY_BLITZ_C1": 6.5,
+        "GOAL_LINE_62_PINCH": 9.34
       }
     },
     "HYDRA_4MIN_BULLDOZER_SWEEP": {
-      "nashWeightPct": 93.9,
-      "epaVsNashDc": -0.016,
-      "allFrontMeanEpa": 0.365,
+      "nashWeightPct": 35.8,
+      "epaVsNashDc": 0.058,
+      "allFrontMeanEpa": 0.29,
       "bestMatchup": {
         "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": 1.063,
-        "yds": 18.38
+        "epa": 0.506,
+        "yds": 10.38
       },
       "worstCounter": {
-        "def": "BASE_43_OVER_C1",
-        "epa": -0.032,
-        "yds": 4.26
+        "def": "NICKEL_OVER_C3",
+        "epa": 0.014,
+        "yds": 4.14
       },
       "bestResponseAgainst": [
-        "NICKEL_OVER_C3",
         "NICKEL_UNDER_C1",
-        "NICKEL_SIM_C2",
-        "DIME_MUG_C0",
-        "DIME_QUARTERS_MATCH",
         "VIKINGS_MUG_CROSSDOG_C0",
-        "VIKINGS_SAFETY_BLITZ_C1",
         "GOAL_LINE_62_PINCH"
       ],
       "byDefenseEpa": {
-        "NICKEL_OVER_C3": 0.219,
-        "NICKEL_UNDER_C1": 0.525,
-        "NICKEL_SIM_C2": 0.512,
-        "BASE_34_BEAR_C4": 0.126,
-        "BASE_43_OVER_C1": -0.032,
-        "DIME_MUG_C0": 0.387,
-        "DIME_QUARTERS_MATCH": 0.008,
-        "VIKINGS_MUG_CROSSDOG_C0": 1.063,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.474,
-        "GOAL_LINE_62_PINCH": 0.921
+        "NICKEL_OVER_C3": 0.014,
+        "NICKEL_UNDER_C1": 0.358,
+        "NICKEL_SIM_C2": 0.212,
+        "BASE_34_BEAR_C4": 0.293,
+        "BASE_43_OVER_C1": 0.446,
+        "DIME_MUG_C0": 0.489,
+        "DIME_QUARTERS_MATCH": 0.016,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.506,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.273,
+        "GOAL_LINE_62_PINCH": 0.427
       },
       "byDefenseYds": {
-        "NICKEL_OVER_C3": 6.68,
-        "NICKEL_UNDER_C1": 10.48,
-        "NICKEL_SIM_C2": 10.67,
-        "BASE_34_BEAR_C4": 5.71,
-        "BASE_43_OVER_C1": 4.26,
-        "DIME_MUG_C0": 9.46,
-        "DIME_QUARTERS_MATCH": 3.96,
-        "VIKINGS_MUG_CROSSDOG_C0": 18.38,
-        "VIKINGS_SAFETY_BLITZ_C1": 9.97,
-        "GOAL_LINE_62_PINCH": 16.59
+        "NICKEL_OVER_C3": 4.14,
+        "NICKEL_UNDER_C1": 8.38,
+        "NICKEL_SIM_C2": 6.54,
+        "BASE_34_BEAR_C4": 7.86,
+        "BASE_43_OVER_C1": 9.46,
+        "DIME_MUG_C0": 10.04,
+        "DIME_QUARTERS_MATCH": 4.1,
+        "VIKINGS_MUG_CROSSDOG_C0": 10.38,
+        "VIKINGS_SAFETY_BLITZ_C1": 7.35,
+        "GOAL_LINE_62_PINCH": 9.3
       }
     },
     "HYDRA_GOALLINE_PHILLY_SPECIAL": {
       "nashWeightPct": 0,
-      "epaVsNashDc": 0.292,
-      "allFrontMeanEpa": 0.226,
+      "epaVsNashDc": 0.195,
+      "allFrontMeanEpa": 0.176,
       "bestMatchup": {
-        "def": "GOAL_LINE_62_PINCH",
-        "epa": 0.292,
-        "yds": 3.28
+        "def": "BASE_43_OVER_C1",
+        "epa": 0.284,
+        "yds": 3.44
       },
       "worstCounter": {
         "def": "VIKINGS_MUG_CROSSDOG_C0",
-        "epa": 0.114,
-        "yds": 2.56
+        "epa": 0.049,
+        "yds": 2.8
       },
       "bestResponseAgainst": [],
       "byDefenseEpa": {
-        "NICKEL_OVER_C3": -0.664,
-        "NICKEL_UNDER_C1": 0.205,
-        "NICKEL_SIM_C2": -0.052,
-        "BASE_34_BEAR_C4": -0.144,
-        "BASE_43_OVER_C1": 0.272,
-        "DIME_MUG_C0": -0.114,
-        "DIME_QUARTERS_MATCH": -0.357,
-        "VIKINGS_MUG_CROSSDOG_C0": 0.114,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.074,
-        "GOAL_LINE_62_PINCH": 0.292
+        "NICKEL_OVER_C3": -0.644,
+        "NICKEL_UNDER_C1": 0.185,
+        "NICKEL_SIM_C2": 0.166,
+        "BASE_34_BEAR_C4": 0.063,
+        "BASE_43_OVER_C1": 0.284,
+        "DIME_MUG_C0": 0.126,
+        "DIME_QUARTERS_MATCH": 0.098,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.049,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.229,
+        "GOAL_LINE_62_PINCH": 0.195
       },
       "byDefenseYds": {
-        "NICKEL_OVER_C3": -0.67,
-        "NICKEL_UNDER_C1": 2.95,
-        "NICKEL_SIM_C2": 2.08,
-        "BASE_34_BEAR_C4": 1.52,
-        "BASE_43_OVER_C1": 3.2,
-        "DIME_MUG_C0": 1.61,
-        "DIME_QUARTERS_MATCH": 0.63,
-        "VIKINGS_MUG_CROSSDOG_C0": 2.56,
-        "VIKINGS_SAFETY_BLITZ_C1": 2.4,
-        "GOAL_LINE_62_PINCH": 3.28
+        "NICKEL_OVER_C3": -0.09,
+        "NICKEL_UNDER_C1": 3.04,
+        "NICKEL_SIM_C2": 2.96,
+        "BASE_34_BEAR_C4": 2.55,
+        "BASE_43_OVER_C1": 3.44,
+        "DIME_MUG_C0": 2.61,
+        "DIME_QUARTERS_MATCH": 2.5,
+        "VIKINGS_MUG_CROSSDOG_C0": 2.8,
+        "VIKINGS_SAFETY_BLITZ_C1": 3.04,
+        "GOAL_LINE_62_PINCH": 3.2
       }
     }
   },
   "nashEquilibrium": {
-    "hydraNashEpa": -0.0156,
+    "hydraNashEpa": 0.0573,
     "hydraMix": {
-      "HYDRA_JET_DOUBLE_OPTION": 1.44,
+      "HYDRA_JET_DOUBLE_OPTION": 0,
       "HYDRA_HOOK_AND_LATERAL": 0,
-      "HYDRA_PONY_SPLIT_BASH": 4.65,
-      "HYDRA_BACKWARD_DOUBLE_PASS": 0,
-      "HYDRA_6OL_ELIGIBLE_SEAM": 0,
-      "HYDRA_2MIN_SIDELINE_CHOICE": 0,
-      "HYDRA_4MIN_BULLDOZER_SWEEP": 93.91
+      "HYDRA_PONY_SPLIT_BASH": 0.04,
+      "HYDRA_BACKWARD_DOUBLE_PASS": 7.93,
+      "HYDRA_6OL_ELIGIBLE_SEAM": 0.4,
+      "HYDRA_2MIN_SIDELINE_CHOICE": 55.85,
+      "HYDRA_4MIN_BULLDOZER_SWEEP": 35.78
     },
     "adversarialDcCounterMix": {
-      "NICKEL_OVER_C3": 0.01,
+      "NICKEL_OVER_C3": 37.1,
       "NICKEL_UNDER_C1": 0,
       "NICKEL_SIM_C2": 0,
-      "BASE_34_BEAR_C4": 0.08,
-      "BASE_43_OVER_C1": 59.24,
+      "BASE_34_BEAR_C4": 0.01,
+      "BASE_43_OVER_C1": 0,
       "DIME_MUG_C0": 0,
-      "DIME_QUARTERS_MATCH": 40.67,
-      "VIKINGS_MUG_CROSSDOG_C0": 0,
+      "DIME_QUARTERS_MATCH": 54.24,
+      "VIKINGS_MUG_CROSSDOG_C0": 8.65,
       "VIKINGS_SAFETY_BLITZ_C1": 0
     },
     "baselinesNashEpa": {
-      "CONV_11_SPREAD": -0.0644,
-      "SHANAHAN_12_PA": -0.0238,
-      "SUPERMAX_STARS": -0.2194
+      "CONV_11_SPREAD": 0.2625,
+      "SHANAHAN_12_PA": 0.1297,
+      "SUPERMAX_STARS": 0.0381
     }
   },
   "fullGameBenchmarks": [
     {
       "philosophyName": "2027 Hydra Vanguard ($85.5M Moneyball)",
       "offCapM": 85.5,
-      "ppgStandardDc": 21.33,
-      "ppgAdversarialNashDc": 10.93,
-      "ppdStandard": 1.94,
-      "tdDrivePct": 22.2,
-      "fgDrivePct": 13.2,
-      "turnoverDrivePct": 14.5,
-      "explosiveRatePct": 14.3,
-      "ppgPer10MCap": 2.49,
-      "projectedTeamNetDiffPerGame": 2.73
+      "ppgStandardDc": 46.5,
+      "ppgAdversarialNashDc": 35.44,
+      "ppdStandard": 4.23,
+      "tdDrivePct": 55.9,
+      "fgDrivePct": 11.2,
+      "turnoverDrivePct": 12.7,
+      "explosiveRatePct": 14.7,
+      "ppgPer10MCap": 5.44,
+      "projectedTeamNetDiffPerGame": 27.9
     },
     {
       "philosophyName": "Conventional 11-Pers Dropback Spread ($138.5M Cap)",
       "offCapM": 138.5,
-      "ppgStandardDc": 20.58,
-      "ppgAdversarialNashDc": 10.75,
-      "ppdStandard": 1.87,
-      "tdDrivePct": 20.5,
-      "fgDrivePct": 14.8,
-      "turnoverDrivePct": 18.2,
-      "explosiveRatePct": 9.1,
-      "ppgPer10MCap": 1.49,
-      "projectedTeamNetDiffPerGame": -1.42
+      "ppgStandardDc": 51.62,
+      "ppgAdversarialNashDc": 38.95,
+      "ppdStandard": 4.69,
+      "tdDrivePct": 63,
+      "fgDrivePct": 10.2,
+      "turnoverDrivePct": 12,
+      "explosiveRatePct": 12.3,
+      "ppgPer10MCap": 3.73,
+      "projectedTeamNetDiffPerGame": 29.62
     },
     {
       "philosophyName": "Shanahan/McVay 12-Pers Play-Action ($146.0M Cap)",
       "offCapM": 146,
-      "ppgStandardDc": 18.73,
-      "ppgAdversarialNashDc": 15.02,
-      "ppdStandard": 1.7,
-      "tdDrivePct": 18.3,
-      "fgDrivePct": 14.3,
-      "turnoverDrivePct": 15.6,
-      "explosiveRatePct": 12,
-      "ppgPer10MCap": 1.28,
-      "projectedTeamNetDiffPerGame": -3.67
+      "ppgStandardDc": 48.76,
+      "ppgAdversarialNashDc": 41.33,
+      "ppdStandard": 4.43,
+      "tdDrivePct": 59.2,
+      "fgDrivePct": 10.5,
+      "turnoverDrivePct": 11.8,
+      "explosiveRatePct": 13.7,
+      "ppgPer10MCap": 3.34,
+      "projectedTeamNetDiffPerGame": 26.36
     },
     {
       "philosophyName": "Top-Heavy Supermax Stars / Cap-Starved OL ($172.0M Cap)",
       "offCapM": 172,
-      "ppgStandardDc": 15.01,
-      "ppgAdversarialNashDc": 8.46,
-      "ppdStandard": 1.36,
-      "tdDrivePct": 13.7,
-      "fgDrivePct": 13.6,
-      "turnoverDrivePct": 20.8,
-      "explosiveRatePct": 8.2,
-      "ppgPer10MCap": 0.87,
-      "projectedTeamNetDiffPerGame": -9.49
+      "ppgStandardDc": 44.75,
+      "ppgAdversarialNashDc": 37.71,
+      "ppdStandard": 4.07,
+      "tdDrivePct": 53.7,
+      "fgDrivePct": 11.1,
+      "turnoverDrivePct": 15,
+      "explosiveRatePct": 15,
+      "ppgPer10MCap": 2.6,
+      "projectedTeamNetDiffPerGame": 20.25
     }
   ],
   "situationalDrills": {
     "twoMinute": {
       "hydra": {
-        "tdWinPct": 4.6,
-        "ydsPerClockSec": 0.77,
-        "oobStopsPerDrive": 1.3,
-        "sackRatePct": 0
+        "tdWinPct": 63.6,
+        "ydsPerClockSec": 1.05,
+        "oobStopsPerDrive": 3.23,
+        "sackRatePct": 0.2
       },
       "conv11": {
-        "tdWinPct": 15.3,
-        "ydsPerClockSec": 0.72,
-        "oobStopsPerDrive": 0.09,
-        "sackRatePct": 7.8
+        "tdWinPct": 62,
+        "ydsPerClockSec": 0.97,
+        "oobStopsPerDrive": 0.22,
+        "sackRatePct": 8.7
       },
       "supermax": {
-        "tdWinPct": 21.6,
-        "ydsPerClockSec": 0.81,
-        "oobStopsPerDrive": 0.1,
-        "sackRatePct": 8.2
+        "tdWinPct": 64.3,
+        "ydsPerClockSec": 1,
+        "oobStopsPerDrive": 0.07,
+        "sackRatePct": 11.9
       }
     },
     "fourMinute": {
       "hydra": {
-        "gameSealPct": 74.6,
-        "meanClockBledSec": 198,
-        "firstDownsPerDrive": 2.67,
-        "clockGiftMistakePct": 0.8
+        "gameSealPct": 89.4,
+        "meanClockBledSec": 204.2,
+        "firstDownsPerDrive": 3,
+        "clockGiftMistakePct": 0
       },
       "shanahan12": {
-        "gameSealPct": 33,
-        "meanClockBledSec": 138.3,
-        "firstDownsPerDrive": 1.31,
+        "gameSealPct": 37.5,
+        "meanClockBledSec": 146.2,
+        "firstDownsPerDrive": 1.6,
         "clockGiftMistakePct": 0
       },
       "conv11": {
-        "gameSealPct": 16.3,
-        "meanClockBledSec": 104.6,
-        "firstDownsPerDrive": 0.75,
+        "gameSealPct": 20.8,
+        "meanClockBledSec": 120.8,
+        "firstDownsPerDrive": 1.12,
         "clockGiftMistakePct": 0
       }
     },
     "goalLine": {
       "hydra": {
-        "fourDownTdPct": 95.8,
-        "singleSnapTdPct": 73.3,
-        "expectedGoalLinePts": 6.67
+        "fourDownTdPct": 97.5,
+        "singleSnapTdPct": 79.6,
+        "expectedGoalLinePts": 6.79
       },
       "shanahan12": {
-        "fourDownTdPct": 58.2,
-        "singleSnapTdPct": 22.9,
-        "expectedGoalLinePts": 4.95
+        "fourDownTdPct": 79.5,
+        "singleSnapTdPct": 41,
+        "expectedGoalLinePts": 5.95
       },
       "conv11": {
-        "fourDownTdPct": 40.9,
-        "singleSnapTdPct": 16.9,
-        "expectedGoalLinePts": 4.26
+        "fourDownTdPct": 72.6,
+        "singleSnapTdPct": 37.8,
+        "expectedGoalLinePts": 5.7
       }
     },
     "thirdAndNine": {
       "hydra": {
-        "conversionPct": 33.5,
-        "explosive18Pct": 33.5,
-        "sackPct": 0,
-        "meanEpa": -0.081
+        "conversionPct": 56.6,
+        "explosive18Pct": 43.1,
+        "sackPct": 0.3,
+        "meanEpa": 0.095
       },
       "conv11": {
-        "conversionPct": 20,
-        "explosive18Pct": 17.9,
-        "sackPct": 22.6,
-        "meanEpa": -0.653
+        "conversionPct": 53.2,
+        "explosive18Pct": 44.3,
+        "sackPct": 17.1,
+        "meanEpa": -0.174
       },
       "supermax": {
-        "conversionPct": 26.2,
-        "explosive18Pct": 22,
-        "sackPct": 21.7,
-        "meanEpa": -0.544
+        "conversionPct": 45.4,
+        "explosive18Pct": 38.7,
+        "sackPct": 26.3,
+        "meanEpa": -0.374
       }
     }
   }

@@ -533,13 +533,17 @@ async function runMassivePlaytest() {
         const yds = term.carrierTackledYards ?? 0;
         sumYds += yds;
 
-        if (term.terminationReason === 'COMPLETE' || (term.ball?.state === 'CAUGHT' && term.terminationReason !== 'SACK')) {
+        if (
+          term.terminationReason === 'COMPLETE' ||
+          term.terminationReason === 'TOUCHDOWN' ||
+          (term.ball?.state === 'CAUGHT' && term.terminationReason !== 'SACK')
+        ) {
           completions++;
         }
         if (term.terminationReason === 'SACK') {
           sacks++;
         }
-        if (term.terminationReason === 'INCOMPLETE') {
+        if (term.terminationReason === 'INCOMPLETE' || term.terminationReason === 'INTERCEPTION') {
           turnaways++;
         }
 
@@ -553,6 +557,8 @@ async function runMassivePlaytest() {
         const isSuccess =
           term.terminationReason !== 'SACK' &&
           term.terminationReason !== 'INCOMPLETE' &&
+          term.terminationReason !== 'INTERCEPTION' &&
+          term.terminationReason !== 'FUMBLE_LOST' &&
           (term.expectedEpa > 0 || yds >= 4.5);
         if (isSuccess) successes++;
 

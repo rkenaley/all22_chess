@@ -16,8 +16,12 @@
     "simulate:vanguard2027": "npx tsx src/vanguard_2027_playtest.ts",
     "generate:cards": "npx tsx src/generate_twitter_cards.ts",
     "simulate:argon2027": "npx tsx src/argon_2027_playtest.ts",
+    "simulate:apex2027": "npx tsx src/apex_2027_playtest.ts",
     "generate:argon-cards": "npx tsx src/generate_argon_cards.ts",
-    "generate:gifs": "npx tsx src/generate_play_gifs.ts"
+    "generate:gifs": "npx tsx src/generate_play_gifs.ts",
+    "generate:apex-gifs": "npx tsx src/generate_apex_gifs.ts",
+    "build:apex-html": "npx tsx src/build_apex_whitepaper_html.ts",
+    "validate:tracking": "npx tsx src/validate_10hz_replay.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

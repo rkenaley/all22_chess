@@ -18,6 +18,10 @@ yarn-debug.log*
 yarn-error.log*
 .system_generated/
 
+# Large Empirical NFL Tracking & Charting Downloads
+data/nflverse/
+data/bdb/
+
 # Environment & Local Secrets
 .env
 .env.local

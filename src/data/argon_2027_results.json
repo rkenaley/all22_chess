@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T01:28:46.570Z",
+  "generatedAt": "2026-11-13T17:30:36.020Z",
   "rosterCapM": 81.1,
   "rosterPlayers": [
     {
@@ -229,414 +229,414 @@
   "argonPlayTelemetry": {
     "ARGON_CHIRAL_JET_LEFT": {
       "name": "ARGON // CHIRAL JET-LEFT OPTION CONTINUUM (SHAKIR THROW/SWEEP)",
-      "meanYds": 10.53,
-      "meanEpa": 0.251,
-      "explosivePct": 29.8,
-      "negativePlayPct": 0.7,
+      "meanYds": 11.63,
+      "meanEpa": 0.295,
+      "explosivePct": 27.3,
+      "negativePlayPct": 3.6,
       "sackPct": 0,
-      "fumbleTotalPct": 0.22,
-      "fumbleLostPct": 0,
-      "branchText": "Displaced Option Pass: 98.7% (+10.7y) | Convoy Tuck: 1.1% (+1.7y)",
+      "fumbleTotalPct": 1.56,
+      "fumbleLostPct": 0.67,
+      "branchText": "Displaced Option Pass: 92.7% (+12.4y) | Convoy Tuck: 5.8% (+4.2y)",
       "branchStats": {
-        "passRate": 98.7,
-        "passYds": 10.7,
-        "keepRate": 1.1,
-        "keepYds": 1.7
+        "passRate": 92.7,
+        "passYds": 12.4,
+        "keepRate": 5.8,
+        "keepYds": 4.2
       },
       "perFrontEpa": {
-        "NICKEL_OVER_C3": 0.308,
-        "NICKEL_UNDER_C1": 0.322,
-        "NICKEL_SIM_C2": 0.454,
-        "BASE_34_BEAR_C4": 0.169,
-        "BASE_43_OVER_C1": 0.213,
-        "DIME_MUG_C0": 0.137,
-        "DIME_QUARTERS_MATCH": 0.374,
-        "VIKINGS_MUG_CROSSDOG_C0": -0.061,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.341
+        "NICKEL_OVER_C3": 0.503,
+        "NICKEL_UNDER_C1": 0.373,
+        "NICKEL_SIM_C2": 0.137,
+        "BASE_34_BEAR_C4": 0.2,
+        "BASE_43_OVER_C1": 0.179,
+        "DIME_MUG_C0": 0.322,
+        "DIME_QUARTERS_MATCH": 0.247,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.359,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.336
       }
     },
     "ARGON_REACTOR_SWEEP_RIGHT": {
       "name": "ARGON // 11-ON-11 RIGHT REACTOR SWEEP (244-LB RICHARDSON + TREMBLE LEAD)",
-      "meanYds": 10.81,
-      "meanEpa": 0.5,
-      "explosivePct": 25.8,
-      "negativePlayPct": 1.3,
+      "meanYds": 9.08,
+      "meanEpa": 0.411,
+      "explosivePct": 4.9,
+      "negativePlayPct": 0.7,
       "sackPct": 0,
       "fumbleTotalPct": 0,
       "fumbleLostPct": 0,
-      "branchText": "11-on-11 Direct 244-lb QB Run (Stuff Rate 7.1%, 0.0% Incomp/Sack)",
+      "branchText": "11-on-11 Direct 244-lb QB Run (Stuff Rate 2.0%, 0.0% Incomp/Sack)",
       "branchStats": {
-        "unstuffedPct": 92.9,
-        "stuffPct": 7.1
+        "unstuffedPct": 98,
+        "stuffPct": 2
       },
       "perFrontEpa": {
-        "NICKEL_OVER_C3": 0.665,
-        "NICKEL_UNDER_C1": 0.66,
-        "NICKEL_SIM_C2": 0.625,
-        "BASE_34_BEAR_C4": 0.185,
-        "BASE_43_OVER_C1": -0.024,
-        "DIME_MUG_C0": 0.35,
-        "DIME_QUARTERS_MATCH": 0.167,
-        "VIKINGS_MUG_CROSSDOG_C0": 1.331,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.543
+        "NICKEL_OVER_C3": 0.328,
+        "NICKEL_UNDER_C1": 0.365,
+        "NICKEL_SIM_C2": 0.395,
+        "BASE_34_BEAR_C4": 0.317,
+        "BASE_43_OVER_C1": 0.368,
+        "DIME_MUG_C0": 0.515,
+        "DIME_QUARTERS_MATCH": 0.406,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.626,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.38
       }
     },
     "ARGON_NOBLE_KINETIC_RELAY": {
       "name": "ARGON // NOBLE KINETIC RELAY (WARREN ZONE-VOID -> 4.21 WORTHY PITCH)",
-      "meanYds": 15.32,
-      "meanEpa": 0.295,
-      "explosivePct": 40.7,
-      "negativePlayPct": 6.2,
-      "sackPct": 5.8,
-      "fumbleTotalPct": 0.44,
-      "fumbleLostPct": 0.44,
-      "branchText": "Comp: 45.6% | Pitch to 4.21 Worthy: 33.7% (+34.0y) | Warren Keep: 66.3% (+34.5y)",
+      "meanYds": 10.72,
+      "meanEpa": 0.046,
+      "explosivePct": 45.6,
+      "negativePlayPct": 8.9,
+      "sackPct": 6.2,
+      "fumbleTotalPct": 1.78,
+      "fumbleLostPct": 1.33,
+      "branchText": "Comp: 69.1% | Pitch to 4.21 Worthy: 39.5% (+13.9y) | Warren Keep: 60.5% (+17.4y)",
       "branchStats": {
-        "compPct": 45.6,
-        "pitchRateOnCatch": 33.7,
-        "latMeanYds": 34,
-        "keepMeanYds": 34.5
+        "compPct": 69.1,
+        "pitchRateOnCatch": 39.5,
+        "latMeanYds": 13.9,
+        "keepMeanYds": 17.4
       },
       "perFrontEpa": {
-        "NICKEL_OVER_C3": -0.252,
-        "NICKEL_UNDER_C1": 1.027,
-        "NICKEL_SIM_C2": 0.761,
-        "BASE_34_BEAR_C4": -0.34,
-        "BASE_43_OVER_C1": 0.731,
-        "DIME_MUG_C0": 0.158,
-        "DIME_QUARTERS_MATCH": -0.204,
-        "VIKINGS_MUG_CROSSDOG_C0": 0.093,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.678
+        "NICKEL_OVER_C3": 0.366,
+        "NICKEL_UNDER_C1": 0.067,
+        "NICKEL_SIM_C2": 0.304,
+        "BASE_34_BEAR_C4": -0.12,
+        "BASE_43_OVER_C1": 0.066,
+        "DIME_MUG_C0": 0.21,
+        "DIME_QUARTERS_MATCH": -0.101,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.52,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.144
       }
     },
     "ARGON_DISPLACED_NODE_LASER": {
       "name": "ARGON // DISPLACED NODE DOUBLE-PASS LASER (RICHARDSON -> MILTON -> WORTHY)",
-      "meanYds": 12.32,
-      "meanEpa": 0.296,
-      "explosivePct": 73.3,
+      "meanYds": 13.78,
+      "meanEpa": 0.39,
+      "explosivePct": 81.6,
       "negativePlayPct": 2,
       "sackPct": 0,
-      "fumbleTotalPct": 2,
-      "fumbleLostPct": 0.67,
-      "branchText": "Displaced Option Pass: 98.0% (+12.7y) | Convoy Tuck: 0.0% (+0.0y)",
+      "fumbleTotalPct": 1.56,
+      "fumbleLostPct": 0.89,
+      "branchText": "Displaced Option Pass: 98.2% (+14.2y) | Convoy Tuck: 0.2% (+-4.3y)",
       "branchStats": {
-        "passRate": 98,
-        "passYds": 12.7,
-        "keepRate": 0,
-        "keepYds": 0
+        "passRate": 98.2,
+        "passYds": 14.2,
+        "keepRate": 0.2,
+        "keepYds": -4.3
       },
       "perFrontEpa": {
-        "NICKEL_OVER_C3": 0.296,
-        "NICKEL_UNDER_C1": 0.44,
-        "NICKEL_SIM_C2": 0.44,
-        "BASE_34_BEAR_C4": 0.329,
-        "BASE_43_OVER_C1": 0.196,
-        "DIME_MUG_C0": 0.384,
-        "DIME_QUARTERS_MATCH": 0.088,
-        "VIKINGS_MUG_CROSSDOG_C0": 0.085,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.404
+        "NICKEL_OVER_C3": 0.348,
+        "NICKEL_UNDER_C1": 0.468,
+        "NICKEL_SIM_C2": 0.425,
+        "BASE_34_BEAR_C4": 0.193,
+        "BASE_43_OVER_C1": 0.495,
+        "DIME_MUG_C0": 0.248,
+        "DIME_QUARTERS_MATCH": 0.44,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.53,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.364
       }
     },
     "ARGON_WILDCAT_TRIPLE_PITCH": {
       "name": "ARGON // 256-LB WILDCAT-TE DIRECT SNAP & 4.21 SPEED-OPTION PITCH (WARREN -> WORTHY)",
-      "meanYds": 7.74,
-      "meanEpa": 0.172,
-      "explosivePct": 15.1,
-      "negativePlayPct": 17.1,
+      "meanYds": 4.36,
+      "meanEpa": -0.054,
+      "explosivePct": 3.3,
+      "negativePlayPct": 22,
       "sackPct": 0,
-      "fumbleTotalPct": 0.22,
-      "fumbleLostPct": 0.22,
-      "branchText": "Speed-Option Pitch to Worthy: 8.2% (+36.1y) | 256-lb Warren Keep: 91.8% (+5.2y)",
+      "fumbleTotalPct": 0,
+      "fumbleLostPct": 0,
+      "branchText": "Speed-Option Pitch to Worthy: 0.0% (+0.0y) | 256-lb Warren Keep: 100.0% (+4.4y)",
       "branchStats": {
-        "pitchRate": 8.2,
-        "pitchYds": 36.1,
-        "keepRate": 91.8,
-        "keepYds": 5.2
+        "pitchRate": 0,
+        "pitchYds": 0,
+        "keepRate": 100,
+        "keepYds": 4.4
       },
       "perFrontEpa": {
-        "NICKEL_OVER_C3": -0.17,
-        "NICKEL_UNDER_C1": 0.69,
-        "NICKEL_SIM_C2": 0.682,
-        "BASE_34_BEAR_C4": 0.06,
-        "BASE_43_OVER_C1": 0.133,
-        "DIME_MUG_C0": -0.807,
-        "DIME_QUARTERS_MATCH": -0.044,
-        "VIKINGS_MUG_CROSSDOG_C0": 1.02,
-        "VIKINGS_SAFETY_BLITZ_C1": -0.015
+        "NICKEL_OVER_C3": -0.221,
+        "NICKEL_UNDER_C1": 0.129,
+        "NICKEL_SIM_C2": 0.413,
+        "BASE_34_BEAR_C4": 0.103,
+        "BASE_43_OVER_C1": -0.411,
+        "DIME_MUG_C0": -0.577,
+        "DIME_QUARTERS_MATCH": -0.065,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.238,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.098
       }
     },
     "ARGON_2MIN_BOUNDARY_LASER": {
       "name": "ARGON 2-MIN // DIRECT-SNAP SPRINT-OUT BOUNDARY LASER & OOB CLOCK-STOPPER",
-      "meanYds": 9.2,
-      "meanEpa": 0.148,
+      "meanYds": 10.64,
+      "meanEpa": 0.236,
       "explosivePct": 9.6,
-      "negativePlayPct": 0,
+      "negativePlayPct": 0.4,
       "sackPct": 0,
       "fumbleTotalPct": 0,
       "fumbleLostPct": 0,
-      "branchText": "Displaced Option Pass: 100.0% (+9.2y) | Convoy Tuck: 0.0% (+0.0y)",
+      "branchText": "Displaced Option Pass: 99.3% (+10.7y) | Convoy Tuck: 0.7% (+2.3y)",
       "branchStats": {
-        "passRate": 100,
-        "passYds": 9.2,
-        "keepRate": 0,
-        "keepYds": 0
+        "passRate": 99.3,
+        "passYds": 10.7,
+        "keepRate": 0.7,
+        "keepYds": 2.3
       },
       "perFrontEpa": {
-        "NICKEL_OVER_C3": -0.387,
-        "NICKEL_UNDER_C1": 0.299,
-        "NICKEL_SIM_C2": -0.348,
-        "BASE_34_BEAR_C4": -0.194,
-        "BASE_43_OVER_C1": 0.299,
-        "DIME_MUG_C0": 0.278,
-        "DIME_QUARTERS_MATCH": 0.534,
-        "VIKINGS_MUG_CROSSDOG_C0": 0.404,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.446
+        "NICKEL_OVER_C3": -0.145,
+        "NICKEL_UNDER_C1": 0.54,
+        "NICKEL_SIM_C2": -0.107,
+        "BASE_34_BEAR_C4": 0.008,
+        "BASE_43_OVER_C1": 0.236,
+        "DIME_MUG_C0": 0.434,
+        "DIME_QUARTERS_MATCH": 0.57,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.321,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.264
       }
     },
     "ARGON_4MIN_LEFT_MONOLITH": {
       "name": "ARGON 4-MIN // 11-ON-11 CHIRAL LEFT MONOLITH SWEEP (BARTON + BORTOLINI + WARREN)",
-      "meanYds": 12.21,
-      "meanEpa": 0.589,
-      "explosivePct": 36,
-      "negativePlayPct": 1.8,
+      "meanYds": 7.61,
+      "meanEpa": 0.287,
+      "explosivePct": 5.8,
+      "negativePlayPct": 2.2,
       "sackPct": 0,
       "fumbleTotalPct": 0,
       "fumbleLostPct": 0,
-      "branchText": "11-on-11 Direct 244-lb QB Run (Stuff Rate 3.1%, 0.0% Incomp/Sack)",
+      "branchText": "11-on-11 Direct 244-lb QB Run (Stuff Rate 4.0%, 0.0% Incomp/Sack)",
       "branchStats": {
-        "unstuffedPct": 96.9,
-        "stuffPct": 3.1
+        "unstuffedPct": 96,
+        "stuffPct": 4
       },
       "perFrontEpa": {
-        "NICKEL_OVER_C3": -0.044,
-        "NICKEL_UNDER_C1": 0.713,
-        "NICKEL_SIM_C2": 1.173,
-        "BASE_34_BEAR_C4": 0.282,
-        "BASE_43_OVER_C1": 0.658,
-        "DIME_MUG_C0": 1.202,
-        "DIME_QUARTERS_MATCH": 0.019,
-        "VIKINGS_MUG_CROSSDOG_C0": 1.154,
-        "VIKINGS_SAFETY_BLITZ_C1": 0.148
+        "NICKEL_OVER_C3": -0.064,
+        "NICKEL_UNDER_C1": 0.391,
+        "NICKEL_SIM_C2": 0.376,
+        "BASE_34_BEAR_C4": 0.289,
+        "BASE_43_OVER_C1": 0.457,
+        "DIME_MUG_C0": 0.428,
+        "DIME_QUARTERS_MATCH": -0.039,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.625,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.121
       }
     },
     "ARGON_GOALLINE_CYCLOTRON": {
       "name": "ARGON GOAL-LINE // +4.0y 2-QB PYLON CYCLOTRON & 256-LB WARREN POP-PASS",
-      "meanYds": 2.75,
-      "meanEpa": 0.133,
-      "explosivePct": 72.7,
-      "negativePlayPct": 2.7,
+      "meanYds": 3.09,
+      "meanEpa": 0.178,
+      "explosivePct": 85.3,
+      "negativePlayPct": 6,
       "sackPct": 0,
-      "fumbleTotalPct": 1.33,
-      "fumbleLostPct": 1.33,
-      "branchText": "Displaced Option Pass: 97.3% (+3.0y) | Convoy Tuck: 1.3% (+-3.1y)",
+      "fumbleTotalPct": 3.33,
+      "fumbleLostPct": 0.67,
+      "branchText": "Displaced Option Pass: 95.3% (+3.6y) | Convoy Tuck: 1.3% (+-3.2y)",
       "branchStats": {
-        "passRate": 97.3,
-        "passYds": 3,
+        "passRate": 95.3,
+        "passYds": 3.6,
         "keepRate": 1.3,
-        "keepYds": -3.1
+        "keepYds": -3.2
       },
       "perFrontEpa": {
-        "GOAL_LINE_62_PINCH": 0.039,
-        "BASE_43_OVER_C1": 0.232,
-        "VIKINGS_MUG_CROSSDOG_C0": 0.126
+        "GOAL_LINE_62_PINCH": 0.14,
+        "BASE_43_OVER_C1": 0.201,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.192
       }
     }
   },
   "nashEquilibrium": {
-    "argonNashEpa": 0.2315,
+    "argonNashEpa": 0.3166,
     "argonMix": {
-      "ARGON_CHIRAL_JET_LEFT": 49.79,
-      "ARGON_REACTOR_SWEEP_RIGHT": 9.67,
+      "ARGON_CHIRAL_JET_LEFT": 0.01,
+      "ARGON_REACTOR_SWEEP_RIGHT": 99.98,
       "ARGON_NOBLE_KINETIC_RELAY": 0,
-      "ARGON_DISPLACED_NODE_LASER": 29.99,
+      "ARGON_DISPLACED_NODE_LASER": 0.01,
       "ARGON_WILDCAT_TRIPLE_PITCH": 0,
-      "ARGON_2MIN_BOUNDARY_LASER": 0.01,
-      "ARGON_4MIN_LEFT_MONOLITH": 10.54
+      "ARGON_2MIN_BOUNDARY_LASER": 0,
+      "ARGON_4MIN_LEFT_MONOLITH": 0
     },
     "adversarialDcCounterMix": {
-      "NICKEL_OVER_C3": 0.02,
+      "NICKEL_OVER_C3": 0.01,
       "NICKEL_UNDER_C1": 0,
       "NICKEL_SIM_C2": 0,
-      "BASE_34_BEAR_C4": 59.12,
-      "BASE_43_OVER_C1": 0.59,
+      "BASE_34_BEAR_C4": 99.98,
+      "BASE_43_OVER_C1": 0,
       "DIME_MUG_C0": 0,
-      "DIME_QUARTERS_MATCH": 35.58,
-      "VIKINGS_MUG_CROSSDOG_C0": 4.69,
+      "DIME_QUARTERS_MATCH": 0,
+      "VIKINGS_MUG_CROSSDOG_C0": 0,
       "VIKINGS_SAFETY_BLITZ_C1": 0
     },
-    "hydraNashEpa": -0.0975,
+    "hydraNashEpa": 0.0911,
     "baselinesNashEpa": {
-      "CONV_11_SPREAD": -0.19,
-      "SHANAHAN_12_PA": 0.1533,
-      "SUPERMAX_STARS": -0.4257
+      "CONV_11_SPREAD": -0.022,
+      "SHANAHAN_12_PA": 0.1531,
+      "SUPERMAX_STARS": -0.0716
     }
   },
   "fullGameBenchmarks": [
     {
       "philosophyName": "2027 Google Argon Continuum ($81.1M Moneyball)",
       "offCapM": 81.1,
-      "ppgStandardDc": 56.08,
-      "ppgAdversarialNashDc": 48.8,
-      "ppdStandard": 5.1,
-      "tdDrivePct": 70.2,
-      "fgDrivePct": 7.1,
-      "turnoverDrivePct": 9.2,
-      "explosiveRatePct": 32.9,
-      "ppgPer10MCap": 6.92,
-      "projectedTeamNetDiffPerGame": 37.78
+      "ppgStandardDc": 61.18,
+      "ppgAdversarialNashDc": 55.4,
+      "ppdStandard": 5.56,
+      "tdDrivePct": 76.8,
+      "fgDrivePct": 7.3,
+      "turnoverDrivePct": 7.3,
+      "explosiveRatePct": 12.9,
+      "ppgPer10MCap": 7.54,
+      "projectedTeamNetDiffPerGame": 42.88
     },
     {
       "philosophyName": "2027 Hydra Vanguard ($85.5M Moneyball)",
       "offCapM": 85.5,
-      "ppgStandardDc": 18.14,
-      "ppgAdversarialNashDc": 10.33,
-      "ppdStandard": 1.65,
-      "tdDrivePct": 18,
-      "fgDrivePct": 13.3,
-      "turnoverDrivePct": 15.3,
-      "explosiveRatePct": 15.5,
-      "ppgPer10MCap": 2.12,
-      "projectedTeamNetDiffPerGame": -0.46
+      "ppgStandardDc": 47.29,
+      "ppgAdversarialNashDc": 36.13,
+      "ppdStandard": 4.3,
+      "tdDrivePct": 57.2,
+      "fgDrivePct": 10.5,
+      "turnoverDrivePct": 12.5,
+      "explosiveRatePct": 24.7,
+      "ppgPer10MCap": 5.53,
+      "projectedTeamNetDiffPerGame": 28.69
     },
     {
       "philosophyName": "Conventional 11-Pers Dropback Spread ($138.5M Cap)",
       "offCapM": 138.5,
-      "ppgStandardDc": 12.97,
-      "ppgAdversarialNashDc": 9.46,
-      "ppdStandard": 1.18,
-      "tdDrivePct": 11.1,
-      "fgDrivePct": 13.5,
-      "turnoverDrivePct": 18,
-      "explosiveRatePct": 7.2,
-      "ppgPer10MCap": 0.94,
-      "projectedTeamNetDiffPerGame": -9.03
+      "ppgStandardDc": 48.79,
+      "ppgAdversarialNashDc": 32.49,
+      "ppdStandard": 4.44,
+      "tdDrivePct": 59.1,
+      "fgDrivePct": 10.7,
+      "turnoverDrivePct": 14,
+      "explosiveRatePct": 11.9,
+      "ppgPer10MCap": 3.52,
+      "projectedTeamNetDiffPerGame": 26.79
     },
     {
       "philosophyName": "Shanahan/McVay 12-Pers Play-Action ($146.0M Cap)",
       "offCapM": 146,
-      "ppgStandardDc": 28.34,
-      "ppgAdversarialNashDc": 21.83,
-      "ppdStandard": 2.58,
-      "tdDrivePct": 31,
-      "fgDrivePct": 14,
-      "turnoverDrivePct": 17.7,
-      "explosiveRatePct": 12.5,
-      "ppgPer10MCap": 1.94,
-      "projectedTeamNetDiffPerGame": 5.94
+      "ppgStandardDc": 41.08,
+      "ppgAdversarialNashDc": 36.88,
+      "ppdStandard": 3.73,
+      "tdDrivePct": 48.6,
+      "fgDrivePct": 11.8,
+      "turnoverDrivePct": 14,
+      "explosiveRatePct": 12.1,
+      "ppgPer10MCap": 2.81,
+      "projectedTeamNetDiffPerGame": 18.68
     },
     {
       "philosophyName": "Top-Heavy Supermax Stars / Cap-Starved OL ($172.0M Cap)",
       "offCapM": 172,
-      "ppgStandardDc": 8.39,
-      "ppgAdversarialNashDc": 5.94,
-      "ppdStandard": 0.76,
-      "tdDrivePct": 6.3,
-      "fgDrivePct": 10.8,
-      "turnoverDrivePct": 15.9,
-      "explosiveRatePct": 10.3,
-      "ppgPer10MCap": 0.49,
-      "projectedTeamNetDiffPerGame": -16.11
+      "ppgStandardDc": 45.02,
+      "ppgAdversarialNashDc": 35.41,
+      "ppdStandard": 4.09,
+      "tdDrivePct": 53.6,
+      "fgDrivePct": 12.1,
+      "turnoverDrivePct": 12.5,
+      "explosiveRatePct": 13.8,
+      "ppgPer10MCap": 2.62,
+      "projectedTeamNetDiffPerGame": 20.52
     }
   ],
   "situationalDrills": {
     "twoMinute": {
       "argon": {
-        "tdWinPct": 64,
-        "ydsPerClockSec": 1.94,
-        "oobStopsPerDrive": 3.42,
-        "sackRatePct": 0.1
+        "tdWinPct": 84.9,
+        "ydsPerClockSec": 1.55,
+        "oobStopsPerDrive": 3.32,
+        "sackRatePct": 0.5
       },
       "hydra": {
-        "tdWinPct": 4.9,
-        "ydsPerClockSec": 0.83,
-        "oobStopsPerDrive": 1.37,
-        "sackRatePct": 0.6
+        "tdWinPct": 64.4,
+        "ydsPerClockSec": 1.06,
+        "oobStopsPerDrive": 3.35,
+        "sackRatePct": 0
       },
       "conv11": {
-        "tdWinPct": 15.7,
-        "ydsPerClockSec": 0.72,
-        "oobStopsPerDrive": 0.05,
-        "sackRatePct": 9.7
+        "tdWinPct": 50.2,
+        "ydsPerClockSec": 0.86,
+        "oobStopsPerDrive": 0.09,
+        "sackRatePct": 9.4
       },
       "supermax": {
-        "tdWinPct": 20.6,
-        "ydsPerClockSec": 0.79,
-        "oobStopsPerDrive": 0.16,
-        "sackRatePct": 9.5
+        "tdWinPct": 57.9,
+        "ydsPerClockSec": 0.97,
+        "oobStopsPerDrive": 0.09,
+        "sackRatePct": 15.6
       }
     },
     "fourMinute": {
       "argon": {
-        "gameSealPct": 67.1,
-        "meanClockBledSec": 186.7,
-        "firstDownsPerDrive": 2.3,
+        "gameSealPct": 93.2,
+        "meanClockBledSec": 159.3,
+        "firstDownsPerDrive": 2.52,
         "clockGiftMistakePct": 0
       },
       "hydra": {
-        "gameSealPct": 77.1,
-        "meanClockBledSec": 203.8,
-        "firstDownsPerDrive": 2.81,
-        "clockGiftMistakePct": 0.5
+        "gameSealPct": 90.2,
+        "meanClockBledSec": 206.4,
+        "firstDownsPerDrive": 3.08,
+        "clockGiftMistakePct": 0.1
       },
       "shanahan12": {
-        "gameSealPct": 48.2,
-        "meanClockBledSec": 169.1,
-        "firstDownsPerDrive": 1.95,
+        "gameSealPct": 55.7,
+        "meanClockBledSec": 174.7,
+        "firstDownsPerDrive": 2.19,
         "clockGiftMistakePct": 0
       },
       "conv11": {
-        "gameSealPct": 15.9,
-        "meanClockBledSec": 109.5,
-        "firstDownsPerDrive": 0.79,
+        "gameSealPct": 17.7,
+        "meanClockBledSec": 116.8,
+        "firstDownsPerDrive": 1.05,
         "clockGiftMistakePct": 0
       }
     },
     "goalLine": {
       "argon": {
-        "fourDownTdPct": 97.1,
-        "singleSnapTdPct": 68.1,
-        "expectedGoalLinePts": 6.76
+        "fourDownTdPct": 96.6,
+        "singleSnapTdPct": 77.5,
+        "expectedGoalLinePts": 6.72
       },
       "hydra": {
-        "fourDownTdPct": 94.9,
-        "singleSnapTdPct": 71.5,
-        "expectedGoalLinePts": 6.61
+        "fourDownTdPct": 96.2,
+        "singleSnapTdPct": 81,
+        "expectedGoalLinePts": 6.7
       },
       "shanahan12": {
-        "fourDownTdPct": 61.9,
-        "singleSnapTdPct": 26.1,
-        "expectedGoalLinePts": 5.14
+        "fourDownTdPct": 75.4,
+        "singleSnapTdPct": 37.9,
+        "expectedGoalLinePts": 5.79
       },
       "conv11": {
-        "fourDownTdPct": 37,
-        "singleSnapTdPct": 13.7,
-        "expectedGoalLinePts": 4.02
+        "fourDownTdPct": 68.4,
+        "singleSnapTdPct": 32.8,
+        "expectedGoalLinePts": 5.39
       }
     },
     "thirdAndNine": {
       "argon": {
-        "conversionPct": 56.7,
-        "explosive18Pct": 16.1,
+        "conversionPct": 72.5,
+        "explosive18Pct": 11.5,
         "sackPct": 0,
-        "meanEpa": 0.239
+        "meanEpa": 0.255
       },
       "hydra": {
-        "conversionPct": 31.1,
-        "explosive18Pct": 31.1,
+        "conversionPct": 52.8,
+        "explosive18Pct": 42.8,
         "sackPct": 0,
-        "meanEpa": -0.094
+        "meanEpa": 0.122
       },
       "conv11": {
-        "conversionPct": 19.8,
-        "explosive18Pct": 17.5,
-        "sackPct": 19.2,
-        "meanEpa": -0.592
+        "conversionPct": 51.7,
+        "explosive18Pct": 43.3,
+        "sackPct": 16.6,
+        "meanEpa": -0.227
       },
       "supermax": {
-        "conversionPct": 27.4,
-        "explosive18Pct": 24.2,
-        "sackPct": 22,
-        "meanEpa": -0.528
+        "conversionPct": 53.7,
+        "explosive18Pct": 47.6,
+        "sackPct": 20.6,
+        "meanEpa": -0.126
       }
     }
   }

@@ -531,6 +531,9 @@ export class TacticalRenderer {
     } else if (reason === 'COMPLETE') {
       tag = `PASS COMPLETE${tgtInfo}`;
       bgColor = 'rgba(46, 160, 67, 0.92)';
+    } else if (reason === 'INTERCEPTION') {
+      tag = `INTERCEPTION (TURNOVER)${tgtInfo}`;
+      bgColor = 'rgba(220, 38, 38, 0.94)';
     } else if (reason === 'INCOMPLETE') {
       tag = `INCOMPLETE PASS${tgtInfo}`;
       bgColor = 'rgba(110, 118, 129, 0.92)';

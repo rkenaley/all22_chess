@@ -64,13 +64,13 @@ async function runBistableAudit() {
         let off: SimAgent[];
 
         if (isReactiveAudible) {
-          const attractorResult = detectDefensiveAttractor(baseDef, df);
+          const attractorResult = detectDefensiveAttractor(baseDef);
           off = kbcPlay.buildAuditedOffense(attractorResult.attractor);
         } else {
           off = kbcPlay.buildBaseOffense();
         }
 
-        const traj = engine.simulatePlay([...off, ...baseDef], 1.0, { yardLineToGoal: 75.0, sidelineObjective: 'NORMAL' });
+        const traj = engine.simulatePlay([...off, ...baseDef], 1.0); // Symmetric capped YAC NO_FC evaluation
         const term = traj.find((s) => s.playOver) || traj[traj.length - 1];
 
         const fallbackCarrier = term.agents.find(
@@ -84,9 +84,10 @@ async function runBistableAudit() {
         sumYds += yards;
         sumEpa += epa;
 
-        if (yards >= 4.0) successCount++;
-        if (yards >= 15.0) explosiveCount++;
-        if (term.terminationReason === 'FUMBLE_LOST') turnoverCount++;
+        const isTurnover = term.terminationReason === 'FUMBLE_LOST' || term.terminationReason === 'INTERCEPTION';
+        if (yards >= 4.0 && !isTurnover) successCount++;
+        if (yards >= 15.0 && !isTurnover) explosiveCount++;
+        if (isTurnover) turnoverCount++;
       }
     }
 

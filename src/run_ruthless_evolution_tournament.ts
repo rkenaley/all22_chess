@@ -186,7 +186,7 @@ async function runTournament() {
         totalSnaps++;
         const off = cp.buildOffense();
         const def = buildModern2027Defense(df);
-        const traj = engine.simulatePlay([...off, ...def], 1.0, { yardLineToGoal: 75.0, sidelineObjective: 'NORMAL' });
+        const traj = engine.simulatePlay([...off, ...def], 1.0); // Symmetric capped NO_FC evaluation for passes & sweeps
         const term = traj.find((t) => t.playOver) || traj[traj.length - 1];
 
         const fallbackCarrier = term.agents.find(
@@ -201,11 +201,12 @@ async function runTournament() {
         sumEpa += epa;
         defEpaSum += epa;
 
-        if (yards >= 4.0) successCount++;
-        if (yards >= 15.0) explosiveCount++;
-        if (term.terminationReason === 'TOUCHDOWN' || yards >= 75.0) tdCount++;
-        if (yards <= 0) negativeCount++;
-        if (term.terminationReason === 'FUMBLE_LOST') {
+        const isTurnover = term.terminationReason === 'FUMBLE_LOST' || term.terminationReason === 'INTERCEPTION';
+        if (yards >= 4.0 && !isTurnover) successCount++;
+        if (yards >= 15.0 && !isTurnover) explosiveCount++;
+        if (!isTurnover && (term.terminationReason === 'TOUCHDOWN' || yards >= 75.0)) tdCount++;
+        if (yards <= 0 || isTurnover) negativeCount++;
+        if (isTurnover) {
           turnoverCount++;
         }
       }
@@ -372,16 +373,17 @@ async function runTournament() {
         const yards =
           term.carrierTackledYards ??
           (term.ball?.state === 'HELD' && fallbackCarrier ? +fallbackCarrier.y.toFixed(2) : 0);
-        const isTd = term.terminationReason === 'TOUCHDOWN' || yards >= 5.95;
-        const epa = isTd ? Math.max(2.1, term.expectedEpa) : term.expectedEpa;
+        const isTurnover = term.terminationReason === 'FUMBLE_LOST' || term.terminationReason === 'INTERCEPTION';
+        const isTd = !isTurnover && (term.terminationReason === 'TOUCHDOWN' || yards >= 5.95);
+        const epa = term.expectedEpa;
 
         sumYds += yards;
         sumEpa += epa;
         defEpaSum += epa;
 
         if (isTd) tdCount++;
-        if (yards <= 0) negativeCount++;
-        if (term.terminationReason === 'FUMBLE_LOST') {
+        if (yards <= 0 || isTurnover) negativeCount++;
+        if (isTurnover) {
           turnoverCount++;
         }
       }

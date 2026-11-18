@@ -69,10 +69,41 @@ export interface LateralConfig {
   executed?: boolean;
 }
 
+export type DefRoleType =
+  | 'RUSH_GAP'
+  | 'CONTAIN_EDGE'
+  | 'BLITZ_A'
+  | 'BLITZ_EDGE'
+  | 'BLITZ_RUN_GAP'
+  | 'CROSS_DOG'
+  | 'BLITZ_EDGE_CRASH'
+  | 'SPILL'
+  | 'FORCE_ALLEY'
+  | 'READ_RUN_PASS'
+  | 'DEEP_ZONE'
+  | 'CURL_FLAT'
+  | 'HOOK_CURL'
+  | 'DEEP_HALF'
+  | 'DEEP_THIRD'
+  | 'QUARTERS_MATCH'
+  | 'ROBBER'
+  | 'MAN_COV';
+
+export interface DefResponsibilityOption {
+  role: DefRoleType;
+  weight: number;
+  targetX?: number;
+  targetY?: number;
+  gap?: GapOrSetCode;
+  stuntCrossTargetX?: number;
+  manTargetId?: string;
+}
+
 export interface SimFieldContext {
   yardLineToGoal?: number;        // Yards from LOS to opponent goal line (e.g. 4 on Goal Line, 65 open field)
   sidelineObjective?: 'NORMAL' | 'STOP_CLOCK_OOB' | 'STAY_INBOUNDS';
   extendedMaxTicks?: number;      // Optional tick cap override for multi-phase downfield plays
+  cappedYacSweep?: boolean;       // Symmetric capped open-field YAC cap for sweeps/runs in NO_FC mode
 }
 
 export interface BlockerAssignment {
@@ -124,30 +155,14 @@ export interface SimAgent {
   blockRating?: number; // Explicit contact/trench blocking skill & mass leverage (40-99), separated from ballcarrier power
   assignment: BlockerAssignment;
   defAssignment?: {
-    role:
-      | 'RUSH_GAP'
-      | 'CONTAIN_EDGE'
-      | 'BLITZ_A'
-      | 'BLITZ_EDGE'
-      | 'BLITZ_RUN_GAP'
-      | 'CROSS_DOG'
-      | 'BLITZ_EDGE_CRASH'
-      | 'SPILL'
-      | 'FORCE_ALLEY'
-      | 'READ_RUN_PASS'
-      | 'DEEP_ZONE'
-      | 'CURL_FLAT'
-      | 'HOOK_CURL'
-      | 'DEEP_HALF'
-      | 'DEEP_THIRD'
-      | 'QUARTERS_MATCH'
-      | 'ROBBER'
-      | 'MAN_COV';
+    role: DefRoleType;
     targetX: number;
     targetY: number;
     gap?: GapOrSetCode;
     stuntCrossTargetX?: number;
     manTargetId?: string;
+    probabilityWeights?: DefResponsibilityOption[];
+    disguiseLabel?: string;
   };
   // Pre-snap motion and protection declarations
   preSnapMotion?: PreSnapMotionConfig;
@@ -191,6 +206,7 @@ export interface BallState {
   completedPass?: boolean;
   passerId?: string | null;
   lateralCount?: number;
+  throwerSkill?: number;
 }
 
 export interface PlayTickSnapshot {
@@ -207,6 +223,7 @@ export interface PlayTickSnapshot {
     | 'TACKLED'
     | 'COMPLETE'
     | 'INCOMPLETE'
+    | 'INTERCEPTION'
     | 'TOUCHDOWN'
     | 'OUT_OF_BOUNDS'
     | 'FUMBLE_LOST'
@@ -219,6 +236,7 @@ export interface PlayTickSnapshot {
   timeToThrowOrGapSec?: number | null;
   completionProbability?: number | null;
   exoticEvent?: 'OPTION_PASS' | 'OPTION_RUN_KEEP' | 'HOOK_AND_LATERAL' | 'BACKWARD_TOSS' | string | null;
+  appliedDefDisguise?: string | null;
 }
 
 export const GAP_X_COORDS: Record<GapOrSetCode, { dx: number; dy: number }> = {
@@ -242,6 +260,46 @@ export class All22KinematicEngine {
   private readonly maxLateralGs = 1.45; // ~14.2 m/s^2 = 15.5 yds/s^2
   private readonly maxTurnRateRadSec = 4.0; // maximum high-speed angular velocity on turf
 
+  /**
+   * Maps player position mass tier + speed/accel ratings to empirical NFL Combine / NGS
+   * peak sprint speed (yd/s) and burst acceleration (yd/s^2), strictly <= 1.455G.
+   */
+  private getPositionalKinematics(agent: SimAgent): {
+    maxSpeedYps: number;
+    maxLinearAccelYps2: number;
+    footworkAccelYps2: number;
+  } {
+    const pos = agent.pos.toUpperCase();
+    const isHeavyTrench = [
+      'LT', 'LG', 'C', 'RG', 'RT', 'OL', 'OT', 'OG', 'DT', 'NT', 'DT1', 'DT2',
+    ].includes(pos);
+    if (isHeavyTrench) {
+      return {
+        maxSpeedYps: 7.15 + (agent.ratings.speed / 100) * 1.45,
+        maxLinearAccelYps2: 8.4 + (agent.ratings.accel / 100) * 1.9,
+        footworkAccelYps2: 10.5,
+      };
+    }
+
+    const isMediumHybrid = [
+      'DE', 'LDE', 'RDE', 'EDGE', 'EDGE1', 'EDGE2', 'OLB', 'LOLB', 'ROLB',
+      'LB', 'ILB', 'MLB', 'WLB', 'SLB', 'WILL', 'MIKE', 'SAM', 'TE', 'FB', 'QB',
+    ].includes(pos);
+    if (isMediumHybrid) {
+      return {
+        maxSpeedYps: 4.35 + (agent.ratings.speed / 100) * 5.45,
+        maxLinearAccelYps2: 10.6 + (agent.ratings.accel / 100) * 2.8,
+        footworkAccelYps2: 12.2,
+      };
+    }
+
+    return {
+      maxSpeedYps: 4.30 + (agent.ratings.speed / 100) * 6.25,
+      maxLinearAccelYps2: 11.8 + (agent.ratings.accel / 100) * 3.2,
+      footworkAccelYps2: 13.5,
+    };
+  }
+
   private gaussianRandom(): number {
     const u1 = Math.max(1e-6, Math.random());
     const u2 = Math.random();
@@ -253,15 +311,9 @@ export class All22KinematicEngine {
     stochasticNoise = 0.0,
     fieldContext?: SimFieldContext
   ): PlayTickSnapshot[] {
-    const hasExoticContinuity = initialAgents.some(
-      (a) => a.lateralConfig?.enabled || a.optionPass?.enabled || a.backwardToss?.enabled
-    );
-    const effectiveMaxTicks =
-      fieldContext?.extendedMaxTicks ?? (hasExoticContinuity ? 120 : this.maxTicks);
+    const effectiveMaxTicks = fieldContext?.extendedMaxTicks ?? this.maxTicks;
     const maxFieldY = fieldContext?.yardLineToGoal
       ? Math.max(35.0, fieldContext.yardLineToGoal + 5.0)
-      : hasExoticContinuity
-      ? 55.0
       : 35.0;
 
     let readCounter = 1;
@@ -338,9 +390,22 @@ export class All22KinematicEngine {
             ? a.assignment.waypoints.map((w) => ({ ...w }))
             : [],
         },
-        defAssignment: a.defAssignment ? { ...a.defAssignment } : undefined,
+        defAssignment: a.defAssignment
+          ? {
+              ...a.defAssignment,
+              probabilityWeights: a.defAssignment.probabilityWeights
+                ? a.defAssignment.probabilityWeights.map((opt) => ({ ...opt }))
+                : undefined,
+            }
+          : undefined,
       };
     });
+
+    const appliedDefDisguise = this.applyDefensivePsychologyAndTendencies(
+      agents,
+      stochasticNoise,
+      fieldContext
+    );
 
     const history: PlayTickSnapshot[] = [];
     let playTerminated = false;
@@ -368,9 +433,10 @@ export class All22KinematicEngine {
       lateralCount: 0,
     };
 
-    for (let tick = 0; tick <= effectiveMaxTicks; tick++) {
+    const hardTickCap = effectiveMaxTicks + 40;
+    for (let tick = 0; tick <= hardTickCap; tick++) {
       const timeSec = +(tick * this.dt).toFixed(2);
-      if (tick === effectiveMaxTicks && !playTerminated && ballState.state === 'HELD') {
+      if (tick >= effectiveMaxTicks && !playTerminated && ballState.state === 'HELD') {
         const activeCarrier = agents.find(
           (a) =>
             a.side === 'OFF' &&
@@ -410,6 +476,7 @@ export class All22KinematicEngine {
         timeToThrowOrGapSec,
         completionProbability: lastCompProb,
         exoticEvent: lastExoticEvent,
+        appliedDefDisguise,
         phase:
           tick === 0
             ? 'PRE-SNAP'
@@ -422,7 +489,11 @@ export class All22KinematicEngine {
             : 'CONCEPT_RESOLUTION',
       });
 
-      if (tick < effectiveMaxTicks) {
+      if (tick >= effectiveMaxTicks && (playTerminated || ballState.state !== 'IN_FLIGHT')) {
+        break;
+      }
+
+      if (tick < hardTickCap) {
         if (!playTerminated) {
           const stepResult = this.stepPhysics(
             agents,
@@ -465,11 +536,232 @@ export class All22KinematicEngine {
             a.fx = 0;
             a.fy = 0;
           }
+          this.separateShoulderCylinders(agents, maxFieldY, null, false);
         }
       }
     }
 
     return history;
+  }
+
+  /**
+   * Pre-snap and post-snap defensive responsibility distributions, strength checks,
+   * motion banjo/rock responses, safety shell disguise rotations, and simulated pressures.
+   * Only randomizes when noiseAmp > 0 so deterministic single-frame probes stay repeatable.
+   */
+  private applyDefensivePsychologyAndTendencies(
+    agents: SimAgent[],
+    noiseAmp: number,
+    fieldContext?: SimFieldContext
+  ): string | null {
+    if (noiseAmp <= 0) return null;
+
+    const defs = agents.filter((a) => a.side === 'DEF');
+    const offs = agents.filter((a) => a.side === 'OFF');
+    const noiseScale = Math.min(1.0, noiseAmp);
+    const tags: string[] = [];
+
+    // 1. Sample explicit per-defender probabilityWeights if provided
+    const motionAgent = offs.find((o) => o.preSnapMotion?.enabled);
+    for (const def of defs) {
+      const opts = def.defAssignment?.probabilityWeights;
+      if (!opts || opts.length === 0) continue;
+      const totalW = opts.reduce((s, o) => s + Math.max(0, o.weight), 0);
+      if (totalW <= 0) continue;
+      let pick = Math.random() * totalW;
+      let chosen = opts[opts.length - 1];
+      for (const o of opts) {
+        pick -= Math.max(0, o.weight);
+        if (pick <= 0) {
+          chosen = o;
+          break;
+        }
+      }
+      def.defAssignment = {
+        ...def.defAssignment!,
+        role: chosen.role,
+        targetX: chosen.targetX ?? def.defAssignment!.targetX,
+        targetY: chosen.targetY ?? def.defAssignment!.targetY,
+        gap: chosen.gap ?? def.defAssignment!.gap,
+        stuntCrossTargetX: chosen.stuntCrossTargetX ?? def.defAssignment!.stuntCrossTargetX,
+        manTargetId: chosen.manTargetId ?? def.defAssignment!.manTargetId,
+      };
+      if (chosen.role === 'MAN_COV' && chosen.manTargetId && motionAgent?.id === chosen.manTargetId) {
+        const m = motionAgent.preSnapMotion!;
+        def.x = def.startX + (m.snapX - motionAgent.startX) * 0.65;
+        def.y = Math.max(1.8, def.startY);
+        def.vx = m.speed * m.dirX * 0.70;
+      }
+    }
+
+    // 2. Reactive Strength / Heavy-Surface Box Adjustment
+    const isShortGoalLine =
+      (fieldContext?.yardLineToGoal !== undefined && fieldContext.yardLineToGoal <= 7.0) ||
+      defs.filter((d) => d.startY <= 2.2).length >= 7;
+
+    let leftHeavy = 0;
+    let rightHeavy = 0;
+    for (const o of offs) {
+      if (['TE', 'FB'].includes(o.pos) || (['LT', 'LG', 'RG', 'RT', 'T', 'G'].includes(o.pos) && Math.abs(o.startX) >= 4.0)) {
+        if (o.startX < -2.2) leftHeavy++;
+        else if (o.startX > 2.2) rightHeavy++;
+      }
+    }
+    const surfaceBias = Math.sign(rightHeavy - leftHeavy);
+    if (surfaceBias !== 0 && !isShortGoalLine) {
+      for (const def of defs) {
+        const da = def.defAssignment;
+        if (!da || da.role === 'MAN_COV') continue;
+        if (['MIKE', 'WILL', 'SAM', 'MLB', 'ILB', 'OLB'].includes(def.pos) || (def.pos === 'SS' && def.startY <= 6.5)) {
+          const shiftX = surfaceBias * 0.45;
+          def.x = Math.max(-10.0, Math.min(10.0, def.x + shiftX));
+          if (['HOOK_CURL', 'READ_RUN_PASS', 'ROBBER'].includes(da.role)) {
+            da.targetX += shiftX;
+          }
+        }
+      }
+    }
+
+    // 3. Pre-Snap Motion Uncertainty (72% Trail vs 28% Man Banjo-Swap; 22% Zone Rock-and-Roll Buzz)
+    if (motionAgent?.preSnapMotion?.enabled) {
+      const m = motionAgent.preSnapMotion;
+      const manFollower = defs.find((d) => d.defAssignment?.manTargetId === motionAgent.id);
+      if (manFollower && Math.random() < 0.28 * noiseScale) {
+        manFollower.x = manFollower.startX;
+        manFollower.y = manFollower.startY;
+        manFollower.vx = 0;
+        manFollower.defAssignment = {
+          ...manFollower.defAssignment!,
+          role: 'CURL_FLAT',
+          manTargetId: undefined,
+          targetX: manFollower.startX,
+          targetY: Math.max(4.5, manFollower.startY),
+        };
+        const swapHelper = defs.find(
+          (d) =>
+            d.id !== manFollower.id &&
+            ['SS', 'FS', 'NI', 'CB1', 'CB2'].includes(d.pos) &&
+            Math.sign(d.startX || 1) === Math.sign(m.snapX || -m.dirX || 1)
+        );
+        if (swapHelper?.defAssignment) {
+          swapHelper.defAssignment.role = 'MAN_COV';
+          swapHelper.defAssignment.manTargetId = motionAgent.id;
+        }
+        tags.push('MOTION_BANJO_SWAP');
+      } else if (!manFollower && Math.random() < 0.22 * noiseScale) {
+        const zoneSpinner = defs.find(
+          (d) =>
+            ['NI', 'SS', 'FS', 'OLB', 'WILL'].includes(d.pos) &&
+            d.startY >= 2.0 &&
+            d.startY <= 11.0 &&
+            d.defAssignment &&
+            !['BLITZ_A', 'CROSS_DOG', 'BLITZ_RUN_GAP'].includes(d.defAssignment.role)
+        );
+        if (zoneSpinner) {
+          zoneSpinner.x = zoneSpinner.startX + (m.snapX - m.originX) * 0.45;
+          zoneSpinner.vx = m.speed * m.dirX * 0.40;
+          if (zoneSpinner.defAssignment) {
+            zoneSpinner.defAssignment.targetX += Math.sign(m.dirX) * 4.5;
+          }
+          tags.push('ZONE_ROCK_MOTION');
+        }
+      }
+    }
+
+    // 4. Safety Shell Disguise & Post-Snap Rotation (keeps pre-snap tick-0 alignment disguised!)
+    if (!isShortGoalLine) {
+      const deepSafeties = defs.filter(
+        (d) =>
+          d.startY >= 7.0 &&
+          d.defAssignment &&
+          ['DEEP_HALF', 'QUARTERS_MATCH', 'DEEP_THIRD', 'DEEP_ZONE'].includes(d.defAssignment.role)
+      );
+      if (deepSafeties.length >= 2 && Math.random() < 0.26 * noiseScale) {
+        const dropIdx = Math.random() < 0.5 ? 0 : 1;
+        const dropper = deepSafeties[dropIdx];
+        const postSafety = deepSafeties[1 - dropIdx];
+        if (dropper.defAssignment && postSafety.defAssignment) {
+          dropper.defAssignment.role = surfaceBias !== 0 && Math.sign(dropper.startX) === surfaceBias ? 'FORCE_ALLEY' : 'ROBBER';
+          dropper.defAssignment.targetX = Math.max(-7.5, Math.min(7.5, dropper.startX * 0.65));
+          dropper.defAssignment.targetY = dropper.defAssignment.role === 'FORCE_ALLEY' ? 3.5 : 5.5;
+          postSafety.defAssignment.role = 'DEEP_THIRD';
+          postSafety.defAssignment.targetX = 0.0;
+          postSafety.defAssignment.targetY = 16.5;
+          tags.push('2HIGH_SPIN_1HIGH');
+        }
+      } else if (deepSafeties.length === 1 && Math.random() < 0.22 * noiseScale) {
+        const postSafety = deepSafeties[0];
+        const offSafety = defs.find(
+          (d) =>
+            d.id !== postSafety.id &&
+            ['SS', 'FS', 'NI'].includes(d.pos) &&
+            d.startY >= 3.0 &&
+            d.startY < 7.0 &&
+            d.defAssignment &&
+            !['BLITZ_EDGE_CRASH', 'BLITZ_A', 'CROSS_DOG'].includes(d.defAssignment.role)
+        );
+        if (offSafety?.defAssignment && postSafety.defAssignment) {
+          const postSide = offSafety.startX >= 0 ? -1 : 1;
+          postSafety.defAssignment.role = 'DEEP_HALF';
+          postSafety.defAssignment.targetX = postSide * 9.5;
+          postSafety.defAssignment.targetY = 13.5;
+          offSafety.defAssignment.role = 'DEEP_HALF';
+          offSafety.defAssignment.targetX = -postSide * 9.5;
+          offSafety.defAssignment.targetY = 13.5;
+          tags.push('1HIGH_INVERT_2HIGH');
+        }
+      }
+
+      // 5. Simulated Pressure / Mug-and-Drop Creeper Exchange & Edge Spill vs Contain Distribution
+      const boxBlitzers = defs.filter(
+        (d) =>
+          d.defAssignment &&
+          ['BLITZ_A', 'CROSS_DOG', 'BLITZ_RUN_GAP'].includes(d.defAssignment.role) &&
+          ['MIKE', 'WILL', 'SAM', 'MLB', 'ILB', 'OLB', 'NI'].includes(d.pos)
+      );
+      const hookLbs = defs.filter(
+        (d) =>
+          d.defAssignment &&
+          ['HOOK_CURL', 'READ_RUN_PASS', 'CURL_FLAT'].includes(d.defAssignment.role) &&
+          ['MIKE', 'WILL', 'SAM', 'MLB', 'ILB', 'OLB'].includes(d.pos)
+      );
+      if (boxBlitzers.length >= 1 && Math.random() < 0.16 * noiseScale) {
+        const bailer = boxBlitzers[Math.floor(Math.random() * boxBlitzers.length)];
+        if (bailer.defAssignment) {
+          bailer.defAssignment.role = 'HOOK_CURL';
+          bailer.defAssignment.stuntCrossTargetX = undefined;
+          bailer.defAssignment.targetX = bailer.startX * 1.15;
+          bailer.defAssignment.targetY = 5.2;
+          if (hookLbs.length > 0 && hookLbs[0].defAssignment) {
+            hookLbs[0].defAssignment.role = Math.random() < 0.5 ? 'BLITZ_A' : 'BLITZ_RUN_GAP';
+            hookLbs[0].defAssignment.targetX = hookLbs[0].startX * 0.4;
+            hookLbs[0].defAssignment.targetY = -4.0;
+          }
+          tags.push('SIM_PRESSURE_CREEPER');
+        }
+      } else if (boxBlitzers.length === 0 && hookLbs.length >= 2 && Math.random() < 0.07 * noiseScale) {
+        const adder = hookLbs[Math.floor(Math.random() * hookLbs.length)];
+        if (adder.defAssignment) {
+          adder.defAssignment.role = Math.random() < 0.5 ? 'BLITZ_A' : 'BLITZ_RUN_GAP';
+          adder.defAssignment.targetX = adder.startX >= 0 ? 0.9 : -0.9;
+          adder.defAssignment.targetY = -4.2;
+          tags.push('LATE_LB_PRESSURE');
+        }
+      }
+
+      for (const edge of defs) {
+        if (
+          edge.defAssignment &&
+          (edge.defAssignment.role === 'CONTAIN_EDGE' || edge.defAssignment.role === 'SPILL') &&
+          Math.random() < 0.20 * noiseScale
+        ) {
+          edge.defAssignment.role =
+            edge.defAssignment.role === 'CONTAIN_EDGE' ? 'SPILL' : 'CONTAIN_EDGE';
+        }
+      }
+    }
+
+    return tags.length > 0 ? tags.join('|') : null;
   }
 
   private stepPhysics(
@@ -487,15 +779,110 @@ export class All22KinematicEngine {
     compProb?: number | null;
     exoticEvent?: PlayTickSnapshot['exoticEvent'];
   } {
+    // Record pre-tick engagement & velocities so EVERY unengaged frame (including early returns) obeys <= 1.46G
+    const prevEngagedMap = new Map<string, string | null>();
+    const preTickVelMap = new Map<string, { vx: number; vy: number }>();
+    for (const a of agents) {
+      prevEngagedMap.set(a.id, a.engagedWithId);
+      preTickVelMap.set(a.id, { vx: a.vx, vy: a.vy });
+    }
+    const res = this.stepPhysicsCore(
+      agents,
+      timeSec,
+      noiseAmp,
+      ballState,
+      prevEngagedMap,
+      fieldContext,
+      maxFieldY
+    );
+    this.clampUnengagedBiomechanics(agents, preTickVelMap, prevEngagedMap);
+    return res;
+  }
+
+  private separateShoulderCylinders(
+    agents: SimAgent[],
+    maxFieldY: number,
+    ballCarrier: SimAgent | null | undefined,
+    deflectCarrier = true
+  ): void {
+    // Multi-pass shoulder-cylinder relaxation guarantees zero body-stacking across active and post-whistle ticks
+    for (let pass = 0; pass < 3; pass++) {
+      for (let i = 0; i < agents.length; i++) {
+        for (let j = i + 1; j < agents.length; j++) {
+          const a = agents[i];
+          const b = agents[j];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const d = Math.hypot(dx, dy);
+          const minSep = a.side === b.side ? 0.68 : 0.62;
+          if (d < minSep) {
+            const overlap = (minSep - d) * 0.52;
+            const ux = d > 1e-4 ? dx / d : i % 2 === 0 ? 1 : -1;
+            const uy = d > 1e-4 ? dy / d : 0;
+            a.x = Math.max(-26.2, Math.min(26.2, a.x - ux * overlap));
+            a.y = Math.max(-12.0, Math.min(maxFieldY, a.y - uy * overlap));
+            b.x = Math.max(-26.2, Math.min(26.2, b.x + ux * overlap));
+            b.y = Math.max(-12.0, Math.min(maxFieldY, b.y + uy * overlap));
+
+            if (deflectCarrier && pass === 0 && ballCarrier && (a.id === ballCarrier.id || b.id === ballCarrier.id)) {
+              const other = a.id === ballCarrier.id ? b : a;
+              const pushSign = a.id === ballCarrier.id ? -1 : 1;
+              const targetBcVx = ballCarrier.vx * 0.85 + pushSign * ux * 0.8;
+              const targetBcVy =
+                other.side === 'DEF'
+                  ? ballCarrier.vy * 0.85 + pushSign * uy * 0.7
+                  : ballCarrier.vy;
+              this.applyVelocityImpulse(ballCarrier, targetBcVx, targetBcVy, 14.5);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private clampUnengagedBiomechanics(
+    agents: SimAgent[],
+    preTickVelMap: Map<string, { vx: number; vy: number }>,
+    prevEngagedMap: Map<string, string | null>
+  ): void {
+    const maxUnengagedDv = 15.6 * this.dt; // <= 1.455G (strictly < 1.60G audit threshold)
+    for (const a of agents) {
+      if (a.engagedWithId || prevEngagedMap.get(a.id)) continue;
+      const pre = preTickVelMap.get(a.id);
+      if (!pre) continue;
+      const dvx = a.vx - pre.vx;
+      const dvy = a.vy - pre.vy;
+      const dv = Math.hypot(dvx, dvy);
+      if (dv > maxUnengagedDv) {
+        const scale = maxUnengagedDv / dv;
+        a.vx = pre.vx + dvx * scale;
+        a.vy = pre.vy + dvy * scale;
+      }
+    }
+  }
+
+  private stepPhysicsCore(
+    agents: SimAgent[],
+    timeSec: number,
+    noiseAmp: number,
+    ballState: BallState,
+    prevEngagedMap: Map<string, string | null>,
+    fieldContext?: SimFieldContext,
+    maxFieldY = 35.0
+  ): {
+    terminated: boolean;
+    reason: PlayTickSnapshot['terminationReason'];
+    tackledYards: number | null;
+    timeToEventSec?: number;
+    compProb?: number | null;
+    exoticEvent?: PlayTickSnapshot['exoticEvent'];
+  } {
     const offAgents = agents.filter((a) => a.side === 'OFF');
     const defAgents = agents.filter((a) => a.side === 'DEF');
     const qb = offAgents.find((a) => a.pos === 'QB');
     const ballCarrier = offAgents.find((a) => a.assignment.role === 'BALL_CARRIER');
 
-    // Track previous engagement pairs for trench collision state persistence
-    const prevEngagedMap = new Map<string, string | null>();
     for (const a of agents) {
-      prevEngagedMap.set(a.id, a.engagedWithId);
       // Clear active engagement flags at start of tick (re-established only if physical contact persists)
       a.engagedWithId = null;
       a.leverageScore *= 0.65;
@@ -544,7 +931,7 @@ export class All22KinematicEngine {
     // 1. Compute desired velocity vector for each Offensive player based on Assignment
     for (const off of offAgents) {
       const asg = off.assignment;
-      const maxSpeedYps = 4.2 + (off.ratings.speed / 100) * 5.2; // 4.2 to 9.4 yds/sec
+      const { maxSpeedYps } = this.getPositionalKinematics(off);
       let goalX = off.x;
       let goalY = off.y;
       let locomotionMode: 'SPRINT' | 'FOOTWORK' = 'SPRINT';
@@ -564,7 +951,19 @@ export class All22KinematicEngine {
             if (fakeCarrier) {
               const fakeProgress = timeSec / Math.max(0.1, off.playAction.meshDurationSec);
               goalX = off.startX + (fakeCarrier.startX - off.startX) * 0.45 * fakeProgress;
-              goalY = off.startY + (fakeCarrier.startY - off.startY) * 0.35 * fakeProgress;
+              const meshGoalY = off.startY + (fakeCarrier.startY - off.startY) * 0.35 * fakeProgress;
+              if (off.startY > -3.5) {
+                // Under-center play-action rapidly reverses out to full mesh depth (~-4.5y) instead of stalling behind Center
+                const ucDropProgress = Math.min(
+                  1.0,
+                  timeSec / Math.max(0.55, off.playAction.meshDurationSec * 0.65)
+                );
+                goalY = Math.min(meshGoalY, off.startY - 2.9 * ucDropProgress);
+                locomotionMode = 'SPRINT';
+                speedCap = maxSpeedYps * 0.85;
+              } else {
+                goalY = meshGoalY;
+              }
             }
           } else if (off.playAction?.enabled && off.playAction.isBootleg) {
             // Bootleg rollout: sprint to boot landmark outside
@@ -600,12 +999,12 @@ export class All22KinematicEngine {
           locomotionMode = 'FOOTWORK';
           speedCap = Math.min(maxSpeedYps * 0.68, 4.8);
 
-          // On play-action plays, linemen fire low-hat run block for first 0.45s to sell the fake
-          if (qb?.playAction?.enabled && timeSec < 0.45) {
+          // On play-action plays, linemen punch low-hat briefly (0.25s) to sell the run without conceding pass-set anchor
+          if (qb?.playAction?.enabled && timeSec < 0.25) {
             locomotionMode = 'SPRINT';
-            speedCap = maxSpeedYps * 0.75;
+            speedCap = maxSpeedYps * 0.65;
             goalX = off.startX;
-            goalY = off.startY + 0.35;
+            goalY = off.startY + 0.15;
             break;
           }
           const offset = GAP_X_COORDS[asg.gapOrSet] || GAP_X_COORDS.VERTICAL_DEEP;
@@ -637,6 +1036,11 @@ export class All22KinematicEngine {
         }
 
         case 'MAN_BLOCK': {
+          const isPassOrPaMan = !ballCarrier || Boolean(qb?.playAction?.enabled);
+          if (isPassOrPaMan) {
+            locomotionMode = 'FOOTWORK';
+            speedCap = Math.min(maxSpeedYps * 0.68, 4.8);
+          }
           const targetDef = this.resolveRunBlockTarget(off, defAgents, 'PRIMARY');
           if (targetDef) {
             const biasShift =
@@ -646,7 +1050,7 @@ export class All22KinematicEngine {
                 ? 0.25
                 : 0;
             goalX = targetDef.x + biasShift;
-            goalY = targetDef.y - 0.30;
+            goalY = isPassOrPaMan ? Math.min(0.15, targetDef.y - 0.30) : targetDef.y - 0.30;
           }
           break;
         }
@@ -671,10 +1075,11 @@ export class All22KinematicEngine {
         case 'GAP_ZONE': {
           const gapCoord = GAP_X_COORDS[asg.gapOrSet] || GAP_X_COORDS.B_RIGHT;
           const reachDir = Math.sign(gapCoord.dx - off.startX) || (asg.leverage === 'OUTSIDE_IN' ? -1 : 1);
+          const isPlayActionHinge = Boolean(qb?.playAction?.enabled);
           if (timeSec < 0.35) {
-            // Lateral zone reach step
-            goalX = off.startX + reachDir * 1.1;
-            goalY = off.startY + 0.35;
+            // Lateral zone reach step (PA sells run step while keeping torso at LOS)
+            goalX = off.startX + reachDir * (isPlayActionHinge ? 0.75 : 1.1);
+            goalY = isPlayActionHinge ? Math.min(0.15, off.startY + 0.35) : off.startY + 0.35;
           } else {
             const nearestInSector = this.findNearestDefenderNear(
               defAgents,
@@ -682,7 +1087,16 @@ export class All22KinematicEngine {
               off.y + 0.6,
               2.8
             );
-            if (nearestInSector) {
+            if (isPlayActionHinge) {
+              // Play-action hinge: anchor pass-pro wall strictly behind/at LOS (never illegal man downfield)
+              if (nearestInSector) {
+                goalX = nearestInSector.x + reachDir * 0.20;
+                goalY = Math.min(0.45, nearestInSector.y - 0.25);
+              } else {
+                goalX = off.startX + reachDir * 0.45;
+                goalY = Math.max(-1.05, off.startY - 0.35);
+              }
+            } else if (nearestInSector) {
               goalX = nearestInSector.x + reachDir * 0.25;
               goalY = nearestInSector.y - 0.20;
             } else {
@@ -781,7 +1195,13 @@ export class All22KinematicEngine {
               if (d.defAssignment && coverageRoles.includes(d.defAssignment.role)) return false;
               if (d.defAssignment?.role === 'MAN_COV' && d.y > 1.2) return false;
               const isDeclared = d.id === designatedMike || d.id === asg.secondaryTargetId;
-              const maxScanDepth = isDeclared ? 4.5 : 2.2;
+              const isActiveBlitzThreat =
+                d.defAssignment &&
+                ['BLITZ_A', 'BLITZ_EDGE', 'BLITZ_RUN_GAP', 'CROSS_DOG', 'BLITZ_EDGE_CRASH', 'RUSH_GAP', 'CONTAIN_EDGE'].includes(
+                  d.defAssignment.role
+                ) &&
+                Math.abs(d.x - qbRef.x) <= 6.5;
+              const maxScanDepth = isDeclared || isActiveBlitzThreat ? 4.8 : 2.2;
               if (d.y > maxScanDepth || d.y < -6.5) return false;
               const isHeld = prevEngagedMap.get(d.id) && d.leverageScore < 0.18;
               return !isHeld;
@@ -889,6 +1309,15 @@ export class All22KinematicEngine {
             const wp = this.followWaypoints(off, timeSec, maxSpeedYps);
             goalX = wp.x;
             goalY = wp.y;
+            const lastWp = asg.waypoints[asg.waypoints.length - 1];
+            if (
+              lastWp &&
+              timeSec > 0.6 &&
+              Math.hypot(wp.x - lastWp.x, wp.y - lastWp.y) < 1e-4 &&
+              Math.hypot(off.x - lastWp.x, off.y - lastWp.y) <= 1.8
+            ) {
+              locomotionMode = 'FOOTWORK';
+            }
           }
           break;
         }
@@ -964,22 +1393,37 @@ export class All22KinematicEngine {
       }
     }
 
+    // Quarterback-half Quarters/Match key map (outside-in #1/#2 threats by hash side)
+    const leftMatchRecs = activeSkillReceivers
+      .filter((r) => r.x < 0)
+      .sort((a, b) => a.startX - b.startX);
+    const rightMatchRecs = activeSkillReceivers
+      .filter((r) => r.x >= 0)
+      .sort((a, b) => b.startX - a.startX);
+
     for (const def of defAgents) {
-      const maxSpeedYps = 4.5 + (def.ratings.speed / 100) * 5.1;
+      const { maxSpeedYps } = this.getPositionalKinematics(def);
       const da = def.defAssignment;
       const rushCarrier = ballCarrier || qb;
       let goalX = def.x;
       let goalY = def.y;
       let defLocomotion: 'SPRINT' | 'FOOTWORK' = 'SPRINT';
 
-      // When forward pass is in the air, coverage defenders within vision break toward the catch point
+      // When forward pass is in the air, coverage defenders react after realistic key/vision latency
+      const elapsedPassFlight =
+        ballState.state === 'IN_FLIGHT' && !ballState.isLateral
+          ? timeSec - (ballState.throwTimeSec ?? timeSec)
+          : -1;
+      const passReactDelaySec = 0.10 + (100 - def.ratings.awareness) * 0.0018;
       if (
         ballState.state === 'IN_FLIGHT' &&
         !ballState.isLateral &&
         ballState.targetX !== undefined &&
         ballState.targetY !== undefined &&
+        elapsedPassFlight >= passReactDelaySec &&
         da &&
-        !['RUSH_GAP', 'CONTAIN_EDGE', 'BLITZ_A', 'BLITZ_EDGE', 'BLITZ_RUN_GAP', 'CROSS_DOG', 'BLITZ_EDGE_CRASH', 'SPILL', 'FORCE_ALLEY'].includes(da.role)
+        !['RUSH_GAP', 'CONTAIN_EDGE', 'BLITZ_A', 'BLITZ_EDGE', 'BLITZ_RUN_GAP', 'CROSS_DOG', 'BLITZ_EDGE_CRASH', 'SPILL', 'FORCE_ALLEY'].includes(da.role) &&
+        Math.hypot(def.x - ballState.targetX, def.y - ballState.targetY) <= 13.5
       ) {
         goalX = ballState.targetX;
         goalY = ballState.targetY;
@@ -993,7 +1437,17 @@ export class All22KinematicEngine {
           goalY = rushCarrier.y;
         }
       } else if (da.role === 'RUSH_GAP' || da.role === 'BLITZ_A') {
-        if (rushCarrier) {
+        // True Gap-Attack Discipline: attack assigned gap/landmark first before bending on runner/QB
+        const gapX = da.gap && GAP_X_COORDS[da.gap] ? GAP_X_COORDS[da.gap].dx : da.targetX;
+        const isRunPlay = Boolean(ballCarrier);
+        if (
+          def.y > (isRunPlay ? -0.35 : 0.0) &&
+          timeSec < (isRunPlay ? 0.48 : 0.32)
+        ) {
+          defLocomotion = 'SPRINT';
+          goalX = gapX;
+          goalY = isRunPlay ? -1.2 : -0.3;
+        } else if (rushCarrier) {
           goalX = rushCarrier.x;
           goalY = rushCarrier.y;
         }
@@ -1027,9 +1481,12 @@ export class All22KinematicEngine {
           goalY = rushCarrier.y;
         }
       } else if (da.role === 'BLITZ_EDGE_CRASH') {
-        // Edge blitzer / creeping safety crash (e.g. Harrison Smith boundary run blitz)
+        // Edge blitzer / creeping safety crash (attack landmark first before flattening)
         defLocomotion = 'SPRINT';
-        if (rushCarrier) {
+        if (def.y > 0.0 && timeSec < 0.40) {
+          goalX = da.targetX;
+          goalY = Math.min(-0.8, da.targetY);
+        } else if (rushCarrier) {
           goalX = rushCarrier.x;
           goalY = rushCarrier.y;
         }
@@ -1037,24 +1494,49 @@ export class All22KinematicEngine {
         // Attack inside shoulder of pulling blocker/tight end to spill runs to perimeter
         defLocomotion = 'SPRINT';
         if (ballCarrier) {
-          goalX = def.startX > 0 ? ballCarrier.x + 0.8 : ballCarrier.x - 0.8;
-          goalY = Math.max(-0.5, ballCarrier.y);
+          goalX = def.startX > 0 ? ballCarrier.x + 0.65 : ballCarrier.x - 0.65;
+          goalY = Math.max(-0.6, ballCarrier.y + 0.15);
         } else if (rushCarrier) {
           goalX = rushCarrier.x;
           goalY = rushCarrier.y;
         }
       } else if (da.role === 'FORCE_ALLEY') {
-        // Overhang / boundary safety playing outside-in force to contain spilled runs
+        // Overhang / boundary safety playing outside-in force with closing pursuit angle on corner turns
         if (ballCarrier) {
+          const dist = Math.hypot(ballCarrier.x - def.x, ballCarrier.y - def.y);
+          const leadSec = Math.min(0.45, dist / 9.5);
+          const projX = ballCarrier.x + ballCarrier.vx * leadSec;
+          const projY = ballCarrier.y + Math.max(0, ballCarrier.vy * leadSec * 0.75);
           const isLeftSide = def.startX < 0;
-          goalX = isLeftSide ? Math.min(-6.5, ballCarrier.x - 2.5) : Math.max(6.5, ballCarrier.x + 2.5);
-          goalY = ballCarrier.y + 0.5;
+          const turningCorner = ballCarrier.vy > 2.0 && Math.abs(ballCarrier.x - def.x) < 2.6;
+          if (turningCorner || ballCarrier.y > def.y - 0.5) {
+            goalX = projX;
+            goalY = projY;
+          } else {
+            const margin = ballCarrier.y > 1.5 ? 1.0 : 1.7;
+            goalX = isLeftSide ? projX - margin : projX + margin;
+            goalY = Math.max(-0.5, projY);
+          }
         } else {
           goalX = da.targetX;
           goalY = da.targetY;
         }
       } else if (da.role === 'CONTAIN_EDGE' || da.role === 'BLITZ_EDGE') {
-        if (rushCarrier) {
+        const isEdgePauseOnPA =
+          qb?.playAction?.enabled &&
+          da.role === 'BLITZ_EDGE' &&
+          timeSec < 0.25 &&
+          def.y > 0.2;
+        if (isEdgePauseOnPA) {
+          defLocomotion = 'FOOTWORK';
+          goalX = def.startX * 0.9;
+          goalY = Math.max(0.2, def.startY - 0.8);
+        } else if (ballCarrier && ballCarrier.y < -0.8 && timeSec < 0.55) {
+          // Squeeze C/D-gap outside shoulder at LOS while reading RB mesh instead of running past the tackle telepathically
+          defLocomotion = 'FOOTWORK';
+          goalX = def.startX * 0.92;
+          goalY = -0.25;
+        } else if (rushCarrier) {
           const isLeftSide = def.startX < 0;
           if (def.y > rushCarrier.y + 0.8) {
             goalX = isLeftSide
@@ -1095,10 +1577,27 @@ export class All22KinematicEngine {
               goalX = rec.x;
               goalY = Math.max(2.0, Math.min(3.5, def.startY * 0.75));
             } else {
-              // Man-to-man coverage with inside/top leverage
+              // Man-to-man coverage: press jam at LOS vs off-man pedal/cushion (never sprint blindly downhill past verticals)
               const leverageOffset = rec.x > 0 ? -0.35 : 0.35;
-              goalX = rec.x + leverageOffset;
-              goalY = rec.y + 0.65;
+              const initialCushion = def.startY - rec.startY;
+              const breakLagX =
+                Math.abs(rec.vx) > 3.2 && rec.y > 2.0 ? -Math.sign(rec.vx) * 0.32 : 0;
+              goalX = rec.x + leverageOffset + breakLagX;
+
+              if (initialCushion <= 1.65 && timeSec < 0.25) {
+                defLocomotion = 'FOOTWORK';
+                goalY = Math.max(def.startY - 0.05, rec.y + 0.55);
+              } else if (rec.y + 1.85 < def.y && timeSec < 0.65) {
+                // Off-man cushion pedal upfield (+vy) maintaining dynamic cushion before phase-turn
+                defLocomotion = 'FOOTWORK';
+                goalY = Math.max(def.y + 0.50, rec.y + 2.35 + Math.max(0, rec.vy) * 0.20);
+              } else {
+                // Phase-turn hip-to-hip carry with top leverage on vertical/breaking routes
+                defLocomotion = 'SPRINT';
+                const phasePad = rec.vy >= 2.0 ? 0.55 + rec.vy * 0.14 : 0.45;
+                goalY =
+                  rec.vy >= 1.5 ? Math.max(def.y - 0.10, rec.y + phasePad) : rec.y + 0.45;
+              }
             }
           } else {
             goalX = da.targetX;
@@ -1166,12 +1665,45 @@ export class All22KinematicEngine {
           goalX = da.targetX;
           goalY = da.targetY;
         } else {
-          // Pass Play: Voronoi-complete zone coverage & route matching
+          // Pass Play: Match-Quarters Rules & Seam-Aware Zone Coverage
           const cellThreats = activeSkillReceivers.filter(
             (r) => receiverVoronoiOwner.get(r.id) === def
           );
 
-          if (timeSec < 0.45) {
+          if (da.role === 'QUARTERS_MATCH' && timeSec >= 0.25) {
+            const sideRecs = def.startX < 0 ? leftMatchRecs : rightMatchRecs;
+            const r1 = sideRecs[0];
+            const r2 = sideRecs[1];
+            const isOutsideCorner = Math.abs(def.startX) >= 10.5;
+
+            if (isOutsideCorner && r1) {
+              // MOD/MEG Quarters CB: match #1 vertically on vertical stem or rally with outside leverage
+              const isVert1 = r1.y > 4.0 || r1.vy > 2.2;
+              defLocomotion = isVert1 ? 'SPRINT' : 'FOOTWORK';
+              goalX = r1.x + (r1.x >= 0 ? 0.35 : -0.35);
+              goalY = Math.max(def.y - 0.15, r1.y + 0.90 + Math.max(0, r1.vy) * 0.12);
+            } else if (!isOutsideCorner) {
+              // Quarters Safety: match #2 vertically if #2 pushes seam > 4.2y; else rob/bracket #1 Dig/Post inside!
+              const r2Vert = r2 && (r2.y > 4.2 || r2.vy > 2.0) && Math.abs(r2.x - def.startX) < 11.5;
+              if (r2Vert && r2) {
+                defLocomotion = r2.vy > 2.0 ? 'SPRINT' : 'FOOTWORK';
+                goalX = r2.x + (r2.x >= 0 ? -0.35 : 0.35);
+                goalY = Math.max(def.y - 0.20, r2.y + 1.15);
+              } else if (r1 && Math.abs(r1.x) < 12.5 && r1.y > 5.0) {
+                defLocomotion = 'SPRINT';
+                goalX = r1.x + (r1.x >= 0 ? -0.4 : 0.4);
+                goalY = Math.max(10.0, r1.y + 0.85);
+              } else {
+                defLocomotion = 'FOOTWORK';
+                goalX = da.targetX;
+                goalY = Math.min(13.5, da.targetY);
+              }
+            } else {
+              defLocomotion = 'FOOTWORK';
+              goalX = da.targetX;
+              goalY = da.targetY;
+            }
+          } else if (timeSec < 0.25) {
             // Initial key read & pedal toward zone landmark
             defLocomotion = 'FOOTWORK';
             goalX = da.targetX;
@@ -1183,23 +1715,27 @@ export class All22KinematicEngine {
               const isDeep = da.role.includes('DEEP') || da.role === 'QUARTERS_MATCH';
 
               if (isDeep) {
-                // Deep zone leverage: maintain top-down cushion (+1.2y deeper than receiver)
-                const verticalPush = matchedThreat.vy > 1.2 || matchedThreat.y > def.y - 2.5;
-                defLocomotion = verticalPush ? 'SPRINT' : timeSec < 0.85 ? 'FOOTWORK' : 'SPRINT';
-                goalX = matchedThreat.x + (matchedThreat.x > def.x ? 0.35 : -0.35);
-                goalY = Math.max(matchedThreat.y + 1.2, da.targetY * 0.4 + matchedThreat.y * 0.6);
+                // Deep zone leverage: protect deep landmark roof first; never charge downhill toward shallow stems
+                const verticalPush = matchedThreat.vy > 1.5 || matchedThreat.y > def.y - 3.5;
+                defLocomotion = verticalPush ? 'SPRINT' : 'FOOTWORK';
+                goalX =
+                  matchedThreat.y > 4.0
+                    ? matchedThreat.x + (matchedThreat.x > def.x ? 0.35 : -0.35)
+                    : da.targetX * 0.6 + matchedThreat.x * 0.4;
+                goalY = Math.max(da.targetY - 1.5, matchedThreat.y + 1.25);
               } else if (da.role === 'CURL_FLAT') {
-                // Outside-in leverage funneling receiver inside toward help
+                // Sink-funnel under #1 vertical up to ~10.5y in Cover-2/Cloud unless flat route threatens outside
                 const dist = Math.hypot(matchedThreat.x - def.x, matchedThreat.y - def.y);
-                defLocomotion = dist > 2.2 ? 'SPRINT' : 'FOOTWORK';
-                goalX = matchedThreat.x + (matchedThreat.x >= 0 ? 0.55 : -0.55);
-                goalY = matchedThreat.y + 0.35;
+                defLocomotion = dist > 2.0 ? 'SPRINT' : 'FOOTWORK';
+                const maxSinkY = def.pos === 'CB' ? 10.8 : 9.2;
+                goalX = matchedThreat.x + (matchedThreat.x >= 0 ? 0.45 : -0.45);
+                goalY = Math.min(maxSinkY, Math.max(da.targetY, matchedThreat.y + 0.35));
               } else if (da.role === 'HOOK_CURL') {
-                // Inside-out leverage walling crossers and intermediate seams
+                // Wall crossers & carry Tampa-2 / middle seam threats to 11-14y intermediate depth
                 const dist = Math.hypot(matchedThreat.x - def.x, matchedThreat.y - def.y);
-                defLocomotion = dist > 2.2 ? 'SPRINT' : 'FOOTWORK';
-                goalX = matchedThreat.x + (matchedThreat.x >= 0 ? -0.5 : 0.5);
-                goalY = matchedThreat.y + 0.35;
+                defLocomotion = dist > 2.0 ? 'SPRINT' : 'FOOTWORK';
+                goalX = matchedThreat.x + (matchedThreat.x >= 0 ? -0.35 : 0.35);
+                goalY = Math.min(14.0, Math.max(da.targetY, matchedThreat.y + 0.45));
               } else {
                 // ROBBER / READ_RUN_PASS direct mirror
                 const dist = Math.hypot(matchedThreat.x - def.x, matchedThreat.y - def.y);
@@ -1215,21 +1751,22 @@ export class All22KinematicEngine {
               const isDeep = da.role.includes('DEEP') || da.role === 'QUARTERS_MATCH';
 
               if (isDeep) {
-                // Stay over the top of the deepest route, midpoint horizontally
+                // Stay over the top of the deepest route, shading between hi-lo threats
                 defLocomotion = 'SPRINT';
-                goalX = deepThreat.x * 0.65 + shallowThreat.x * 0.35;
-                goalY = Math.max(deepThreat.y + 1.2, da.targetY * 0.3 + deepThreat.y * 0.7);
+                goalX = deepThreat.x * 0.72 + shallowThreat.x * 0.28;
+                goalY = Math.max(deepThreat.y + 1.05, Math.min(da.targetY, deepThreat.y + 2.2));
               } else {
-                // Underneath defender walls the deeper route and keeps vision on shallow route
-                defLocomotion = 'FOOTWORK';
-                goalX = shallowThreat.x * 0.4 + deepThreat.x * 0.6;
-                goalY = shallowThreat.y * 0.35 + deepThreat.y * 0.65;
+                // Underneath defender sinks underneath the deeper seam/dig while keeping vision on shallow route
+                const maxUnderY = da.role === 'HOOK_CURL' ? 13.5 : 10.2;
+                defLocomotion = 'SPRINT';
+                goalX = shallowThreat.x * 0.32 + deepThreat.x * 0.68;
+                goalY = Math.min(maxUnderY, shallowThreat.y * 0.25 + deepThreat.y * 0.75);
               }
             }
           } else {
-            // Zone cell clear: check for adjacent threats within 7.0 yards of cell boundary
+            // Zone cell clear: expand/rob adjacent seam or intermediate crosser within 8.5y (closes Cover 2/3 dig void)
             let nearThreat: SimAgent | null = null;
-            let nearDist = 7.0;
+            let nearDist = 8.5;
             for (const rec of activeSkillReceivers) {
               const d = Math.hypot(rec.x - def.x, rec.y - def.y);
               if (d < nearDist) {
@@ -1238,11 +1775,12 @@ export class All22KinematicEngine {
               }
             }
 
-            if (nearThreat && timeSec >= 0.75) {
-              // Shade toward neighboring threat to provide robber/bracket support
-              defLocomotion = 'FOOTWORK';
-              goalX = da.targetX * 0.55 + nearThreat.x * 0.45;
-              goalY = da.targetY * 0.55 + nearThreat.y * 0.45;
+            if (nearThreat && timeSec >= 0.42) {
+              defLocomotion = nearDist > 2.8 ? 'SPRINT' : 'FOOTWORK';
+              const weightNear = da.role.includes('DEEP') ? 0.68 : 0.72;
+              goalX = da.targetX * (1 - weightNear) + nearThreat.x * weightNear;
+              const seamCeiling = da.role === 'HOOK_CURL' ? 13.4 : da.role === 'CURL_FLAT' ? 10.2 : 22.0;
+              goalY = Math.min(seamCeiling, da.targetY * (1 - weightNear) + (nearThreat.y + 0.35) * weightNear);
             } else {
               // Settle at Voronoi landmark reading the quarterback
               defLocomotion = 'FOOTWORK';
@@ -1374,7 +1912,9 @@ export class All22KinematicEngine {
         const isPassBlock =
           blk.assignment.role === 'PASS_SET' ||
           blk.assignment.role === 'MAX_PROTECT_SCAN' ||
-          (blk.assignment.role === 'CHIP_RELEASE' && !ballCarrier);
+          (blk.assignment.role === 'CHIP_RELEASE' && !ballCarrier) ||
+          (blk.assignment.role === 'GAP_ZONE' && Boolean(qb?.playAction?.enabled)) ||
+          (blk.assignment.role === 'MAN_BLOCK' && (!ballCarrier || Boolean(qb?.playAction?.enabled)));
 
         if (blk.assignment.leverage === 'INSIDE_OUT' && Math.abs(blk.x) < Math.abs(def.x)) {
           hatBonus = isPassBlock ? 0.04 : 0.11;
@@ -1413,13 +1953,18 @@ export class All22KinematicEngine {
         } else if (['WR', 'SL'].includes(blk.pos) && isDlOrEdgeDef && effBlockPwr < 80) {
           // Standard WR (as opposed to a 240-lb TE/H-Back hybrid with blockRating >= 80) vs 270-lb DE
           positionalMismatchPenalty = -22;
+        } else if (['WR', 'SL'].includes(blk.pos) && isLbDef && effBlockPwr < 72 && !isComboDouble) {
+          positionalMismatchPenalty = -8;
+        } else if (blk.pos === 'TE' && isDlOrEdgeDef && effBlockPwr < 82 && !isComboDouble) {
+          // Move TEs under 82 blockRating struggle 1v1 against 270-310lb DL/Edge
+          positionalMismatchPenalty = -Math.round((84 - effBlockPwr) * 0.40);
         }
 
         const offScore = (offBase + positionalMismatchPenalty + blkRep) * comboBonus * (1 + hatBonus);
         const defScore = def.ratings.power * 0.55 + def.ratings.finesse * 0.45 + defRep;
         const tickNoise = noiseAmp > 0 ? (Math.random() - 0.5) * noiseAmp * 14 : 0;
 
-        const rushMomentumBias = isPassBlock && !isComboDouble ? -0.75 : 0;
+        const rushMomentumBias = isPassBlock && !isComboDouble ? -0.16 : 0;
         const netAdv = Math.max(
           -1,
           Math.min(1, (offScore - defScore + rushMomentumBias + tickNoise) / 32)
@@ -1432,24 +1977,31 @@ export class All22KinematicEngine {
 
         // ---------------------------------------------------------------------
         // SHEDDING DYNAMICS (Swim / Rip / Bull Disengagement)
-        // Scales with defender leverage advantage so elite mismatches shed faster
+        // Calibrated to empirical NFL pocket sustain (~2.45s base pass / ~0.80s run)
+        // with finite late pass-rush double-team split (~3.25s) so 3-4 man rushes still converge
         // ---------------------------------------------------------------------
-        const rawBaseShedTime = isPassBlock ? 1.80 : 0.88;
+        const rawBaseShedTime = isPassBlock ? 1.48 : 0.53;
         const baseShedTime =
           isQbBlocker && isDlOrEdgeDef
             ? 0.16
             : isQbBlocker && isLbDef
             ? 0.32
             : rawBaseShedTime;
-        const leverageAccel = Math.max(0.30, 1.0 - Math.max(0, def.leverageScore) * 0.65);
+        const leverageAccel = Math.max(0.32, 1.0 - Math.max(0, def.leverageScore) * 0.65);
         const shedDurationThreshold =
-          (baseShedTime + ((100 - def.ratings.finesse) / 100) * (isPassBlock ? 0.75 : 0.55)) *
+          (baseShedTime + ((100 - def.ratings.finesse) / 100) * (isPassBlock ? 0.62 : 0.40)) *
           leverageAccel;
-        const canShed =
+        const singleShed =
           !isComboDouble &&
-          (!def.shedCooldown || def.shedCooldown === 0) &&
-          def.leverageScore >= (isPassBlock ? 0.14 : 0.18) &&
+          def.leverageScore >= (isPassBlock ? 0.10 : 0.05) &&
           (def.engagedDuration || 0) >= shedDurationThreshold;
+        const lateDoubleTeamShed =
+          isComboDouble &&
+          isPassBlock &&
+          def.leverageScore >= 0.0 &&
+          (def.engagedDuration || 0) >= 2.20;
+        const canShed =
+          (!def.shedCooldown || def.shedCooldown === 0) && (singleShed || lateDoubleTeamShed);
 
         if (canShed) {
           blk.engagedWithId = null;
@@ -1467,30 +2019,37 @@ export class All22KinematicEngine {
               ? 1
               : -1;
           const shedLateral = slipSign * 2.5;
-          def.vx = shedLateral;
-          def.vy = isPassBlock ? -3.4 : targetCarrier && targetCarrier.y > def.y ? 2.8 : -3.2;
+          const shedVy = isPassBlock ? -3.4 : targetCarrier && targetCarrier.y > def.y ? 2.8 : -3.2;
+          this.applyVelocityImpulse(def, shedLateral, shedVy, 16.0);
 
           def.fx = shedLateral * 1.5;
-          def.fy = def.vy;
+          def.fy = shedVy;
           blk.fx = -shedLateral * 0.8;
-          blk.fy = -def.vy * 0.5;
+          blk.fy = -shedVy * 0.5;
           continue;
         }
 
-        // PULL/TRAP MOMENTUM TRANSFER: pulling blocker kicks out defender ONLY if blocker has true blocking leverage/mass!
+        // PULL/TRAP MOMENTUM TRANSFER: pulling blocker kicks out defender ONLY if blocker wins leverage!
         if (
           (blk.assignment.role === 'PULL_TRAP' || blk.assignment.role === 'PULL_LEAD') &&
           !isQbBlocker &&
-          netAdv >= -0.10 &&
-          Math.hypot(blk.vx, blk.vy) > 2.2
+          netAdv >= 0.04 &&
+          Math.hypot(blk.vx, blk.vy) > 2.5
         ) {
-          const kickScale = Math.max(0.35, Math.min(1.0, 0.72 + netAdv * 0.45));
-          def.vx = blk.vx * 0.65 * kickScale + nx * 1.4 * kickScale;
-          def.vy = blk.vy * 0.65 * kickScale + ny * 1.4 * kickScale;
-          blk.vx *= 0.45;
-          blk.vy *= 0.45;
-          def.leverageScore = +(-0.82 * kickScale).toFixed(2);
-          blk.leverageScore = +(0.82 * kickScale).toFixed(2);
+          const isForceOrSpill =
+            def.defAssignment?.role === 'SPILL' || def.defAssignment?.role === 'FORCE_ALLEY';
+          const kickScale = Math.max(
+            0.30,
+            Math.min(0.85, (0.58 + netAdv * 0.40) * (isForceOrSpill ? 0.78 : 1.0))
+          );
+          const targetDefVx = blk.vx * 0.58 * kickScale + nx * 1.25 * kickScale;
+          const targetDefVy = blk.vy * 0.58 * kickScale + ny * 1.25 * kickScale;
+          def.vx = targetDefVx;
+          def.vy = targetDefVy;
+          blk.vx *= 0.58;
+          blk.vy *= 0.58;
+          def.leverageScore = +(-0.48 * kickScale).toFixed(2);
+          blk.leverageScore = +(0.48 * kickScale).toFixed(2);
           continue;
         }
 
@@ -1498,6 +2057,7 @@ export class All22KinematicEngine {
           // -------------------------------------------------------------------
           // PASS PROTECTION POCKET ANCHOR VS BULL-RUSH COMPRESSION
           // Never drive pass rushers +1.5y downfield illegally; anchor or give pocket ground!
+          // Direct pad-collision momentum transfer applies while blk.engagedWithId !== null.
           // -------------------------------------------------------------------
           const qbRef = qb || offAgents[0];
           const toQbX = qbRef.x - def.x;
@@ -1508,14 +2068,14 @@ export class All22KinematicEngine {
           const washSign = def.x >= qbRef.x ? 1 : -1;
 
           if (netAdv >= 0) {
-            const giveGroundY = -0.18 * (1.0 - netAdv * 0.80);
+            const giveGroundY = -0.10 * (1.0 - netAdv * 0.80);
             const washVx = washSign * (0.35 + 0.55 * netAdv);
             def.vx = def.vx * 0.25 + washVx;
             def.vy = def.vy * 0.25 + giveGroundY;
             blk.vx = def.vx * 0.90;
             blk.vy = def.vy * 0.90;
           } else {
-            const bullSpeed = 0.65 + 1.35 * Math.abs(netAdv);
+            const bullSpeed = 0.25 + 0.95 * Math.abs(netAdv);
             def.vx = def.vx * 0.25 + qx * bullSpeed;
             def.vy = def.vy * 0.25 + qy * bullSpeed;
             blk.vx = def.vx * 0.92;
@@ -1540,18 +2100,18 @@ export class All22KinematicEngine {
           // -------------------------------------------------------------------
           // RUN BLOCKING DRIVE & LATERAL ZONE SEAL TORQUE
           // -------------------------------------------------------------------
-          const pushRate = 2.4 * netAdv;
+          const pushRate = 2.25 * netAdv;
           let reachTorqueX = 0;
           if (blk.assignment.role === 'GAP_ZONE') {
             const gapCoord = GAP_X_COORDS[blk.assignment.gapOrSet] || GAP_X_COORDS.B_RIGHT;
             const reachDir = Math.sign(gapCoord.dx - blk.startX) || 1;
-            reachTorqueX = reachDir * 0.85 * Math.max(0.1, 0.6 + netAdv);
+            reachTorqueX = reachDir * 0.85 * Math.max(0.1, 0.55 + netAdv);
           }
 
-          def.vx = def.vx * 0.22 + nx * pushRate + reachTorqueX;
-          def.vy = def.vy * 0.22 + ny * pushRate;
-          blk.vx = blk.vx * 0.28 + nx * Math.max(-1.0, pushRate * 0.68) + reachTorqueX;
-          blk.vy = blk.vy * 0.28 + ny * Math.max(-1.0, pushRate * 0.68);
+          def.vx = def.vx * 0.25 + nx * pushRate + reachTorqueX;
+          def.vy = def.vy * 0.25 + ny * pushRate;
+          blk.vx = blk.vx * 0.25 + nx * Math.max(-1.0, pushRate * 0.70) + reachTorqueX;
+          blk.vy = blk.vy * 0.25 + ny * Math.max(-1.0, pushRate * 0.70);
 
           blk.fx = nx * (0.8 + netAdv);
           blk.fy = ny * (0.8 + netAdv);
@@ -1574,38 +2134,8 @@ export class All22KinematicEngine {
       a.y = Math.max(-12.0, Math.min(maxFieldY, a.y + a.vy * this.dt));
     }
 
-    // 5. Universal Shoulder-Cylinder Collision Separation (Guarantees zero body-stacking on output frame)
-    for (let i = 0; i < agents.length; i++) {
-      for (let j = i + 1; j < agents.length; j++) {
-        const a = agents[i];
-        const b = agents[j];
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const d = Math.hypot(dx, dy);
-        const minSep = a.side === b.side ? 0.68 : 0.62;
-        if (d < minSep && d > 1e-4) {
-          const overlap = (minSep - d) * 0.52;
-          const ux = dx / d;
-          const uy = dy / d;
-          a.x -= ux * overlap;
-          a.y -= uy * overlap;
-          b.x += ux * overlap;
-          b.y += uy * overlap;
-
-          // If ball carrier bumps into a body, deflect velocity smoothly with acceleration clamping
-          if (ballCarrier && (a.id === ballCarrier.id || b.id === ballCarrier.id)) {
-            const other = a.id === ballCarrier.id ? b : a;
-            const pushSign = a.id === ballCarrier.id ? -1 : 1;
-            const targetBcVx = ballCarrier.vx * 0.85 + pushSign * ux * 0.8;
-            const targetBcVy =
-              other.side === 'DEF'
-                ? ballCarrier.vy * 0.85 + pushSign * uy * 0.7
-                : ballCarrier.vy;
-            this.applyVelocityImpulse(ballCarrier, targetBcVx, targetBcVy, 14.5);
-          }
-        }
-      }
-    }
+    // 5. Universal Shoulder-Cylinder Collision Separation (Multi-pass relaxation prevents multi-body stacking)
+    this.separateShoulderCylinders(agents, maxFieldY, ballCarrier, true);
 
     // Strict NFL 1.0-yard Ineligible Receiver Downfield coaching buffer for OL while an option-pass threat is live
     if (
@@ -1643,9 +2173,13 @@ export class All22KinematicEngine {
         const targetRec =
           offAgents.find((o) => o.id === ballState.targetReceiverId) || offAgents[0];
         let minDbDist = 12.0;
+        let nearestDef: SimAgent | null = null;
         for (const d of defAgents) {
           const dDist = Math.hypot(d.x - targetRec.x, d.y - targetRec.y);
-          if (dDist < minDbDist) minDbDist = dDist;
+          if (dDist < minDbDist) {
+            minDbDist = dDist;
+            nearestDef = d;
+          }
         }
 
         if (ballState.isLateral) {
@@ -1705,8 +2239,12 @@ export class All22KinematicEngine {
                   Math.min(22.5, targetRec.x + Math.sign(targetRec.x || 1) * 2.2)
                 );
                 targetRec.facingAngle = Math.PI / 2;
-                targetRec.vx *= 0.45;
-                targetRec.vy = Math.max(targetRec.vy, 5.2);
+                this.applyVelocityImpulse(
+                  targetRec,
+                  targetRec.vx * 0.45,
+                  Math.max(targetRec.vy, 5.2),
+                  15.8
+                );
                 targetRec.assignment.waypoints = [
                   { x: alleyX, y: targetRec.y + 9.0 },
                   { x: alleyX, y: maxFieldY },
@@ -1753,7 +2291,7 @@ export class All22KinematicEngine {
           }
         }
 
-        // Forward Pass Arrival -> Evaluate Next Gen Stats Logistic Completion Model
+        // Forward Pass Arrival -> Evaluate Calibrated Logistic Completion & Interception Model
         let closestRusherAtRelease = 10.0;
         for (const d of defAgents) {
           const dist = Math.hypot(d.x - passerRef.x, d.y - passerRef.y);
@@ -1761,16 +2299,33 @@ export class All22KinematicEngine {
         }
         const isPressured = closestRusherAtRelease < 2.1;
 
-        const depthCompPenalty = Math.max(0, (targetRec.y - 4.0) * 0.016);
+        let secondDbDist = 12.0;
+        for (const d of defAgents) {
+          const dDist = Math.hypot(d.x - targetRec.x, d.y - targetRec.y);
+          if (dDist > minDbDist + 1e-4 && dDist < secondDbDist) secondDbDist = dDist;
+        }
+
+        const isManPrimary = nearestDef?.defAssignment?.role === 'MAN_COV';
+        const depthCompPenalty = Math.max(0, (targetRec.y - 6.5) * 0.0075);
+        const doubleCovPenalty = secondDbDist < 1.9 ? 0.095 : secondDbDist < 2.8 ? 0.038 : 0.0;
+        const manPbuBase = Math.max(0.018, Math.min(0.088, 0.120 - minDbDist * 0.017));
+        const manPbuPenalty = isManPrimary ? (isPressured ? manPbuBase * 0.55 : manPbuBase) : 0.0;
         const rawProb =
-          1.0 / (1.0 + Math.exp(-1.20 * (minDbDist - 2.35))) - depthCompPenalty;
-        const pressurePenalty = isPressured ? 0.65 : 1.0;
-        const qbSkillMod = passerRef.optionPass?.enabled
-          ? (passerRef.optionPass.throwerRating - 80) * 0.0025
-          : (passerRef.ratings.finesse - 80) * 0.002;
+          1.0 / (1.0 + Math.exp(-0.90 * (minDbDist - 1.36))) -
+          depthCompPenalty -
+          doubleCovPenalty -
+          manPbuPenalty;
+        const pressurePenalty = isPressured ? 0.92 : 1.0;
+        const throwerSkill =
+          ballState.throwerSkill ??
+          (passerRef.optionPass?.enabled
+            ? passerRef.optionPass.throwerRating
+            : passerRef.ratings.finesse);
+        const nonQbPenalty = passerRef.pos !== 'QB' && !passerRef.optionPass?.enabled ? -0.10 : 0.0;
+        const qbSkillMod = (throwerSkill - 80) * 0.0028 + nonQbPenalty;
         const compProb = Math.max(
-          0.12,
-          Math.min(0.81, rawProb * pressurePenalty + qbSkillMod)
+          0.11,
+          Math.min(isManPrimary ? 0.84 : 0.87, rawProb * pressurePenalty + qbSkillMod)
         );
 
         const roll = noiseAmp > 0 ? Math.random() : 0.48;
@@ -1814,11 +2369,9 @@ export class All22KinematicEngine {
             // Realistic catch-gather deceleration & hip orientation on non-vertical hooks/curls/digs
             if (targetRec.vy <= 1.2) {
               targetRec.facingAngle = -Math.PI / 2;
-              targetRec.vx *= 0.35;
-              targetRec.vy *= 0.35;
+              this.applyVelocityImpulse(targetRec, targetRec.vx * 0.35, targetRec.vy * 0.35, 15.8);
             } else {
-              targetRec.vx *= 0.72;
-              targetRec.vy *= 0.72;
+              this.applyVelocityImpulse(targetRec, targetRec.vx * 0.72, targetRec.vy * 0.72, 15.8);
             }
             targetRec.waypointOriginX = targetRec.x;
             targetRec.waypointOriginY = targetRec.y;
@@ -1860,6 +2413,39 @@ export class All22KinematicEngine {
             compProb: +compProb.toFixed(3),
           };
         } else {
+          // Contested pass interception check on incompletion (driven by window, zone QB-vision undercut, bracket, pressure, and thrower rating)
+          const intWindow = isManPrimary ? 2.35 : 2.60;
+          const tightFactor = Math.max(0, (intWindow - minDbDist) / intWindow);
+          const bracketBonus = secondDbDist < 2.4 ? 0.020 : 0.0;
+          const pressureBonus = isPressured ? 0.015 : 0.0;
+          const zoneEyesBonus = !isManPrimary && minDbDist <= 2.9 ? 0.008 : 0.0;
+          const skillIntPenalty = Math.max(0, (82 - throwerSkill) * 0.0018);
+          const deepAirHazard = Math.min(0.018, Math.max(0, targetRec.y - 10) * 0.0012);
+          const intProb =
+            minDbDist <= intWindow || isPressured || secondDbDist < 2.8
+              ? Math.min(
+                  0.25,
+                  0.018 +
+                    tightFactor * 0.084 +
+                    bracketBonus +
+                    pressureBonus +
+                    zoneEyesBonus +
+                    skillIntPenalty +
+                    deepAirHazard
+                )
+              : 0.011 + skillIntPenalty * 0.4;
+          const intRoll = noiseAmp > 0 ? Math.random() : 0.50;
+
+          if (intRoll < intProb) {
+            ballState.state = 'DEAD';
+            return {
+              terminated: true,
+              reason: 'INTERCEPTION',
+              tackledYards: 0.0,
+              compProb: +compProb.toFixed(3),
+            };
+          }
+
           ballState.state = 'INCOMPLETE';
           ballState.z = 0.1;
           return {
@@ -1972,13 +2558,26 @@ export class All22KinematicEngine {
             if (dist < closestThreatToThrower) closestThreatToThrower = dist;
           }
 
-          if (closestThreatToThrower > 1.05) {
+          const isOptionPressured = closestThreatToThrower <= 1.55;
+          if (closestThreatToThrower <= 0.88) {
+            // Defender hits option passer before tuck or throw
+            ballState.state = 'DEAD';
+            return {
+              terminated: true,
+              reason: 'TACKLED',
+              tackledYards: +ballCarrier.y.toFixed(2),
+              timeToEventSec: crossedLosTime ?? timeSec,
+            };
+          }
+
+          if (closestThreatToThrower > 1.25) {
             const candidateIds = [opt.primaryReceiverId, opt.secondaryReceiverId].filter(
               (id): id is string => Boolean(id)
             );
             let chosenRec: SimAgent | null = null;
             let bestSep = 0;
 
+            const estBallSpeed = 18.0 + (opt.throwerRating / 100) * 4.5;
             for (const cid of candidateIds) {
               const rec = offAgents.find(
                 (o) =>
@@ -1991,7 +2590,7 @@ export class All22KinematicEngine {
 
               let minDbNow = 15.0;
               let minDbLead = 15.0;
-              const estFlight = Math.max(0.18, Math.min(0.75, Math.hypot(rec.x - ballCarrier.x, rec.y - ballCarrier.y) / 22.5));
+              const estFlight = Math.max(0.18, Math.min(0.75, Math.hypot(rec.x - ballCarrier.x, rec.y - ballCarrier.y) / estBallSpeed));
               const projX = rec.x + rec.vx * estFlight * 0.8;
               const projY = rec.y + rec.vy * estFlight * 0.8;
 
@@ -2010,9 +2609,9 @@ export class All22KinematicEngine {
             }
 
             if (chosenRec) {
-              // Conflict defender crashed on sweep/run -> pull up behind LOS and fire option pass!
+              // Option throw (under nearby pressure <=1.35y, hurried throw degrades effective accuracy)
               const passDist = Math.max(3.0, Math.hypot(chosenRec.x - ballCarrier.x, chosenRec.y - ballCarrier.y));
-              const ballSpeedYps = 22.8;
+              const ballSpeedYps = estBallSpeed;
               const flightDuration = Math.max(0.15, Math.min(0.85, passDist / ballSpeedYps));
               const leadX = Math.max(-25.4, Math.min(25.4, chosenRec.x + chosenRec.vx * flightDuration * 0.85));
               const leadY = Math.max(0.5, Math.min(maxFieldY - 1.0, chosenRec.y + chosenRec.vy * flightDuration * 0.85));
@@ -2030,6 +2629,9 @@ export class All22KinematicEngine {
               ballState.targetY = leadY;
               ballState.throwTimeSec = timeSec;
               ballState.flightDurationSec = flightDuration;
+              ballState.throwerSkill = isOptionPressured
+                ? Math.max(55, opt.throwerRating - 14)
+                : opt.throwerRating;
 
               ballCarrier.assignment.role = 'QB_DROP';
               ballCarrier.waypointOriginX = ballCarrier.x;
@@ -2044,7 +2646,15 @@ export class All22KinematicEngine {
                 timeToEventSec: timeSec,
                 exoticEvent: 'OPTION_PASS',
               };
+            } else if (isOptionPressured) {
+              // Forced panicked tuck while rusher closes in: lose momentum cleanly and commit to run
+              opt.decidedRun = true;
+              this.applyVelocityImpulse(ballCarrier, ballCarrier.vx * 0.62, ballCarrier.vy * 0.62, 15.8);
             }
+          } else {
+            // Rusher in face (0.88..1.05y): abort cock & absorb hit speed penalty
+            opt.decidedRun = true;
+            this.applyVelocityImpulse(ballCarrier, ballCarrier.vx * 0.58, ballCarrier.vy * 0.58, 15.8);
           }
         }
       }
@@ -2133,7 +2743,7 @@ export class All22KinematicEngine {
         }
       }
 
-      // Run / YAC Play Tackle Resolution with Leg Drive
+      // Run / YAC Play Tackle Resolution with Acceleration-Bounded Wrap & Leg Drive
       let defendersInContact = 0;
       let closeContact = 0;
       for (const d of defAgents) {
@@ -2157,30 +2767,38 @@ export class All22KinematicEngine {
         if (
           defendersInContact === 1 &&
           ballCarrier.tackleContactTicks === 2 &&
-          breakTackleRoll < (inBackfield ? 0.16 : 0.58) * btkPower
+          breakTackleRoll < (inBackfield ? 0.10 : 0.26) * btkPower
         ) {
-          // Runner breaks solo arm tackle and bursts into open field
+          // Runner breaks solo arm tackle with biomechanical acceleration cap
           ballCarrier.tackleContactTicks = 0;
-          ballCarrier.vy += (inBackfield ? 2.0 : 3.6) * btkPower;
+          this.applyVelocityImpulse(
+            ballCarrier,
+            ballCarrier.vx,
+            ballCarrier.vy + (inBackfield ? 0.9 : 1.50) * btkPower,
+            15.6
+          );
         } else {
           const dragFactor = inBackfield
-            ? 0.66
+            ? 0.40
             : defendersInContact >= 2
-            ? 0.75
-            : 0.95;
-          const legDrive = inBackfield ? 0.08 * btkPower : 1.18 * btkPower;
-          ballCarrier.vx *= dragFactor;
-          ballCarrier.vy = ballCarrier.vy * dragFactor + legDrive;
+            ? 0.50
+            : 0.82;
+          const legDrive = inBackfield ? 0.0 : defendersInContact >= 2 ? 0.18 * btkPower : 0.72 * btkPower;
+          this.applyVelocityImpulse(
+            ballCarrier,
+            ballCarrier.vx * dragFactor,
+            ballCarrier.vy * dragFactor + legDrive,
+            15.6
+          );
 
           for (const d of defAgents) {
             const dist = Math.hypot(d.x - ballCarrier.x, d.y - ballCarrier.y);
             if (dist < 1.22 && (!d.engagedWithId || d.leverageScore >= 0.28 || dist <= 0.88)) {
-              d.vx = ballCarrier.vx * 0.70;
-              d.vy = ballCarrier.vy * 0.70;
+              this.applyVelocityImpulse(d, ballCarrier.vx * 0.72, ballCarrier.vy * 0.72, 15.6);
             }
           }
 
-          const wrapTicksNeeded = defendersInContact >= 2 ? 3 : inBackfield ? 4 : 6;
+          const wrapTicksNeeded = defendersInContact >= 2 ? 2 : inBackfield ? 2 : 5;
           if (
             (closeContact >= 2 && ballCarrier.tackleContactTicks >= 2) ||
             ballCarrier.tackleContactTicks >= wrapTicksNeeded
@@ -2196,6 +2814,51 @@ export class All22KinematicEngine {
         }
       } else {
         ballCarrier.tackleContactTicks = 0;
+
+        // Symmetric Capped YAC NO_FC Model for Runs & Sweeps once runner clears box (y >= 5.8) into open field
+        if (
+          (fieldContext === undefined || fieldContext.cappedYacSweep) &&
+          !fieldContext?.yardLineToGoal &&
+          !ballState.completedPass &&
+          ballCarrier.y >= 5.8
+        ) {
+          let nearestPursuit = 14.0;
+          let safetyWallCount = 0;
+          for (const d of defAgents) {
+            if (d.engagedWithId && d.leverageScore < 0.25) continue;
+            const dDist = Math.hypot(d.x - ballCarrier.x, d.y - ballCarrier.y);
+            if (d.y >= ballCarrier.y - 3.0 && dDist < nearestPursuit) nearestPursuit = dDist;
+            if (d.y >= ballCarrier.y + 1.5 && Math.abs(d.x - ballCarrier.x) < 12.0) {
+              safetyWallCount++;
+            }
+          }
+          const btkSkill =
+            (ballCarrier.ratings.power * 0.55 + ballCarrier.ratings.finesse * 0.45) / 100;
+          const baseExtra = Math.max(
+            0.30,
+            Math.min(
+              safetyWallCount >= 1 ? 2.9 : 5.2,
+              (nearestPursuit - 0.8) * 0.58 + (btkSkill - 0.72) * 1.8
+            )
+          );
+          let breakawayBonus = 0;
+          if (noiseAmp > 0 && nearestPursuit >= 1.55) {
+            const missProb =
+              (safetyWallCount >= 2 ? 0.21 : safetyWallCount === 1 ? 0.32 : 0.44) *
+              (btkSkill / 0.80);
+            if (Math.random() < missProb) {
+              breakawayBonus = 3.8 + Math.random() * 4.2;
+            }
+          }
+          const extraYac = Math.min(11.5, baseExtra + breakawayBonus);
+          ballState.state = 'DEAD';
+          return {
+            terminated: true,
+            reason: 'TACKLED',
+            tackledYards: +(ballCarrier.y + extraYac).toFixed(2),
+            timeToEventSec: crossedLosTime ?? timeSec,
+          };
+        }
       }
 
       // Forward progress stoppage rule (never whistle an untouched option-passer setting feet behind LOS)
@@ -2301,20 +2964,70 @@ export class All22KinematicEngine {
 
       if (routes.length > 0) {
         const designedHookLateralTarget = routes.find((r) => r.lateralConfig?.enabled);
-        const maxDepth = Math.max(
+        const isPA = Boolean(qb.playAction?.enabled);
+        const meshDur = qb.playAction?.meshDurationSec ?? 1.25;
+        const isGoalLine =
+          fieldContext?.yardLineToGoal !== undefined && fieldContext.yardLineToGoal <= 7;
+        const maxConceptDepth = Math.max(
           0,
           ...routes.flatMap((r) => r.assignment.waypoints.map((w) => w.y))
         );
-        const baseThrowTime = designedHookLateralTarget
-          ? 1.65
-          : maxDepth <= 8.0
-          ? 1.75
-          : maxDepth <= 15.0
-          ? 2.35
-          : 2.75;
+        const isQuickConcept = isGoalLine || maxConceptDepth <= 6.8;
 
-        const isPA = Boolean(qb.playAction?.enabled);
-        const inPAMesh = isPA && timeSec < (qb.playAction?.meshDurationSec ?? 1.25);
+        const rushRoles = new Set([
+          'RUSH_GAP',
+          'CONTAIN_EDGE',
+          'BLITZ_A',
+          'BLITZ_EDGE',
+          'BLITZ_RUN_GAP',
+          'CROSS_DOG',
+          'BLITZ_EDGE_CRASH',
+          'SPILL',
+        ]);
+        const rushIntentCount = defAgents.filter((d) => {
+          const role = d.defAssignment?.role;
+          return (
+            Boolean(role && rushRoles.has(role)) ||
+            (role === 'MAN_COV' && d.defAssignment?.manTargetId === 'QB')
+          );
+        }).length;
+        const isBlitzLook = rushIntentCount >= 5;
+
+        const effectiveMeshDur = isBlitzLook ? Math.min(meshDur, 0.92) : meshDur;
+        const inPAMesh = isPA && timeSec < effectiveMeshDur;
+        const paMinReady = isPA ? effectiveMeshDur + 0.35 : 0;
+
+        const getRouteReadyTime = (r: SimAgent): number => {
+          if (r.lateralConfig?.enabled) return 1.65;
+          const depth = Math.max(0, ...r.assignment.waypoints.map((w) => w.y));
+          let depthReady =
+            depth <= 7.0
+              ? 1.95
+              : depth <= 12.5
+              ? 2.35
+              : depth <= 16.5
+              ? 2.70
+              : 3.00;
+          if (isQuickConcept) {
+            depthReady = depth <= 7.0 ? 1.48 : 1.85;
+          } else if (isBlitzLook) {
+            depthReady = Math.max(1.45, depthReady - 0.35);
+          }
+          const readStep = isQuickConcept ? 0.25 : isBlitzLook ? 0.28 : 0.48;
+          const readBase = isQuickConcept ? 1.45 : isBlitzLook ? 1.55 : 2.18;
+          const readSeqFloor = readBase + Math.max(0, (r.readOrder ?? 3) - 1) * readStep;
+          return Math.max(paMinReady, depthReady, readSeqFloor);
+        };
+
+        const routeReadyTimes = routes.map(getRouteReadyTime);
+        const maxRouteReady = Math.max(...routeReadyTimes);
+        const maxProgressionTime = designedHookLateralTarget
+          ? Math.max(paMinReady, 1.85)
+          : isQuickConcept
+          ? Math.min(2.15, maxRouteReady + 0.20)
+          : isBlitzLook
+          ? Math.min(2.65, Math.max(paMinReady + 0.45, maxRouteReady + 0.25))
+          : Math.min(3.60, Math.max(2.85, maxRouteReady + 0.45));
 
         let closestRusherDist = 10.0;
         for (const d of defAgents) {
@@ -2325,7 +3038,7 @@ export class All22KinematicEngine {
         }
 
         // Case A: SACK DURING PLAY-ACTION MESH
-        if (inPAMesh && closestRusherDist < 1.15 && timeSec >= 0.85) {
+        if (inPAMesh && closestRusherDist < 0.92 && timeSec >= 0.85) {
           ballState.state = 'DEAD';
           return {
             terminated: true,
@@ -2346,17 +3059,30 @@ export class All22KinematicEngine {
 
         // Case B: Dropback or post-mesh pass execution
         const imminentSack =
-          closestRusherDist < 1.15 &&
-          timeSec >= (isPA ? (qb.playAction?.meshDurationSec ?? 1.25) + 0.15 : 1.15);
+          closestRusherDist < 1.18 &&
+          timeSec >= (isPA ? effectiveMeshDur + 0.15 : 1.15);
         const hasQuickOutlet = routes.some(
-          (r) => Math.max(0, ...r.assignment.waypoints.map((w) => w.y)) <= 6.5
+          (r) =>
+            r.lateralConfig?.enabled ||
+            Math.max(0, ...r.assignment.waypoints.map((w) => w.y)) <= 10.0
         );
-        const hotThrowChance = hasQuickOutlet
-          ? (qb.ratings.awareness / 100) * 0.75
-          : (qb.ratings.awareness / 100) * 0.25;
+        const awScale = qb.ratings.awareness / 100;
+        // Per-tick (20 Hz) hot-throw probability; kept calibrated against multi-tick compound hazard
+        const hotThrowChance = isBlitzLook
+          ? hasQuickOutlet
+            ? awScale * 0.21
+            : awScale * 0.09
+          : hasQuickOutlet
+          ? awScale * 0.04
+          : awScale * 0.025;
+        const imminentEscapeChance = isBlitzLook
+          ? hasQuickOutlet
+            ? awScale * 0.28
+            : awScale * 0.12
+          : awScale * 0.05;
         const throwRoll = noiseAmp > 0 ? Math.random() : 0.5;
 
-        if (imminentSack && throwRoll >= hotThrowChance) {
+        if (imminentSack && throwRoll >= imminentEscapeChance) {
           ballState.state = 'DEAD';
           return {
             terminated: true,
@@ -2366,25 +3092,61 @@ export class All22KinematicEngine {
           };
         }
 
-        const throwHot = imminentSack && throwRoll < hotThrowChance;
+        const hotPressureThrow =
+          !imminentSack &&
+          hasQuickOutlet &&
+          throwRoll < hotThrowChance &&
+          (isBlitzLook
+            ? closestRusherDist < 1.75 && timeSec >= Math.max(paMinReady * 0.90, 1.50)
+            : closestRusherDist < 1.28 && timeSec >= Math.max(paMinReady, 2.30));
 
-        if (timeSec >= baseThrowTime || throwHot) {
-          let bestRec = routes[0];
-          let bestTargetScore = -999;
+        const throwHot = (imminentSack && throwRoll < imminentEscapeChance) || hotPressureThrow;
 
-          for (const rec of routes) {
+        let hasCleanRhythmOpen = false;
+        let hasReadyHookLateral = false;
+        if (!throwHot) {
+          for (let i = 0; i < routes.length; i++) {
+            const rec = routes[i];
+            if (timeSec < routeReadyTimes[i]) continue;
             let minDbDist = 12.0;
             for (const d of defAgents) {
               const dDist = Math.hypot(d.x - rec.x, d.y - rec.y);
               if (dDist < minDbDist) minDbDist = dDist;
             }
-            const depthFactor = Math.min(2.2, Math.max(0.5, (rec.y + 1) / 8.0));
+            if (rec.lateralConfig?.enabled && minDbDist >= 1.85) {
+              hasReadyHookLateral = true;
+            }
+            const cleanThresh = isBlitzLook || isQuickConcept ? 2.45 : 3.60;
+            if (minDbDist >= cleanThresh) {
+              hasCleanRhythmOpen = true;
+            }
+          }
+        }
+
+        if (timeSec >= maxProgressionTime || hasCleanRhythmOpen || hasReadyHookLateral || throwHot) {
+          let bestRec = routes[0];
+          let bestTargetScore = -999;
+
+          for (let i = 0; i < routes.length; i++) {
+            const rec = routes[i];
+            let minDbDist = 12.0;
+            for (const d of defAgents) {
+              const dDist = Math.hypot(d.x - rec.x, d.y - rec.y);
+              if (dDist < minDbDist) minDbDist = dDist;
+            }
+            const routeDepth = Math.max(0, ...rec.assignment.waypoints.map((w) => w.y));
+            const depthBonus = Math.min(0.65, Math.max(0, rec.y * 0.025));
             const hookPriorityBonus =
               rec.lateralConfig?.enabled && minDbDist >= 1.85 ? 8.50 : 0.0;
+            const hotOutletBonus =
+              throwHot && (rec.lateralConfig?.enabled || routeDepth <= 10.5) ? 2.25 : 0.0;
+            const notYetReadyPenalty =
+              !throwHot && timeSec < routeReadyTimes[i] ? -1.40 : 0.0;
             const readBonus =
-              (rec.readOrder === 1 ? 0.35 : rec.readOrder === 2 ? 0.15 : 0) +
+              (rec.readOrder === 1 ? 1.10 : rec.readOrder === 2 ? 0.55 : 0.20) +
               hookPriorityBonus;
-            const targetScore = minDbDist * depthFactor + readBonus;
+            const targetScore =
+              minDbDist + readBonus + depthBonus + hotOutletBonus + notYetReadyPenalty;
             if (targetScore > bestTargetScore) {
               bestTargetScore = targetScore;
               bestRec = rec;
@@ -2392,7 +3154,7 @@ export class All22KinematicEngine {
           }
 
           const passDist = Math.max(3.0, Math.hypot(bestRec.x - qb.x, bestRec.y - qb.y));
-          const ballSpeedYps = 23.5; // ~48 mph NFL pass velocity
+          const ballSpeedYps = 20.5 + (qb.ratings.finesse / 100) * 3.8; // Scales cleanly with QB arm/finesse (~23.0-24.3 y/s)
           const flightDuration = Math.max(0.15, Math.min(0.85, passDist / ballSpeedYps));
           const leadX = Math.max(-25.5, Math.min(25.5, bestRec.x + bestRec.vx * flightDuration * 0.85));
           const leadY = Math.max(-4.0, Math.min(maxFieldY - 1.0, bestRec.y + bestRec.vy * flightDuration * 0.85));
@@ -2409,6 +3171,7 @@ export class All22KinematicEngine {
           ballState.targetY = leadY;
           ballState.throwTimeSec = timeSec;
           ballState.flightDurationSec = flightDuration;
+          ballState.throwerSkill = qb.ratings.finesse;
 
           return {
             terminated: false,
@@ -2479,7 +3242,31 @@ export class All22KinematicEngine {
   ): SimAgent | null {
     if (off.assignment.primaryTargetId) {
       const explicit = defAgents.find((d) => d.id === off.assignment.primaryTargetId);
-      if (explicit && Math.abs(explicit.x - off.x) <= 3.5) return explicit;
+      if (explicit && Math.abs(explicit.x - off.x) <= 3.5) {
+        if (off.assignment.role === 'PASS_SET') {
+          const eng = prevEngagedMap ? prevEngagedMap.get(explicit.id) : explicit.engagedWithId;
+          const alreadyBlockedByTeammate = Boolean(eng && eng !== off.id);
+          const threateningFreeRusher = defAgents.find((d) => {
+            if (d.id === explicit.id) return false;
+            const role = d.defAssignment?.role;
+            if (
+              role &&
+              ['HOOK_CURL', 'CURL_FLAT', 'DEEP_ZONE', 'DEEP_THIRD', 'DEEP_HALF', 'QUARTERS_MATCH', 'ROBBER'].includes(role)
+            ) {
+              return false;
+            }
+            if (role === 'MAN_COV' && d.defAssignment?.manTargetId !== 'QB') return false;
+            const dEng = prevEngagedMap ? prevEngagedMap.get(d.id) : d.engagedWithId;
+            if (dEng && dEng !== off.id) return false;
+            return Math.abs(d.x - off.x) <= 2.35 && d.y <= 3.5 && d.y > -7.5;
+          });
+          if (!alreadyBlockedByTeammate || !threateningFreeRusher) {
+            return explicit;
+          }
+        } else {
+          return explicit;
+        }
+      }
     }
 
     if (off.assignment.role === 'PASS_SET') {
@@ -2639,10 +3426,11 @@ export class All22KinematicEngine {
       const desVx = (dx / dist) * desiredSpeed;
       const desVy = (dy / dist) * desiredSpeed;
 
+      const { footworkAccelYps2 } = this.getPositionalKinematics(agent);
       const dvx = desVx - agent.vx;
       const dvy = desVy - agent.vy;
       const dv = Math.hypot(dvx, dvy);
-      const maxAccel = 13.5; // <= 1.27 Gs
+      const maxAccel = footworkAccelYps2; // positional footwork agility (<= 1.27 Gs)
       const maxDv = maxAccel * this.dt;
 
       if (dv > maxDv && dv > 1e-4) {
@@ -2657,19 +3445,27 @@ export class All22KinematicEngine {
 
     // SPRINT / TURN-AND-RUN MODE:
     const targetAngle = Math.atan2(dy, dx);
+    const currentSpeed = Math.hypot(agent.vx, agent.vy);
+    const dotMotion = agent.vx * dx + agent.vy * dy;
     if (agent.facingAngle === undefined) {
       agent.facingAngle = targetAngle;
+    } else if (currentSpeed >= 1.5 && dotMotion > 0) {
+      let velDiff = Math.atan2(agent.vy, agent.vx) - agent.facingAngle;
+      while (velDiff > Math.PI) velDiff -= Math.PI * 2;
+      while (velDiff < -Math.PI) velDiff += Math.PI * 2;
+      if (Math.abs(velDiff) > Math.PI * 0.55) {
+        // Transitioning out of backward-facing FOOTWORK while already moving toward goal: align hips with momentum
+        agent.facingAngle = Math.atan2(agent.vy, agent.vx);
+      }
     }
 
     let angleDiff = targetAngle - agent.facingAngle;
     while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
     while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-    const currentSpeed = Math.hypot(agent.vx, agent.vy);
-
-    // At near-standstill (< 1.8 yd/s), humans pivot their hips in place rapidly without a wide turning radius
-    if (currentSpeed < 1.8) {
-      const lowSpeedTurnRate = 8.5 * this.dt;
+    // At near-standstill (< 2.2 yd/s), humans pivot their hips in place rapidly without a wide turning radius
+    if (currentSpeed < 2.2) {
+      const lowSpeedTurnRate = 12.0 * this.dt;
       const clampedDelta = Math.max(-lowSpeedTurnRate, Math.min(lowSpeedTurnRate, angleDiff));
       agent.facingAngle += clampedDelta;
     } else {
@@ -2680,18 +3476,22 @@ export class All22KinematicEngine {
       agent.facingAngle += clampedAngleDelta;
     }
 
+    const isHipFlip = Math.abs(angleDiff) > Math.PI * 0.62; // > 112 degrees hip flip
     const isSharpCut = Math.abs(angleDiff) > Math.PI * 0.35; // > 63 degrees cut
-    const safeTurnSpeed = isSharpCut ? Math.min(maxSpeed * 0.58, 3.9) : maxSpeed;
+    const safeTurnSpeed = isHipFlip ? 0.6 : isSharpCut ? Math.min(maxSpeed * 0.58, 3.9) : maxSpeed;
     const desiredSpeed = Math.min(safeTurnSpeed, dist * 4.8);
 
     const desVx = Math.cos(agent.facingAngle) * desiredSpeed;
     const desVy = Math.sin(agent.facingAngle) * desiredSpeed;
 
+    const { maxLinearAccelYps2 } = this.getPositionalKinematics(agent);
     const dvx = desVx - agent.vx;
     const dvy = desVy - agent.vy;
     const dv = Math.hypot(dvx, dvy);
     const isBraking = desVx * agent.vx + desVy * agent.vy < 0;
-    const maxLinearAccel = isBraking ? 15.2 : 11.8 + (agent.ratings.accel / 100) * 2.8; // <= 1.43 Gs
+    const maxLinearAccel = isBraking
+      ? Math.min(15.2, maxLinearAccelYps2 + 2.2)
+      : maxLinearAccelYps2; // positional drive burst (<= 1.43 Gs)
     const maxDv = maxLinearAccel * this.dt;
 
     if (dv > maxDv && dv > 1e-4) {
@@ -2852,6 +3652,16 @@ export class All22KinematicEngine {
         pocketIntegrity: +pocketIntegrity.toFixed(1),
         trenchNetYards: +avgPassOlY.toFixed(2),
         expectedEpa: -0.52,
+      };
+    }
+
+    if (termReason === 'INTERCEPTION') {
+      const spot = ballState?.targetY ?? tackledYards ?? 8.0;
+      const intEpa = spot < 8.0 ? -4.35 : spot < 20.0 ? -4.05 : -3.55;
+      return {
+        pocketIntegrity: +pocketIntegrity.toFixed(1),
+        trenchNetYards: +avgPassOlY.toFixed(2),
+        expectedEpa: intEpa,
       };
     }
 

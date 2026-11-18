@@ -12,6 +12,12 @@ import {
 import { ThemeManager, SkinId } from './theme';
 import { TacticalRenderer, RenderOptions, MonteCarloRunTrace } from './renderer';
 import {
+  RoutePresetId,
+  RECEIVER_EVOLUTION_SEEDS,
+  BACKFIELD_EVOLUTION_SEEDS,
+  applyRoutePresetToAgent,
+} from './route_presets';
+import {
   HYDRA_2027_TEAM_ENTRY,
   HYDRA_2027_PLAYBOOK,
 } from './vanguard_2027_playbook';
@@ -24,6 +30,7 @@ import {
   KBC_2027_PLAYBOOK,
   detectDefensiveAttractor,
 } from './bistable_packaged_playbook';
+import { APEX_2027_TEAM_ENTRY, APEX_2027_PLAYBOOK } from './apex_2027_playbook';
 
 import nflTeamsRaw from './data/nfl_teams_32.json';
 import evolvedPassesRaw from './data/evolved_plays_catalog.json';
@@ -110,12 +117,14 @@ class All22WorkstationApp {
 
     if (nflTeamsRaw && typeof nflTeamsRaw === 'object' && !Array.isArray(nflTeamsRaw)) {
       this.teamsMap = {
+        APX: APEX_2027_TEAM_ENTRY,
         KBC: KBC_2027_TEAM_ENTRY,
         ARG: ARGON_2027_TEAM_ENTRY,
         HYD: HYDRA_2027_TEAM_ENTRY,
         ...(nflTeamsRaw as Record<string, any>),
       };
     } else if (Array.isArray(nflTeamsRaw)) {
+      this.teamsMap['APX'] = APEX_2027_TEAM_ENTRY;
       this.teamsMap['KBC'] = KBC_2027_TEAM_ENTRY;
       this.teamsMap['ARG'] = ARGON_2027_TEAM_ENTRY;
       this.teamsMap['HYD'] = HYDRA_2027_TEAM_ENTRY;
@@ -161,6 +170,7 @@ class All22WorkstationApp {
     const offTeam = this.teamsMap[offCode];
     const defTeam = this.teamsMap[defCode];
     const isCustomVanguardPresetWithMatchingTeam =
+      (offCode === 'APX' && this.activePresetId.startsWith('APEX_')) ||
       (offCode === 'KBC' && this.activePresetId.startsWith('KBC_')) ||
       (offCode === 'HYD' && this.activePresetId.startsWith('HYDRA_')) ||
       (offCode === 'ARG' && this.activePresetId.startsWith('ARGON_'));
@@ -433,6 +443,15 @@ class All22WorkstationApp {
       situationBadge: ap.situationBadge,
       buildOffense: () => ap.buildOffense(),
     }));
+    const apexItems: PlayPreset[] = APEX_2027_PLAYBOOK.map((ap) => ({
+      id: ap.id,
+      name: ap.name,
+      category: ap.category,
+      personnel: ap.personnel,
+      situations: ap.situations,
+      situationBadge: ap.situationBadge,
+      buildOffense: () => ap.buildOffense(),
+    }));
     const hydraItems: PlayPreset[] = HYDRA_2027_PLAYBOOK.map((hp) => ({
       id: hp.id,
       name: hp.name,
@@ -442,7 +461,7 @@ class All22WorkstationApp {
       situationBadge: hp.situationBadge,
       buildOffense: () => hp.buildOffense(),
     }));
-    this.presets.splice(11, 0, ...kbcItems, ...argonItems, ...hydraItems);
+    this.presets.splice(11, 0, ...kbcItems, ...apexItems, ...argonItems, ...hydraItems);
 
     this.renderPlaybookList();
   }
@@ -1213,6 +1232,16 @@ class All22WorkstationApp {
       } else if (this.activeSituationFilter === 'ALL' && this.renderOpts.firstDownYards === 4.0) {
         this.renderOpts.firstDownYards = 10.0;
       }
+    } else if (preset.id.startsWith('APEX_')) {
+      const offSelect = document.getElementById('off-team-select') as HTMLSelectElement | null;
+      if (offSelect && offSelect.value !== 'APX') {
+        offSelect.value = 'APX';
+      }
+      if (preset.id === 'APEX_GOALLINE_SPRINT_SMASH') {
+        this.renderOpts.firstDownYards = 4.0;
+      } else if (this.activeSituationFilter === 'ALL' && this.renderOpts.firstDownYards === 4.0) {
+        this.renderOpts.firstDownYards = 10.0;
+      }
     } else if (preset.id.startsWith('ARGON_')) {
       const offSelect = document.getElementById('off-team-select') as HTMLSelectElement | null;
       if (offSelect && offSelect.value !== 'ARG') {
@@ -1233,7 +1262,8 @@ class All22WorkstationApp {
         if (
           preset.id === 'KBC_REDZONE_BISTABLE_HAMMER' ||
           preset.id === 'HYDRA_GOALLINE_PHILLY_SPECIAL' ||
-          preset.id === 'ARGON_GOALLINE_CYCLOTRON'
+          preset.id === 'ARGON_GOALLINE_CYCLOTRON' ||
+          preset.id === 'APEX_GOALLINE_SPRINT_SMASH'
         ) {
           matched = 'GOAL_LINE_62_PINCH';
         } else if (
@@ -1252,7 +1282,9 @@ class All22WorkstationApp {
         } else if (
           preset.id === 'HYDRA_HOOK_AND_LATERAL' ||
           preset.id === 'ARGON_NOBLE_KINETIC_RELAY' ||
-          preset.id === 'ARGON_2MIN_BOUNDARY_LASER'
+          preset.id === 'ARGON_2MIN_BOUNDARY_LASER' ||
+          preset.id === 'APEX_TWOMIN_BOUNDARY_OOB' ||
+          preset.id === 'APEX_SWITCH_MESH_STICKS'
         ) {
           matched = 'DIME_QUARTERS_MATCH';
         } else if (preset.id === 'HYDRA_BACKWARD_DOUBLE_PASS' || preset.id === 'ARGON_DISPLACED_NODE_LASER') {
@@ -1305,21 +1337,24 @@ class All22WorkstationApp {
     }
     if (
       this.activePresetId === 'HYDRA_GOALLINE_PHILLY_SPECIAL' ||
-      this.activePresetId === 'ARGON_GOALLINE_CYCLOTRON'
+      this.activePresetId === 'ARGON_GOALLINE_CYCLOTRON' ||
+      this.activePresetId === 'APEX_GOALLINE_SPRINT_SMASH'
     ) {
       return { yardLineToGoal: 4.0, sidelineObjective: 'NORMAL' };
     }
     if (
       this.activePresetId === 'KBC_TWOMIN_BOUNDARY_CONTINUUM' ||
       this.activePresetId === 'HYDRA_2MIN_SIDELINE_CHOICE' ||
-      this.activePresetId === 'ARGON_2MIN_BOUNDARY_LASER'
+      this.activePresetId === 'ARGON_2MIN_BOUNDARY_LASER' ||
+      this.activePresetId === 'APEX_TWOMIN_BOUNDARY_OOB'
     ) {
       return { sidelineObjective: 'STOP_CLOCK_OOB' };
     }
     if (
       this.activePresetId === 'KBC_4MIN_CLOCK_BLEEDER' ||
       this.activePresetId === 'HYDRA_4MIN_BULLDOZER_SWEEP' ||
-      this.activePresetId === 'ARGON_4MIN_LEFT_MONOLITH'
+      this.activePresetId === 'ARGON_4MIN_LEFT_MONOLITH' ||
+      this.activePresetId === 'APEX_EAGLES_RHINO_COUNTER'
     ) {
       return { sidelineObjective: 'STAY_INBOUNDS' };
     }
@@ -1495,30 +1530,28 @@ class All22WorkstationApp {
       }
     }
 
-    // 2. Motion Reaction Tell
+    // 2. Observable Alignment / Motion Probe Tell (No hidden manTargetId x-ray oracle)
     const motionEl = document.getElementById('intel-motion-reaction');
     const motionAgent = off.find((a) => a.preSnapMotion?.enabled);
+    const cbs = defs.filter((d) => ['CB', 'CB1', 'CB2', 'NI'].includes(d.pos));
+    const pressed = cbs.filter((cb) => cb.startY <= 3.0);
+    const losMug = defs.filter((d) => Math.abs(d.startX) <= 2.4 && d.startY >= 0.8 && d.startY <= 2.6);
     if (motionEl) {
       motionEl.className = 'intel-tag';
       if (motionAgent) {
-        const trailingDb = defs.find((d) => d.defAssignment?.manTargetId === motionAgent.id);
-        if (trailingDb) {
-          const jersey = trailingDb.jersey ? `#${trailingDb.jersey} ` : '';
-          motionEl.textContent = `MOTION TELL: MAN (${jersey}${trailingDb.label} TRAILS)`;
+        if (deepSafeties.length === 0 || (deepSafeties.length === 1 && pressed.length >= 2) || losMug.length >= 2) {
+          motionEl.textContent = 'PROBE TELL: PRESS / MUG LOOK (DISGUISE RISK)';
           motionEl.classList.add('tell-man');
         } else {
-          motionEl.textContent = 'MOTION TELL: ZONE (SHELL BUMP / ROLL)';
+          motionEl.textContent = 'PROBE TELL: OFF-SHELL / ZONE LOOK (ROTATION RISK)';
           motionEl.classList.add('tell-zone');
         }
       } else {
-        // Static read: check corner leverage
-        const cbs = defs.filter((d) => ['CB', 'CB1', 'CB2', 'NI'].includes(d.pos));
-        const pressed = cbs.filter((cb) => cb.startY <= 2.8);
         if (pressed.length >= 2) {
-          motionEl.textContent = 'ALIGN: PRESS LOOK (MAN TELL)';
+          motionEl.textContent = 'ALIGN: PRESS LOOK (MAN/TRAP TELL)';
           motionEl.classList.add('tell-man');
         } else {
-          motionEl.textContent = 'ALIGN: OFF-CUSHION (ZONE TELL)';
+          motionEl.textContent = 'ALIGN: OFF-CUSHION (ZONE/DISGUISE TELL)';
           motionEl.classList.add('tell-zone');
         }
       }
@@ -2392,68 +2425,12 @@ class All22WorkstationApp {
     // ROUTE TREE PRESETS DROPDOWN
     const routePresetSel = document.getElementById('insp-route-preset') as HTMLSelectElement | null;
     routePresetSel?.addEventListener('change', () => {
-      const val = routePresetSel.value;
+      const val = routePresetSel.value as RoutePresetId | '';
       if (!val) return;
       const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
       if (!sel || sel.side !== 'OFF') return;
 
-      const x0 = sel.startX;
-      const insideDir = x0 < 0 ? 1 : -1;
-      const outsideDir = -insideDir;
-
-      sel.assignment.role = sel.pos === 'RB' ? 'BALL_CARRIER' : 'ROUTE';
-
-      if (val === 'SLANT') {
-        sel.assignment.waypoints = [
-          { x: +x0.toFixed(2), y: 3.5 },
-          { x: +(x0 + insideDir * 6.5).toFixed(2), y: 7.5 },
-        ];
-      } else if (val === 'OUT_5') {
-        sel.assignment.waypoints = [
-          { x: +x0.toFixed(2), y: 5.0 },
-          { x: +(x0 + outsideDir * 6.0).toFixed(2), y: 5.2 },
-        ];
-      } else if (val === 'CURL_6') {
-        sel.assignment.waypoints = [
-          { x: +x0.toFixed(2), y: 6.2 },
-          { x: +x0.toFixed(2), y: 5.4 },
-        ];
-      } else if (val === 'DIG_12') {
-        sel.assignment.waypoints = [
-          { x: +x0.toFixed(2), y: 12.0 },
-          { x: +(x0 + insideDir * 11.0).toFixed(2), y: 12.0 },
-        ];
-      } else if (val === 'CORNER_10') {
-        sel.assignment.waypoints = [
-          { x: +x0.toFixed(2), y: 9.5 },
-          { x: +(x0 + outsideDir * 8.0).toFixed(2), y: 17.5 },
-        ];
-      } else if (val === 'POST_14') {
-        sel.assignment.waypoints = [
-          { x: +x0.toFixed(2), y: 13.5 },
-          { x: +(x0 + insideDir * 9.0).toFixed(2), y: 23.0 },
-        ];
-      } else if (val === 'GO') {
-        sel.assignment.waypoints = [
-          { x: +x0.toFixed(2), y: 12.0 },
-          { x: +x0.toFixed(2), y: 26.0 },
-        ];
-      } else if (val === 'DRAG') {
-        sel.assignment.waypoints = [
-          { x: +x0.toFixed(2), y: 3.5 },
-          { x: +(x0 + insideDir * 18.0).toFixed(2), y: 4.8 },
-        ];
-      } else if (val === 'WHEEL') {
-        sel.assignment.waypoints = [
-          { x: +(x0 + outsideDir * 5.0).toFixed(2), y: 2.0 },
-          { x: +(x0 + outsideDir * 5.5).toFixed(2), y: 16.0 },
-        ];
-      } else if (val === 'SWING') {
-        sel.assignment.waypoints = [
-          { x: +(x0 + outsideDir * 6.0).toFixed(2), y: -2.0 },
-          { x: +(x0 + outsideDir * 12.0).toFixed(2), y: 3.5 },
-        ];
-      }
+      applyRoutePresetToAgent(sel, val);
 
       routePresetSel.value = '';
       this.recomputeSimulation();
@@ -2739,21 +2716,41 @@ class All22WorkstationApp {
 
   private mutateCurrentPlayAndProtection(): void {
     let bestAgents = JSON.parse(JSON.stringify(this.agents)) as SimAgent[];
+    const fieldCtx = this.getActiveFieldContext();
     let bestEpa = this.snapshots[this.snapshots.length - 1]?.expectedEpa ?? 0;
 
     const leverages: LeverageBias[] = ['INSIDE_OUT', 'NEUTRAL', 'OUTSIDE_IN'];
     for (let i = 0; i < 16; i++) {
       const candidate = JSON.parse(JSON.stringify(bestAgents)) as SimAgent[];
+      const routeCandidates = candidate.filter(
+        (x) =>
+          x.side === 'OFF' &&
+          x.assignment.role === 'ROUTE' &&
+          !x.optionPass?.enabled &&
+          !x.lateralConfig?.enabled &&
+          !x.backwardToss?.enabled
+      );
+
+      // Seed structural route stems from the canonical 16-route tree in later mutation trials
+      if (i >= 4 && routeCandidates.length > 0) {
+        const seedTarget = routeCandidates[Math.floor(Math.random() * routeCandidates.length)];
+        const pool = seedTarget.pos === 'RB' ? BACKFIELD_EVOLUTION_SEEDS : RECEIVER_EVOLUTION_SEEDS;
+        const chosenPreset = pool[Math.floor(Math.random() * pool.length)];
+        applyRoutePresetToAgent(seedTarget, chosenPreset);
+      }
+
       for (const a of candidate.filter((x) => x.side === 'OFF')) {
         if (Math.random() < 0.35) {
           a.assignment.leverage = leverages[Math.floor(Math.random() * leverages.length)];
         }
+        const jitterSpan = i >= 4 ? 1.2 : 1.8;
         for (const wp of a.assignment.waypoints) {
-          wp.x = +(wp.x + (Math.random() - 0.5) * 1.8).toFixed(2);
-          wp.y = +(wp.y + (Math.random() - 0.5) * 1.8).toFixed(2);
+          const nextX = wp.x + (Math.random() - 0.5) * jitterSpan;
+          wp.x = +Math.max(-25.2, Math.min(25.2, nextX)).toFixed(2);
+          wp.y = +(wp.y + (Math.random() - 0.5) * jitterSpan).toFixed(2);
         }
       }
-      const sim = this.engine.simulatePlay(candidate, 0.0);
+      const sim = this.engine.simulatePlay(candidate, 0.0, fieldCtx);
       const term = sim.find((s) => s.playOver) || sim[sim.length - 1];
       if (term.expectedEpa > bestEpa) {
         bestEpa = term.expectedEpa;
@@ -2793,11 +2790,15 @@ class All22WorkstationApp {
 
       const yds = termFrame.carrierTackledYards ?? 0;
       sumYards += yds;
-      if (yds >= 15.0 || termFrame.terminationReason === 'TOUCHDOWN') explosives++;
+      const isTurnover =
+        termFrame.terminationReason === 'FUMBLE_LOST' ||
+        termFrame.terminationReason === 'INTERCEPTION';
+      if (!isTurnover && (yds >= 15.0 || termFrame.terminationReason === 'TOUCHDOWN')) explosives++;
 
       if (
         yds <= 0.0 ||
         termFrame.terminationReason === 'INCOMPLETE' ||
+        termFrame.terminationReason === 'INTERCEPTION' ||
         termFrame.terminationReason === 'SACK' ||
         termFrame.terminationReason === 'FUMBLE_LOST' ||
         termFrame.terminationReason === 'FUMBLE_RECOVERED'
@@ -2821,7 +2822,7 @@ class All22WorkstationApp {
       const endBall = termFrame.ball;
       const endX = endBall ? endBall.x : 0;
       const endY =
-        termFrame.terminationReason === 'INCOMPLETE'
+        termFrame.terminationReason === 'INCOMPLETE' || termFrame.terminationReason === 'INTERCEPTION'
           ? endBall?.targetY ?? endBall?.y ?? 0
           : yds;
 
@@ -2832,6 +2833,7 @@ class All22WorkstationApp {
         Boolean(termFrame.ball?.completedPass);
       const isFail =
         termFrame.terminationReason === 'INCOMPLETE' ||
+        termFrame.terminationReason === 'INTERCEPTION' ||
         termFrame.terminationReason === 'SACK' ||
         termFrame.terminationReason === 'FUMBLE_LOST' ||
         termFrame.terminationReason === 'FUMBLE_RECOVERED' ||
@@ -2855,6 +2857,7 @@ class All22WorkstationApp {
         (termFrame.expectedEpa > 0 || converted) &&
         termFrame.terminationReason !== 'SACK' &&
         termFrame.terminationReason !== 'INCOMPLETE' &&
+        termFrame.terminationReason !== 'INTERCEPTION' &&
         termFrame.terminationReason !== 'FUMBLE_LOST' &&
         termFrame.terminationReason !== 'FUMBLE_RECOVERED'
       ) {
@@ -2989,6 +2992,8 @@ class All22WorkstationApp {
       const isSuccess =
         termSnap.terminationReason !== 'SACK' &&
         termSnap.terminationReason !== 'INCOMPLETE' &&
+        termSnap.terminationReason !== 'INTERCEPTION' &&
+        termSnap.terminationReason !== 'FUMBLE_LOST' &&
         (termSnap.expectedEpa > 0 || finalYds >= toGo);
       document.getElementById('val-sr')!.textContent = isSuccess
         ? `WIN (${finalYds >= 0 ? '+' : ''}${finalYds.toFixed(1)}y)`

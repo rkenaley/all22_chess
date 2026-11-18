@@ -456,6 +456,7 @@ interface SampledPlayOutcome {
     | 'TACKLED'
     | 'COMPLETE'
     | 'INCOMPLETE'
+    | 'INTERCEPTION'
     | 'TOUCHDOWN'
     | 'OUT_OF_BOUNDS'
     | 'WHISTLE'
@@ -788,6 +789,7 @@ export function runVanguard2027Playtest(): void {
       allSamples.filter(
         (s) =>
           (s.yards <= 0.0 && s.reason !== 'INCOMPLETE') ||
+          s.reason === 'INTERCEPTION' ||
           s.reason === 'FUMBLE_LOST' ||
           s.reason === 'FUMBLE_RECOVERED'
       ).length / n
@@ -802,7 +804,9 @@ export function runVanguard2027Playtest(): void {
 
     let branchText = 'Direct Execution / Built-in Multi-Level Progression';
     if (hp.id === 'HYDRA_HOOK_AND_LATERAL') {
-      const completedHooks = allSamples.filter((s) => s.reason !== 'INCOMPLETE' && s.reason !== 'SACK');
+      const completedHooks = allSamples.filter(
+        (s) => s.reason !== 'INCOMPLETE' && s.reason !== 'INTERCEPTION' && s.reason !== 'SACK'
+      );
       const pitchRateOnCatch =
         completedHooks.length > 0 ? (hookLatSamples.length / completedHooks.length) * 100 : 0;
       const latMeanYds =
@@ -1355,14 +1359,12 @@ export function runVanguard2027Playtest(): void {
           const effGain = Math.min(ydsToGoal, sample.yards);
           if (effGain >= 15.0) explosiveSnaps++;
 
-          // Honest NFL Turnover Physics (Direct Engine FUMBLE_LOST + Strip-Sacks + Tight-Window INTs + Rushing Fumbles)
+          // Honest NFL Turnover Physics (Direct Engine INTERCEPTION + FUMBLE_LOST + Strip-Sacks + Rushing Fumbles)
           let turnover = false;
-          if (sample.reason === 'FUMBLE_LOST') {
-            turnover = true; // Direct kinematic lateral/pitch fumble recovered by defense!
+          if (sample.reason === 'FUMBLE_LOST' || sample.reason === 'INTERCEPTION') {
+            turnover = true; // Direct kinematic lateral/pitch fumble or forward-pass interception!
           } else if (sample.reason === 'SACK' && Math.random() < 0.105) {
             turnover = true; // Strip-sack lost fumble
-          } else if (sample.reason === 'INCOMPLETE' && Math.random() < (sample.pressured ? 0.085 : 0.048)) {
-            turnover = true; // Interception on contested/pressured incompletion
           } else if (sample.reason === 'TACKLED' && Math.random() < 0.008) {
             turnover = true; // Standard ballcarrier tackle fumble lost
           }
@@ -1532,11 +1534,11 @@ export function runVanguard2027Playtest(): void {
         if (s.reason === 'SACK') sacks++;
         if (s.reason === 'OUT_OF_BOUNDS') oobStops++;
 
-        // Turnover check (including live-ball lateral fumbles!)
+        // Turnover check (including live-ball lateral fumbles & interceptions!)
         if (
           s.reason === 'FUMBLE_LOST' ||
-          (s.reason === 'SACK' && Math.random() < 0.10) ||
-          (s.reason === 'INCOMPLETE' && Math.random() < 0.055)
+          s.reason === 'INTERCEPTION' ||
+          (s.reason === 'SACK' && Math.random() < 0.10)
         ) {
           break;
         }
@@ -1621,8 +1623,8 @@ export function runVanguard2027Playtest(): void {
           clockStopMistakes++;
         }
 
-        // Fumble check
-        if (s.reason === 'FUMBLE_LOST' || Math.random() < 0.008) break;
+        // Fumble / turnover check
+        if (s.reason === 'FUMBLE_LOST' || s.reason === 'INTERCEPTION' || Math.random() < 0.008) break;
 
         const gain = Math.min(ydsToGoal, s.yards);
         ydsToGoal -= gain;
@@ -1704,8 +1706,8 @@ export function runVanguard2027Playtest(): void {
         // Turnover check
         if (
           s.reason === 'FUMBLE_LOST' ||
-          (s.reason === 'SACK' && Math.random() < 0.09) ||
-          (s.reason === 'INCOMPLETE' && Math.random() < 0.06)
+          s.reason === 'INTERCEPTION' ||
+          (s.reason === 'SACK' && Math.random() < 0.09)
         ) {
           break;
         }
@@ -1752,8 +1754,8 @@ export function runVanguard2027Playtest(): void {
         s = pool[Math.floor(Math.random() * pool.length)];
       }
 
-      if (s.yards >= 9.0 && s.reason !== 'FUMBLE_LOST') conversions++;
-      if (s.yards >= 18.0 && s.reason !== 'FUMBLE_LOST') explosives++;
+      if (s.yards >= 9.0 && s.reason !== 'FUMBLE_LOST' && s.reason !== 'INTERCEPTION') conversions++;
+      if (s.yards >= 18.0 && s.reason !== 'FUMBLE_LOST' && s.reason !== 'INTERCEPTION') explosives++;
       if (s.reason === 'SACK') sacks++;
       sumEpa += s.epa;
     }

@@ -473,6 +473,7 @@ interface SampledPlayOutcome {
     | 'TACKLED'
     | 'COMPLETE'
     | 'INCOMPLETE'
+    | 'INTERCEPTION'
     | 'TOUCHDOWN'
     | 'OUT_OF_BOUNDS'
     | 'WHISTLE'
@@ -812,6 +813,7 @@ export function runArgon2027Playtest(): void {
       (allSamples.filter(
         (s) =>
           (s.yards <= 0.0 && s.reason !== 'INCOMPLETE') ||
+          s.reason === 'INTERCEPTION' ||
           s.reason === 'FUMBLE_LOST' ||
           s.reason === 'FUMBLE_RECOVERED'
       ).length /
@@ -830,7 +832,9 @@ export function runArgon2027Playtest(): void {
     let branchStats: Record<string, number> = {};
 
     if (ap.id === 'ARGON_NOBLE_KINETIC_RELAY') {
-      const completedCatches = allSamples.filter((s) => s.reason !== 'INCOMPLETE' && s.reason !== 'SACK');
+      const completedCatches = allSamples.filter(
+        (s) => s.reason !== 'INCOMPLETE' && s.reason !== 'INTERCEPTION' && s.reason !== 'SACK'
+      );
       const compPct = (completedCatches.length / n) * 100;
       const pitchRateOnCatch =
         completedCatches.length > 0 ? (hookLatSamples.length / completedCatches.length) * 100 : 0;
@@ -1330,13 +1334,11 @@ export function runArgon2027Playtest(): void {
           const effGain = Math.min(ydsToGoal, sample.yards);
           if (effGain >= 15.0) explosiveSnaps++;
 
-          // Identical Honest NFL Turnover Physics across all 5 philosophies (Direct Engine FUMBLE_LOST + Strip-Sacks + INTs + Tackle Fumbles)
+          // Identical Honest NFL Turnover Physics across all 5 philosophies (Direct Engine INTERCEPTION + FUMBLE_LOST + Strip-Sacks + Tackle Fumbles)
           let turnover = false;
-          if (sample.reason === 'FUMBLE_LOST') {
+          if (sample.reason === 'FUMBLE_LOST' || sample.reason === 'INTERCEPTION') {
             turnover = true;
           } else if (sample.reason === 'SACK' && Math.random() < 0.105) {
-            turnover = true;
-          } else if (sample.reason === 'INCOMPLETE' && Math.random() < (sample.pressured ? 0.085 : 0.048)) {
             turnover = true;
           } else if (sample.reason === 'TACKLED' && Math.random() < 0.008) {
             turnover = true;
@@ -1531,8 +1533,8 @@ export function runArgon2027Playtest(): void {
 
         if (
           s.reason === 'FUMBLE_LOST' ||
-          (s.reason === 'SACK' && Math.random() < 0.10) ||
-          (s.reason === 'INCOMPLETE' && Math.random() < 0.055)
+          s.reason === 'INTERCEPTION' ||
+          (s.reason === 'SACK' && Math.random() < 0.10)
         ) {
           break;
         }
@@ -1622,7 +1624,7 @@ export function runArgon2027Playtest(): void {
           clockStopMistakes++;
         }
 
-        if (s.reason === 'FUMBLE_LOST' || Math.random() < 0.008) break;
+        if (s.reason === 'FUMBLE_LOST' || s.reason === 'INTERCEPTION' || Math.random() < 0.008) break;
 
         const gain = Math.min(ydsToGoal, s.yards);
         ydsToGoal -= gain;
@@ -1705,8 +1707,8 @@ export function runArgon2027Playtest(): void {
 
         if (
           s.reason === 'FUMBLE_LOST' ||
-          (s.reason === 'SACK' && Math.random() < 0.09) ||
-          (s.reason === 'INCOMPLETE' && Math.random() < 0.06)
+          s.reason === 'INTERCEPTION' ||
+          (s.reason === 'SACK' && Math.random() < 0.09)
         ) {
           break;
         }
@@ -1754,8 +1756,8 @@ export function runArgon2027Playtest(): void {
         s = pool[Math.floor(Math.random() * pool.length)];
       }
 
-      if (s.yards >= 9.0 && s.reason !== 'FUMBLE_LOST') conversions++;
-      if (s.yards >= 18.0 && s.reason !== 'FUMBLE_LOST') explosives++;
+      if (s.yards >= 9.0 && s.reason !== 'FUMBLE_LOST' && s.reason !== 'INTERCEPTION') conversions++;
+      if (s.yards >= 18.0 && s.reason !== 'FUMBLE_LOST' && s.reason !== 'INTERCEPTION') explosives++;
       if (s.reason === 'SACK') sacks++;
       sumEpa += s.epa;
     }
