@@ -6,7 +6,11 @@ import {
   SimAgent,
 } from './engine.js';
 import { ARGON_2027_PLAYBOOK } from './argon_2027_playbook.js';
-import { buildModern2027Defense, ModernDefFrontId } from './vanguard_2027_playbook.js';
+import {
+  buildAdaptiveCounterDefense,
+  buildModern2027Defense,
+  ModernDefFrontId,
+} from './vanguard_2027_playbook.js';
 import { KBC_2027_PLAYBOOK, detectDefensiveAttractor } from './bistable_packaged_playbook.js';
 
 function makeDummyBlocker(id: string, pos: string, x: number, y: number): SimAgent {
@@ -411,6 +415,148 @@ async function runTests() {
       }
     }
     console.log(`[6] Full 11v11 KBC x Modern 2027 Fronts biomechanical invariant checks PASSED (${checks} snaps, 0 G-force or overlap violations)`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // 7. Designed Scramble-as-Read-#3 (IF/THEN Grass Void vs QB_SPY Fallback)
+  // ---------------------------------------------------------------------------
+  {
+    const buildRead3TestOff = (): SimAgent[] => {
+      const mkOl = (id: string, pos: string, x: number, y: number, gap: 'VERTICAL_DEEP' | 'ANGLE_45', pri: string): SimAgent => ({
+        ...makeDummyBlocker(id, pos, x, y),
+        blockRating: 88,
+        ratings: { speed: 78, accel: 84, power: 88, finesse: 88, awareness: 86 },
+        assignment: { role: 'PASS_SET', primaryTargetId: pri, secondaryTargetId: null, gapOrSet: gap, leverage: 'INSIDE_OUT', climbOrChipDelaySec: 0, waypoints: [] },
+      });
+      const ol = [
+        mkOl('LT', 'LT', -3.2, -0.4, 'VERTICAL_DEEP', 'LDE'),
+        mkOl('LG', 'LG', -1.6, -0.3, 'ANGLE_45', '3T'),
+        mkOl('C', 'C', 0.0, -0.2, 'ANGLE_45', 'NT'),
+        mkOl('RG', 'RG', 1.6, -0.3, 'ANGLE_45', '3T'),
+        mkOl('RT', 'RT', 3.2, -0.4, 'VERTICAL_DEEP', 'RDE'),
+      ];
+      const mkRoute = (id: string, pos: string, x: number, y: number, wps: { x: number; y: number }[], readOrder: number): SimAgent => ({
+        ...makeDummyBlocker(id, pos, x, y),
+        readOrder,
+        ratings: { speed: 92, accel: 92, power: 78, finesse: 88, awareness: 85 },
+        assignment: { role: 'ROUTE', primaryTargetId: null, secondaryTargetId: null, gapOrSet: 'VERTICAL_DEEP', leverage: 'NEUTRAL', climbOrChipDelaySec: 0, waypoints: wps },
+      });
+      const wr1 = mkRoute('WR1', 'WR', -14.5, -0.35, [{ x: -14.0, y: 11.0 }, { x: -6.5, y: 16.5 }], 1);
+      const wr2 = mkRoute('WR2', 'WR', 14.8, -0.35, [{ x: 17.5, y: 12.0 }, { x: 20.0, y: 22.0 }], 3);
+      const sl = mkRoute('SL', 'SL', -7.2, -1.10, [{ x: -10.5, y: 8.2 }, { x: -15.5, y: 12.5 }], 2);
+      const te: SimAgent = {
+        ...makeDummyBlocker('TE', 'TE', 4.8, -1.10),
+        readOrder: 4,
+        ratings: { speed: 86, accel: 88, power: 88, finesse: 86, awareness: 85 },
+        assignment: {
+          role: 'CHIP_RELEASE',
+          primaryTargetId: 'RDE',
+          secondaryTargetId: null,
+          gapOrSet: 'C_RIGHT',
+          leverage: 'OUTSIDE_IN',
+          climbOrChipDelaySec: 0.35,
+          waypoints: [{ x: 1.0, y: 5.0 }, { x: -5.2, y: 7.4 }],
+        },
+      };
+      const rb = mkRoute('RB', 'RB', -2.2, -4.6, [{ x: -9.5, y: -1.5 }, { x: -15.0, y: 3.5 }], 5);
+      const qb: SimAgent = {
+        ...makeDummyBlocker('QB', 'QB', 0.0, -4.5),
+        ratings: { speed: 90, accel: 91, power: 86, finesse: 85, awareness: 86 },
+        assignment: {
+          role: 'QB_DROP',
+          primaryTargetId: null,
+          secondaryTargetId: null,
+          gapOrSet: 'VERTICAL_DEEP',
+          leverage: 'NEUTRAL',
+          climbOrChipDelaySec: 0,
+          waypoints: [{ x: 2.2, y: -5.6 }, { x: 4.8, y: -5.5 }],
+        },
+        designedScrambleRead: {
+          enabled: true,
+          afterReadOrder: 2,
+          minDecisionTimeSec: 2.00,
+          voidCorridorCenterX: 8.2,
+          voidCorridorHalfWidthX: 3.3,
+          voidCorridorMaxY: 9.5,
+          maxDefendersInVoid: 0,
+          fallbackReceiverId: 'TE',
+          scrambleWaypoints: [{ x: 7.4, y: -2.0 }, { x: 8.8, y: 4.5 }, { x: 10.0, y: 14.5 }],
+        },
+      };
+      return [...ol, wr1, wr2, sl, te, rb, qb];
+    };
+
+    const trajOpen = engine.simulatePlay(
+      [...buildRead3TestOff(), ...buildModern2027Defense('NICKEL_UNDER_C1')],
+      0.0
+    );
+    verifyTrajectoryBiomechanics(trajOpen, 'READ3_OPEN_VOID');
+    const triggeredOpenScramble = trajOpen.some((s) => s.exoticEvent === 'DESIGNED_SCRAMBLE_READ3');
+    assert.ok(triggeredOpenScramble, 'Empty grass void vs Man C1 must trigger DESIGNED_SCRAMBLE_READ3');
+
+    const trajSpy = engine.simulatePlay(
+      [...buildRead3TestOff(), ...buildAdaptiveCounterDefense('NICKEL_QB_SPY_CONTAIN_C1')],
+      0.0
+    );
+    verifyTrajectoryBiomechanics(trajSpy, 'READ3_SPY_FALLBACK');
+    const triggeredSpyScramble = trajSpy.some((s) => s.exoticEvent === 'DESIGNED_SCRAMBLE_READ3');
+    const triggeredSpyFallback = trajSpy.some((s) => s.exoticEvent === 'DESIGNED_SCRAMBLE_FALLBACK_PASS');
+    assert.ok(!triggeredSpyScramble, 'QB_SPY plugging void must abort DESIGNED_SCRAMBLE_READ3');
+    assert.ok(triggeredSpyFallback, 'QB_SPY plugging void must trigger Read-4 DESIGNED_SCRAMBLE_FALLBACK_PASS');
+    console.log(
+      `[7] Designed Scramble-as-Read-#3 IF/THEN check PASSED (ManC1->DESIGNED_SCRAMBLE_READ3, QB_SPY->DESIGNED_SCRAMBLE_FALLBACK_PASS)`
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 8. Directional Shotgun Snap & 2-QB Split-Shotgun (Zero-Oracle + MAN_COV Adaptation)
+  // ---------------------------------------------------------------------------
+  {
+    const ol = [
+      makeDummyBlocker('LT', 'LT', -3.2, -0.4),
+      makeDummyBlocker('LG', 'LG', -1.6, -0.3),
+      makeDummyBlocker('C', 'C', 0.0, -0.2),
+      makeDummyBlocker('RG', 'RG', 1.6, -0.3),
+      makeDummyBlocker('RT', 'RT', 3.2, -0.4),
+    ];
+    const mkR = (id: string, pos: string, x: number, y: number, wps: { x: number; y: number }[], readOrder: number): SimAgent => ({
+      ...makeDummyBlocker(id, pos, x, y),
+      readOrder,
+      ratings: { speed: 91, accel: 91, power: 82, finesse: 86, awareness: 85 },
+      assignment: { role: 'ROUTE', primaryTargetId: null, secondaryTargetId: null, gapOrSet: 'VERTICAL_DEEP', leverage: 'NEUTRAL', climbOrChipDelaySec: 0, waypoints: wps },
+    });
+    const wr1 = mkR('WR1', 'WR', -14.5, -0.35, [{ x: -13.0, y: 12.0 }], 1);
+    const wr2 = mkR('WR2', 'WR', 14.5, -0.35, [{ x: 16.5, y: 14.0 }], 2);
+    const sl = mkR('SL', 'SL', -6.0, -1.10, [{ x: -9.5, y: 9.0 }], 3);
+    const te = mkR('TE', 'TE', 6.0, -1.10, [{ x: 2.0, y: 6.0 }], 4);
+    // QB1 aligns left (-1.9, -4.5) and flares left; QB2 (id='RB', pos='QB') receives direct snap RIGHT at (+1.9, -4.5)!
+    const qb1 = mkR('QB', 'QB', -1.9, -4.5, [{ x: -9.0, y: -2.0 }, { x: -14.0, y: 3.0 }], 5);
+    const qb2: SimAgent = {
+      ...makeDummyBlocker('RB', 'QB', 1.9, -4.5),
+      isSnapRecipient: true,
+      ratings: { speed: 88, accel: 89, power: 86, finesse: 84, awareness: 84 },
+      assignment: {
+        role: 'QB_DROP',
+        primaryTargetId: null,
+        secondaryTargetId: null,
+        gapOrSet: 'VERTICAL_DEEP',
+        leverage: 'NEUTRAL',
+        climbOrChipDelaySec: 0,
+        waypoints: [{ x: 2.8, y: -5.6 }],
+      },
+    };
+    const traj2Qb = engine.simulatePlay(
+      [...ol, wr1, wr2, sl, te, qb1, qb2, ...buildModern2027Defense('NICKEL_UNDER_C1')],
+      0.0
+    );
+    verifyTrajectoryBiomechanics(traj2Qb, 'DUAL_QB_DIRECTIONAL_SNAP');
+    assert.equal(traj2Qb[0].ball?.carrierId, 'RB', 'Directional shotgun snap must assign ball directly to QB2 (RB) at t=0.00s');
+    assert.equal(traj2Qb[0].exoticEvent, 'DIRECTIONAL_SNAP_RIGHT', 'Off-axis right snap must emit DIRECTIONAL_SNAP_RIGHT');
+    const willAt1s = traj2Qb.find((s) => s.timeSec >= 1.0)?.agents.find((a) => a.id === 'WILL');
+    assert.ok((willAt1s?.y ?? 0) > -1.0, 'MAN_COV WILL must switch onto flaring QB1 rather than illegally blitzing direct-snap passer QB2');
+    console.log(
+      `[8] Directional Shotgun Snap & 2-QB Split-Gun check PASSED (carrier0=${traj2Qb[0].ball?.carrierId}, event=${traj2Qb[0].exoticEvent}, WILL_y@1s=${willAt1s?.y.toFixed(2)}y)`
+    );
   }
 
   console.log('\n[PASS] ALL ENGINE REALISM, DEFENSIVE PSYCHOLOGY & ANTI-GAMING VALIDATIONS SUCCEEDED.');

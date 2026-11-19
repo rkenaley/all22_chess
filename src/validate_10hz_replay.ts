@@ -444,7 +444,9 @@ function simulatePlayWithTelemetry(
     (term.ball?.state === 'HELD' && fallbackCarrier ? +fallbackCarrier.y.toFixed(2) : 0);
 
   const sack = term.terminationReason === 'SACK';
-  const scrambled = traj.some((s) => s.exoticEvent === 'QB_SCRAMBLE');
+  const scrambled = traj.some(
+    (s) => s.exoticEvent === 'QB_SCRAMBLE' || s.exoticEvent === 'DESIGNED_SCRAMBLE_READ3'
+  );
   const intercepted = term.terminationReason === 'INTERCEPTION';
   const completed =
     !scrambled &&

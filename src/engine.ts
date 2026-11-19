@@ -69,6 +69,20 @@ export interface LateralConfig {
   executed?: boolean;
 }
 
+export interface DesignedScrambleReadConfig {
+  enabled: boolean;
+  afterReadOrder?: number;           // Evaluate grass void after reads <= this order (default 2)
+  minDecisionTimeSec: number;        // Earliest time (s) to execute IF/THEN void check
+  voidCorridorCenterX: number;       // Target engineered grass corridor X center (yards)
+  voidCorridorHalfWidthX: number;    // Lateral corridor half-width (yards)
+  voidCorridorMaxY: number;          // Downfield depth of void scan (yards)
+  maxDefendersInVoid?: number;       // Max unblocked defenders inside void to trigger scramble (default 0)
+  fallbackReceiverId?: string;       // Read #4 outlet if void is plugged by Spy/LB (ELSE branch)
+  scrambleWaypoints: Waypoint2D[];   // Designed scramble burst path through the engineered void
+  evaluated?: boolean;               // Runtime flag (reset per snap)
+  voidPlugged?: boolean;             // Runtime flag when void is plugged -> triggers Read #4 fallback pass
+}
+
 export type DefRoleType =
   | 'RUSH_GAP'
   | 'CONTAIN_EDGE'
@@ -172,6 +186,8 @@ export interface SimAgent {
   backwardToss?: BackwardTossConfig;
   optionPass?: OptionPassConfig;
   lateralConfig?: LateralConfig;
+  designedScrambleRead?: DesignedScrambleReadConfig;
+  isSnapRecipient?: boolean; // Explicit direct/directional shotgun snap recipient (enables 2-QB split-gun)
   designatedMikeId?: string | null;
   // Dynamic runtime telemetry
   readOrder?: number;
@@ -238,7 +254,18 @@ export interface PlayTickSnapshot {
   targetedReceiverId?: string | null;
   timeToThrowOrGapSec?: number | null;
   completionProbability?: number | null;
-  exoticEvent?: 'OPTION_PASS' | 'OPTION_RUN_KEEP' | 'HOOK_AND_LATERAL' | 'BACKWARD_TOSS' | 'QB_SCRAMBLE' | string | null;
+  exoticEvent?:
+    | 'OPTION_PASS'
+    | 'OPTION_RUN_KEEP'
+    | 'HOOK_AND_LATERAL'
+    | 'BACKWARD_TOSS'
+    | 'QB_SCRAMBLE'
+    | 'DESIGNED_SCRAMBLE_READ3'
+    | 'DESIGNED_SCRAMBLE_FALLBACK_PASS'
+    | 'DIRECTIONAL_SNAP_LEFT'
+    | 'DIRECTIONAL_SNAP_RIGHT'
+    | string
+    | null;
   appliedDefDisguise?: string | null;
 }
 
@@ -407,6 +434,15 @@ export class All22KinematicEngine {
           : undefined,
         optionPass: a.optionPass ? { ...a.optionPass, decidedRun: false } : undefined,
         lateralConfig: a.lateralConfig ? { ...a.lateralConfig, executed: false } : undefined,
+        designedScrambleRead: a.designedScrambleRead
+          ? {
+              ...a.designedScrambleRead,
+              scrambleWaypoints: a.designedScrambleRead.scrambleWaypoints.map((w) => ({ ...w })),
+              evaluated: false,
+              voidPlugged: false,
+            }
+          : undefined,
+        isSnapRecipient: a.isSnapRecipient,
         designatedMikeId: a.designatedMikeId,
         assignment: {
           ...a.assignment,
@@ -440,8 +476,20 @@ export class All22KinematicEngine {
     let releasePocketIntegrity: number | null = null;
     let lastExoticEvent: PlayTickSnapshot['exoticEvent'] = null;
 
-    const qbInit = agents.find((a) => a.side === 'OFF' && a.pos === 'QB');
-    const rbCarrierInit = agents.find((a) => a.side === 'OFF' && a.assignment.role === 'BALL_CARRIER');
+    const snapRecipientInit = agents.find((a) => a.side === 'OFF' && a.isSnapRecipient);
+    const qbInit =
+      snapRecipientInit ??
+      agents.find((a) => a.side === 'OFF' && a.assignment.role === 'QB_DROP') ??
+      agents.find((a) => a.side === 'OFF' && a.pos === 'QB');
+    const rbCarrierInit =
+      snapRecipientInit && snapRecipientInit.assignment.role === 'BALL_CARRIER'
+        ? snapRecipientInit
+        : agents.find((a) => a.side === 'OFF' && a.assignment.role === 'BALL_CARRIER');
+
+    if (snapRecipientInit && Math.abs(snapRecipientInit.startX) > 0.85) {
+      lastExoticEvent =
+        snapRecipientInit.startX < 0 ? 'DIRECTIONAL_SNAP_LEFT' : 'DIRECTIONAL_SNAP_RIGHT';
+    }
 
     const ballState: BallState = {
       x: rbCarrierInit ? rbCarrierInit.x : qbInit ? qbInit.x : 0,
@@ -460,6 +508,26 @@ export class All22KinematicEngine {
     const hardTickCap = effectiveMaxTicks + 40;
     for (let tick = 0; tick <= hardTickCap; tick++) {
       const timeSec = +(tick * this.dt).toFixed(2);
+      // Honest off-axis directional shotgun snap handling risk (only applies when |startX| > 1.20y)
+      if (
+        tick === 1 &&
+        !playTerminated &&
+        stochasticNoise > 0 &&
+        snapRecipientInit &&
+        Math.abs(snapRecipientInit.startX) > 1.20
+      ) {
+        const offAxisExcess = Math.abs(snapRecipientInit.startX) - 0.85;
+        const steepWideRisk = Math.max(0, offAxisExcess - 3.15) * 0.015;
+        const badSnapProb = Math.min(0.06, Math.max(0, offAxisExcess - 0.35) * 0.0045 + steepWideRisk);
+        if (badSnapProb > 0 && Math.random() < badSnapProb) {
+          const defRec = Math.random() < 0.32;
+          playTerminated = true;
+          termReason = defRec ? 'FUMBLE_LOST' : 'FUMBLE_RECOVERED';
+          finalTackledYards = +(snapRecipientInit.startY - 3.2).toFixed(2);
+          ballState.state = 'DEAD';
+          ballState.carrierId = null;
+        }
+      }
       if (tick >= effectiveMaxTicks && !playTerminated && ballState.state === 'HELD') {
         const activeCarrier = agents.find(
           (a) =>
@@ -903,7 +971,13 @@ export class All22KinematicEngine {
   } {
     const offAgents = agents.filter((a) => a.side === 'OFF');
     const defAgents = agents.filter((a) => a.side === 'DEF');
-    const qb = offAgents.find((a) => a.pos === 'QB');
+    const qb =
+      (ballState.carrierId
+        ? offAgents.find((a) => a.id === ballState.carrierId && a.assignment.role === 'QB_DROP')
+        : undefined) ??
+      offAgents.find((a) => a.assignment.role === 'QB_DROP') ??
+      offAgents.find((a) => a.isSnapRecipient) ??
+      offAgents.find((a) => a.pos === 'QB');
     const ballCarrier = offAgents.find((a) => a.assignment.role === 'BALL_CARRIER');
 
     for (const a of agents) {
@@ -1403,6 +1477,17 @@ export class All22KinematicEngine {
         goalY = Math.min(0.85, goalY);
       }
 
+      // Honest off-axis directional shotgun snap gather beat (0.05s at +/-1.9y, scales up to 0.15s for wider snaps)
+      if (off.isSnapRecipient && Math.abs(off.startX) > 0.85) {
+        const gatherSec = Math.min(0.15, (Math.abs(off.startX) - 0.85) * 0.05);
+        if (timeSec < gatherSec) {
+          locomotionMode = 'FOOTWORK';
+          speedCap = Math.min(speedCap, 2.0);
+          goalX = off.startX;
+          goalY = off.startY;
+        }
+      }
+
       // 4-Minute Drill clock discipline: runner steers inside the numbers/sideline buffer
       if (asg.role === 'BALL_CARRIER' && fieldContext?.sidelineObjective === 'STAY_INBOUNDS') {
         goalX = Math.max(-21.0, Math.min(21.0, goalX));
@@ -1674,7 +1759,19 @@ export class All22KinematicEngine {
           }
         }
       } else if (da.role === 'MAN_COV' && da.manTargetId) {
-        const rec = offAgents.find((o) => o.id === da.manTargetId);
+        const assignedRec = offAgents.find((o) => o.id === da.manTargetId);
+        // Directional-snap / 2-QB split-gun adaptation: if our assigned backfield target actually took the direct snap
+        // as QB_DROP, switch after a realistic 0.25s eye-conflict delay onto the other releasing backfield player!
+        const rec =
+          assignedRec && assignedRec.assignment.role === 'QB_DROP' && timeSec >= 0.25
+            ? offAgents.find(
+                (o) =>
+                  o.id !== assignedRec.id &&
+                  o.assignment.role === 'ROUTE' &&
+                  o.startY <= -2.5 &&
+                  !defAgents.some((other) => other.id !== def.id && other.defAssignment?.manTargetId === o.id)
+              ) ?? assignedRec
+            : assignedRec;
         const isTargetRunBlocking = Boolean(
           rec &&
             ['MAN_BLOCK', 'COMBO_CLIMB', 'GAP_ZONE', 'PULL_LEAD', 'PULL_TRAP'].includes(
@@ -1709,10 +1806,10 @@ export class All22KinematicEngine {
             : projX;
           goalY = Math.max(ballCarrier.y > 0.2 ? ballCarrier.y : (isLeftForce || isRightForce ? 0.90 : 0.30), projY);
         } else if (rec) {
-          // Check if the assigned man target is staying in to pass-protect behind the LOS
+          // Check if the assigned man target is staying in to pass-protect (or acting as direct-snap passer) behind LOS
           const isTargetPassPro =
             rec.y <= 0.4 &&
-            ['PASS_SET', 'MAX_PROTECT_SCAN'].includes(rec.assignment.role);
+            ['PASS_SET', 'MAX_PROTECT_SCAN', 'QB_DROP'].includes(rec.assignment.role);
           if (isTargetPassPro) {
             // Hold low-hole / robber read depth (+2.4y) mirroring the RB/TE laterally in case of delayed release
             defLocomotion = 'FOOTWORK';
@@ -3288,6 +3385,7 @@ export class All22KinematicEngine {
         const awrReadBaseMod = Math.max(-0.12, Math.min(0.16, -qbAwrDelta * 0.012));
         const awrCleanThreshMod = Math.max(-0.32, Math.min(0.42, -qbAwrDelta * 0.032));
 
+        const hasDesignedScramble = Boolean(qb.designedScrambleRead?.enabled);
         const getRouteReadyTime = (r: SimAgent): number => {
           if (r.lateralConfig?.enabled) return 1.65;
           const depth = Math.max(0, ...r.assignment.waypoints.map((w) => w.y));
@@ -3305,9 +3403,14 @@ export class All22KinematicEngine {
             depthReady = Math.min(1.65, depthReady);
           } else if (isBlitzLook) {
             depthReady = Math.max(1.45, depthReady - 0.22);
+          } else if (hasDesignedScramble) {
+            // Designed Clear-Out Read-3 Scramble uses snappy alert/clear-out progression (Reads 1-2 checked by ~2.25s)
+            depthReady = depth <= 8.5 ? 1.78 : depth <= 13.5 ? 2.02 : 2.18;
           }
-          const baseReadStep = isQuickConcept || isGoalLine ? 0.25 : isBlitzLook ? 0.28 : 0.46;
-          const baseReadBase = isQuickConcept ? 1.45 : isGoalLine ? 1.68 : isBlitzLook ? 1.72 : 2.25;
+          const baseReadStep =
+            isQuickConcept || isGoalLine ? 0.25 : isBlitzLook ? 0.28 : hasDesignedScramble ? 0.28 : 0.46;
+          const baseReadBase =
+            isQuickConcept ? 1.45 : isGoalLine ? 1.68 : isBlitzLook ? 1.72 : hasDesignedScramble ? 1.88 : 2.25;
           const readStep = Math.max(0.18, baseReadStep + awrReadStepMod);
           const readBase = Math.max(1.25, baseReadBase + awrReadBaseMod);
           const readSeqFloor = readBase + Math.max(0, (r.readOrder ?? 3) - 1) * readStep;
@@ -3437,11 +3540,16 @@ export class All22KinematicEngine {
         let hasReadyHookLateral = false;
         let rhythmTarget: SimAgent | null = null;
         let bestOpenSep = 0;
+        const preRead3Ceiling =
+          qb.designedScrambleRead?.enabled && !qb.designedScrambleRead.evaluated
+            ? qb.designedScrambleRead.afterReadOrder ?? 2
+            : 99;
         if (!throwHot) {
           const orderedRouteIdx = routes
             .map((rec, i) => ({ rec, i, order: rec.readOrder ?? 3 }))
             .sort((a, b) => a.order - b.order);
-          for (const { rec, i } of orderedRouteIdx) {
+          for (const { rec, i, order } of orderedRouteIdx) {
+            if (order > preRead3Ceiling) continue;
             if (timeSec < routeReadyTimes[i]) continue;
             const { minDbDist, secondDbDist, hasExplicitBracket } = getRecCovDists(rec);
             if (minDbDist > bestOpenSep) bestOpenSep = minDbDist;
@@ -3461,6 +3569,104 @@ export class All22KinematicEngine {
           }
         }
 
+        // First-Class Designed Scramble-as-Read-#3 (IF/THEN Engineered Grass Void Inspection)
+        // Reads ONLY live observable kinematics inside the engineered void corridor (zero hidden-role oracle!).
+        // IF Read 1/2 covered & void corridor clear -> tuck and explode into void (DESIGNED_SCRAMBLE_READ3);
+        // ELSE (void plugged by Spy/LB/flat defender) -> immediately pivot to Read #4 fallback outlet!
+        let forceRead4FallbackPass = false;
+        if (
+          qb.designedScrambleRead?.enabled &&
+          !qb.designedScrambleRead.evaluated &&
+          !imminentSack &&
+          !throwHot &&
+          !hasCleanRhythmOpen &&
+          !hasReadyHookLateral
+        ) {
+          const cfg = qb.designedScrambleRead;
+          const afterOrder = cfg.afterReadOrder ?? 2;
+          let maxPriorReady = cfg.minDecisionTimeSec;
+          for (let i = 0; i < routes.length; i++) {
+            if ((routes[i].readOrder ?? 3) <= afterOrder && routeReadyTimes[i] > maxPriorReady) {
+              maxPriorReady = routeReadyTimes[i];
+            }
+          }
+          const read3CheckTime = Math.max(cfg.minDecisionTimeSec, maxPriorReady + 0.06);
+          if (timeSec >= read3CheckTime) {
+            cfg.evaluated = true;
+            let defendersInVoid = 0;
+            let launchGateBlocked = false;
+            const firstWp = cfg.scrambleWaypoints[0] ?? { x: cfg.voidCorridorCenterX, y: 0.0 };
+            const gateMidX = (qb.x + firstWp.x) * 0.5;
+            const gateMidY = (qb.y + firstWp.y) * 0.5;
+            const segDx = cfg.voidCorridorCenterX - qb.x;
+            const segDy = 4.2 - 0.5;
+            const segLenSq = Math.max(1.0, segDx * segDx + segDy * segDy);
+            for (const d of defAgents) {
+              const isPinned = Boolean(d.engagedWithId && d.leverageScore < 0.22);
+              if (isPinned) continue;
+              const px = d.x + d.vx * 0.25;
+              const py = d.y + d.vy * 0.25;
+              // 1. Downfield second-level grass void (y >= 0.4..voidCorridorMaxY)
+              const inVoidNow =
+                Math.abs(d.x - cfg.voidCorridorCenterX) <= cfg.voidCorridorHalfWidthX &&
+                d.y >= 0.4 &&
+                d.y <= cfg.voidCorridorMaxY;
+              const inVoidProj =
+                Math.abs(px - cfg.voidCorridorCenterX) <= cfg.voidCorridorHalfWidthX &&
+                py >= 0.4 &&
+                py <= cfg.voidCorridorMaxY;
+              // 2. Kinematic Spy/Hook detection (zero hidden role oracle!):
+              //    Low-vertical-velocity second-level defender hovering directly in front of QB or across the void mouth
+              const tProj = Math.max(
+                0,
+                Math.min(1, ((d.x - qb.x) * segDx + (d.y - 0.5) * segDy) / segLenSq)
+              );
+              const mouthDist = Math.hypot(d.x - (qb.x + tProj * segDx), d.y - (0.5 + tProj * segDy));
+              const hoveringSpyOrHook =
+                d.y >= 1.2 &&
+                d.y <= 5.4 &&
+                Math.abs(d.vy) < 2.2 &&
+                (mouthDist <= 2.35 || (Math.abs(d.x - qb.x) <= 2.2 && d.y <= 4.6));
+              if (inVoidNow || inVoidProj || hoveringSpyOrHook) {
+                defendersInVoid++;
+              }
+              // 3. Check whether an unblocked pass rusher directly blocks the escape launch path to firstWp
+              const distToMid = Math.hypot(d.x - gateMidX, d.y - gateMidY);
+              const distToFirst = Math.hypot(d.x - firstWp.x, d.y - firstWp.y);
+              if ((distToMid < 1.65 || distToFirst < 1.55) && d.y <= 1.0) {
+                launchGateBlocked = true;
+              }
+            }
+
+            // Realistic QB void-recognition precision (raw AWR < 82 occasionally misreads a Spy; sharp QBs diagnose cleanly)
+            const misreadProb = noiseAmp > 0 ? Math.max(0, (82 - qb.ratings.awareness) * 0.015) : 0;
+            const misreadVoid = misreadProb > 0 && Math.random() < misreadProb;
+            const voidOpen =
+              !launchGateBlocked &&
+              (defendersInVoid <= (cfg.maxDefendersInVoid ?? 0) || (misreadVoid && defendersInVoid === 1));
+
+            if (voidOpen) {
+              qb.assignment.role = 'BALL_CARRIER';
+              qb.assignment.waypoints = cfg.scrambleWaypoints.map((w) => ({ ...w }));
+              qb.waypointOriginX = qb.x;
+              qb.waypointOriginY = qb.y;
+              qb.waypointResetTimeSec = timeSec;
+              return {
+                terminated: false,
+                reason: null,
+                tackledYards: null,
+                timeToEventSec: timeSec,
+                exoticEvent: 'DESIGNED_SCRAMBLE_READ3',
+              };
+            } else {
+              cfg.voidPlugged = true;
+              forceRead4FallbackPass = true;
+            }
+          }
+        } else if (qb.designedScrambleRead?.voidPlugged && !throwHot && !hasCleanRhythmOpen && !hasReadyHookLateral) {
+          forceRead4FallbackPass = true;
+        }
+
         // Improvised Dropback Scramble Escape (calibrated to 2022-2024 nflverse: ~3% pocket, ~7% mid-mobile, ~9% raw-mobile)
         // Triggers when pocket is collapsing or coverage clamps down past 2.25s; directly deterred by an active QB_SPY!
         const hasActiveSpy = defAgents.some(
@@ -3468,6 +3674,7 @@ export class All22KinematicEngine {
         );
         const scrambleWindow =
           routes.length >= 2 &&
+          !hasDesignedScramble &&
           !isQuickConcept &&
           !isGoalLine &&
           !imminentSack &&
@@ -3515,12 +3722,19 @@ export class All22KinematicEngine {
           }
         }
 
-        if (timeSec >= maxProgressionTime || hasCleanRhythmOpen || hasReadyHookLateral || throwHot) {
+        if (
+          timeSec >= maxProgressionTime ||
+          hasCleanRhythmOpen ||
+          hasReadyHookLateral ||
+          throwHot ||
+          forceRead4FallbackPass
+        ) {
           let bestRec = routes[0];
-          if (!throwHot && rhythmTarget) {
+          if (!throwHot && !forceRead4FallbackPass && rhythmTarget) {
             bestRec = rhythmTarget;
           } else {
             let bestTargetScore = -999;
+            const fallbackId = forceRead4FallbackPass ? qb.designedScrambleRead?.fallbackReceiverId : undefined;
 
             for (let i = 0; i < routes.length; i++) {
               const rec = routes[i];
@@ -3531,8 +3745,9 @@ export class All22KinematicEngine {
                 rec.lateralConfig?.enabled && minDbDist >= 1.85 ? 8.50 : 0.0;
               const hotOutletBonus =
                 throwHot && (rec.lateralConfig?.enabled || routeDepth <= 10.5) ? 2.25 : 0.0;
+              const fallbackBonus = fallbackId && rec.id === fallbackId ? 2.65 : 0.0;
               const notYetReadyPenalty =
-                !throwHot && timeSec < routeReadyTimes[i] ? -1.40 : 0.0;
+                !throwHot && !forceRead4FallbackPass && timeSec < routeReadyTimes[i] ? -1.40 : 0.0;
               // Bracket avoidance scales with QB Read Versatility (awareness): elite processors pivot cleanly off doubled WR1
               const isBracketed =
                 (hasExplicitBracket && minDbDist < 3.50) || (secondDbDist < 2.65 && minDbDist < 2.55);
@@ -3546,11 +3761,17 @@ export class All22KinematicEngine {
                   ? read1Weight
                   : readOrd === 2
                   ? read2Weight
-                  : readOrd >= 4 && throwHot
-                  ? 0.70
+                  : readOrd >= 4 && (throwHot || forceRead4FallbackPass)
+                  ? 0.90
                   : 0.35 + Math.max(0, qb.ratings.awareness - 88) * 0.030) + hookPriorityBonus;
               const targetScore =
-                minDbDist + readBonus + deepDiffPenalty + hotOutletBonus + notYetReadyPenalty + bracketAvoidPenalty;
+                minDbDist +
+                readBonus +
+                deepDiffPenalty +
+                hotOutletBonus +
+                fallbackBonus +
+                notYetReadyPenalty +
+                bracketAvoidPenalty;
               if (targetScore > bestTargetScore) {
                 bestTargetScore = targetScore;
                 bestRec = rec;
@@ -3609,6 +3830,7 @@ export class All22KinematicEngine {
             reason: null,
             tackledYards: null,
             timeToEventSec: timeSec,
+            exoticEvent: forceRead4FallbackPass ? 'DESIGNED_SCRAMBLE_FALLBACK_PASS' : undefined,
           };
         }
       }
@@ -4018,7 +4240,15 @@ export class All22KinematicEngine {
   ): { pocketIntegrity: number; trenchNetYards: number; expectedEpa: number } {
     const off = agents.filter((a) => a.side === 'OFF');
     const def = agents.filter((a) => a.side === 'DEF');
-    const qb = off.find((a) => a.pos === 'QB') || off[0];
+    const qb =
+      (ballState?.passerId ? off.find((a) => a.id === ballState.passerId) : undefined) ??
+      (ballState?.carrierId
+        ? off.find((a) => a.id === ballState.carrierId && a.assignment.role === 'QB_DROP')
+        : undefined) ??
+      off.find((a) => a.assignment.role === 'QB_DROP') ??
+      off.find((a) => a.isSnapRecipient) ??
+      off.find((a) => a.pos === 'QB') ??
+      off[0];
     const carrier = off.find((a) => a.assignment.role === 'BALL_CARRIER');
 
     // -------------------------------------------------------------------------
