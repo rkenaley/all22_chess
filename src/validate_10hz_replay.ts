@@ -126,6 +126,7 @@ interface PlayTelemetry {
   completed: boolean;
   intercepted: boolean;
   sack: boolean;
+  scrambled: boolean;
   pressured: boolean;
   touchdown: boolean;
   timeToThrowSec: number | null;
@@ -443,15 +444,17 @@ function simulatePlayWithTelemetry(
     (term.ball?.state === 'HELD' && fallbackCarrier ? +fallbackCarrier.y.toFixed(2) : 0);
 
   const sack = term.terminationReason === 'SACK';
+  const scrambled = traj.some((s) => s.exoticEvent === 'QB_SCRAMBLE');
   const intercepted = term.terminationReason === 'INTERCEPTION';
   const completed =
+    !scrambled &&
     (Boolean(term.ball?.completedPass) ||
       term.terminationReason === 'COMPLETE' ||
       term.ball?.state === 'CAUGHT') &&
     !intercepted &&
     !sack;
   const touchdown = term.terminationReason === 'TOUCHDOWN';
-  const pressured = sack || minPocket < 48;
+  const pressured = sack || minPocket < 48 || Boolean(throwSnap?.ball?.pressuredAtRelease);
   const timeToThrowSec = throwSnap ? throwSnap.timeSec : sack ? term.timeSec : null;
   const yacYards =
     completed && airYards !== null ? Math.max(0, yards - airYards) : null;
@@ -470,6 +473,7 @@ function simulatePlayWithTelemetry(
     completed,
     intercepted,
     sack,
+    scrambled,
     pressured,
     touchdown,
     timeToThrowSec,
@@ -494,7 +498,7 @@ function simulatePlayWithTelemetry(
 function aggregatePass(rows: PlayTelemetry[]): AggregatedPassMetrics {
   const dropbacks = rows;
   const totalW = dropbacks.reduce((a, b) => a + b.weight, 0);
-  const attempts = dropbacks.filter((r) => !r.sack);
+  const attempts = dropbacks.filter((r) => !r.sack && !r.scrambled);
   const attW = attempts.reduce((a, b) => a + b.weight, 0);
   const comps = attempts.filter((r) => r.completed);
   const compW = comps.reduce((a, b) => a + b.weight, 0);

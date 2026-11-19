@@ -87,7 +87,9 @@ export type DefRoleType =
   | 'DEEP_THIRD'
   | 'QUARTERS_MATCH'
   | 'ROBBER'
-  | 'MAN_COV';
+  | 'MAN_COV'
+  | 'QB_SPY'
+  | 'BRACKET_TOP';
 
 export interface DefResponsibilityOption {
   role: DefRoleType;
@@ -236,7 +238,7 @@ export interface PlayTickSnapshot {
   targetedReceiverId?: string | null;
   timeToThrowOrGapSec?: number | null;
   completionProbability?: number | null;
-  exoticEvent?: 'OPTION_PASS' | 'OPTION_RUN_KEEP' | 'HOOK_AND_LATERAL' | 'BACKWARD_TOSS' | string | null;
+  exoticEvent?: 'OPTION_PASS' | 'OPTION_RUN_KEEP' | 'HOOK_AND_LATERAL' | 'BACKWARD_TOSS' | 'QB_SCRAMBLE' | string | null;
   appliedDefDisguise?: string | null;
 }
 
@@ -335,6 +337,19 @@ export class All22KinematicEngine {
         initY = a.preSnapMotion.snapY;
         initVx = a.preSnapMotion.speed * a.preSnapMotion.dirX;
         initVy = a.preSnapMotion.speed * (a.preSnapMotion.dirY ?? 0);
+      } else if (a.side === 'DEF' && a.defAssignment?.role === 'BRACKET_TOP') {
+        // Safety rolling over-the-top to double-cover an elite X-WR ("Calvin Johnson Bracket")
+        const targetId = a.defAssignment.manTargetId;
+        const explicitTarget = targetId ? initialAgents.find((o) => o.side === 'OFF' && o.id === targetId) : undefined;
+        const autoStar =
+          explicitTarget ??
+          initialAgents
+            .filter((o) => o.side === 'OFF' && ['WR', 'SL', 'TE'].includes(o.pos))
+            .sort((u, v) => v.ratings.finesse + v.ratings.speed - (u.ratings.finesse + u.ratings.speed))[0];
+        if (autoStar) {
+          initX = Math.max(-18.5, Math.min(18.5, autoStar.startX * 0.62));
+          initY = Math.max(10.5, a.startY);
+        }
       } else if (a.side === 'DEF' && a.defAssignment?.manTargetId) {
         // Align man-coverage defender to his assigned eligible receiver pre-snap (both motion trail & static formation flips)
         const assignedTarget = initialAgents.find((o) => o.id === a.defAssignment!.manTargetId);
@@ -1600,6 +1615,64 @@ export class All22KinematicEngine {
             goalY = rushCarrier.y;
           }
         }
+      } else if (da.role === 'QB_SPY') {
+        // Dedicated QB Spy (LB or Safety): ignores RB play-action fakes, mirrors QB laterally from +3.5y spy depth,
+        // and immediately triggers full-speed contain pursuit on designed QB runs or improvised scrambles!
+        const qbIsRunning = Boolean(ballCarrier && (ballCarrier.id === qb?.id || ballCarrier.pos === 'QB'));
+        const runnerExitedBox = Boolean(
+          ballCarrier && !optionPassThreatActive && (Math.abs(ballCarrier.x) > 3.5 || ballCarrier.y > 0.25)
+        );
+        if ((qbIsRunning || runnerExitedBox) && ballCarrier) {
+          const dist = Math.hypot(ballCarrier.x - def.x, ballCarrier.y - def.y);
+          const leadSec = Math.min(0.35, Math.max(0.06, dist / 9.2));
+          defLocomotion = 'SPRINT';
+          goalX = ballCarrier.x + ballCarrier.vx * leadSec;
+          goalY = Math.max(
+            ballCarrier.y > 0.2 ? ballCarrier.y : 0.95,
+            ballCarrier.y + Math.max(0, ballCarrier.vy * leadSec * 0.85)
+          );
+        } else if (qb) {
+          const targetSpyX = Math.max(-9.5, Math.min(9.5, qb.x + qb.vx * 0.25));
+          const targetSpyY = Math.max(2.6, Math.min(4.6, qb.y + 7.2));
+          const spyDist = Math.hypot(targetSpyX - def.x, targetSpyY - def.y);
+          defLocomotion = spyDist > 1.6 ? 'SPRINT' : 'FOOTWORK';
+          goalX = targetSpyX;
+          goalY = targetSpyY;
+        } else {
+          defLocomotion = 'FOOTWORK';
+          goalX = da.targetX;
+          goalY = da.targetY;
+        }
+      } else if (da.role === 'BRACKET_TOP') {
+        // Dedicated Over-the-Top Double-Coverage Safety ("Calvin Johnson Bracket" / 2-Man Cloud):
+        // Shades inside and over the top of the designated elite playmaker to squeeze verticals, digs, corners, and outs.
+        if (ballCarrier && !optionPassThreatActive) {
+          const leadTime = Math.min(0.35, Math.max(0.08, (def.y - ballCarrier.y) / 8.5));
+          defLocomotion = 'SPRINT';
+          goalX = ballCarrier.x + ballCarrier.vx * leadTime;
+          goalY = Math.max(0.5, ballCarrier.y + Math.max(0, ballCarrier.vy * leadTime));
+        } else {
+          const explicitTarget = da.manTargetId ? offAgents.find((o) => o.id === da.manTargetId) : undefined;
+          const starRec =
+            explicitTarget ??
+            activeSkillReceivers
+              .slice()
+              .sort((u, v) => v.ratings.finesse + v.ratings.speed - (u.ratings.finesse + u.ratings.speed))[0];
+          if (starRec) {
+            const insideShade = starRec.x >= 0 ? -1.35 : 1.35;
+            const vertThreat = starRec.y >= 3.5 || starRec.vy >= 3.2;
+            defLocomotion = vertThreat || Math.hypot(starRec.x - def.x, starRec.y - def.y) > 4.0 ? 'SPRINT' : 'FOOTWORK';
+            goalX = Math.max(-24.5, Math.min(24.5, starRec.x + starRec.vx * 0.22 + insideShade));
+            goalY = Math.max(
+              def.y + 0.08,
+              Math.max(8.5, starRec.y + Math.max(0, starRec.vy) * 0.34 + 2.15)
+            );
+          } else {
+            defLocomotion = 'FOOTWORK';
+            goalX = da.targetX;
+            goalY = da.targetY;
+          }
+        }
       } else if (da.role === 'MAN_COV' && da.manTargetId) {
         const rec = offAgents.find((o) => o.id === da.manTargetId);
         const isTargetRunBlocking = Boolean(
@@ -1709,11 +1782,24 @@ export class All22KinematicEngine {
             goalX = da.targetX;
             goalY = da.targetY;
           } else if (isBoxDefender) {
-            const leadSec = runnerCrossedLos ? 0.15 : 0.22;
-            goalX = ballCarrier.x + ballCarrier.vx * leadSec;
-            goalY = runnerCrossedLos
-              ? ballCarrier.y + Math.max(-0.2, ballCarrier.vy * 0.12)
-              : Math.max(0.2, ballCarrier.y + ballCarrier.vy * leadSec);
+            const isOffBallBox = def.startY >= 2.8;
+            if (isOffBallBox && !runnerCrossedLos) {
+              // Off-ball LB/box-safety scrape: flow laterally without telepathic lookahead while holding LOS depth
+              // (prevents over-pursuing to y=-2.5 behind sweeps while keeping authentic NFL read-and-scrape lag).
+              const leadSecX = 0.24;
+              const projX = ballCarrier.x + ballCarrier.vx * leadSecX;
+              const outsideLeft = def.startX <= -4.5 && ballCarrier.vx < -1.5 && def.x <= ballCarrier.x + 1.0;
+              const outsideRight = def.startX >= 4.5 && ballCarrier.vx > 1.5 && def.x >= ballCarrier.x - 1.0;
+              goalX = outsideLeft ? Math.min(projX - 0.6, def.x) : outsideRight ? Math.max(projX + 0.6, def.x) : projX;
+              goalY = Math.max(0.65, ballCarrier.y + 1.6);
+            } else {
+              const dist = Math.hypot(ballCarrier.x - def.x, ballCarrier.y - def.y);
+              const leadSec = runnerCrossedLos ? Math.min(0.24, dist / 9.5) : 0.20;
+              goalX = ballCarrier.x + ballCarrier.vx * leadSec;
+              goalY = runnerCrossedLos
+                ? ballCarrier.y + Math.max(-0.15, ballCarrier.vy * leadSec * 0.70)
+                : Math.max(0.25, ballCarrier.y + ballCarrier.vy * leadSec);
+            }
           } else if (isDeepSafety) {
             const leadTime = Math.min(0.35, Math.max(0.08, (def.y - ballCarrier.y) / 8.5));
             goalX = ballCarrier.x + ballCarrier.vx * leadTime;
@@ -1801,13 +1887,16 @@ export class All22KinematicEngine {
                   matchedThreat.y > 4.0
                     ? matchedThreat.x + (matchedThreat.x > def.x ? 0.25 : -0.25)
                     : da.targetX * 0.5 + matchedThreat.x * 0.5;
+                const isCover3Corner = da.role === 'DEEP_THIRD' && def.pos === 'CB';
                 const roofFloor =
-                  matchedThreat.y >= 4.0
-                    ? Math.min(da.targetY - 1.5, 12.5)
-                    : Math.min(da.targetY, def.startY + 3.5);
+                  isCover3Corner && matchedThreat.y < 8.5
+                    ? Math.min(da.targetY - 3.6, 9.6)
+                    : matchedThreat.y >= 4.0
+                    ? Math.min(da.targetY - 1.8, 12.2)
+                    : Math.min(da.targetY, def.startY + 3.2);
                 goalY = Math.max(
                   roofFloor,
-                  matchedThreat.y + Math.max(0, matchedThreat.vy) * 0.28 + 1.15
+                  matchedThreat.y + Math.max(0, matchedThreat.vy) * (isCover3Corner ? 0.22 : 0.28) + (isCover3Corner ? 0.90 : 1.15)
                 );
               } else if (da.role === 'CURL_FLAT') {
                 // Sink-funnel under #1 vertical up to ~10.5y in Cover-2/Cloud unless flat route threatens outside
@@ -3324,30 +3413,105 @@ export class All22KinematicEngine {
 
         const throwHot = (imminentSack && throwRoll < imminentEscapeChance) || hotPressureThrow;
 
+        // Read Versatility: elite processors recognize safety double-coverage brackets ("Calvin Johnson Bracket")
+        // and immediately progress to reads #2/#3/#4, whereas tunnel-vision QBs force throws into brackets or hold for sacks.
+        const awrBracketDiag = Math.max(0.20, Math.min(1.0, (qb.ratings.awareness - 72) / 22));
+        const getRecCovDists = (rec: SimAgent) => {
+          let d1 = 12.0;
+          let d2 = 12.0;
+          let hasExplicitBracket = false;
+          for (const d of defAgents) {
+            const dist = Math.hypot(d.x - rec.x, d.y - rec.y);
+            if (d.defAssignment?.role === 'BRACKET_TOP' && dist < 4.5) hasExplicitBracket = true;
+            if (dist < d1) {
+              d2 = d1;
+              d1 = dist;
+            } else if (dist < d2) {
+              d2 = dist;
+            }
+          }
+          return { minDbDist: d1, secondDbDist: d2, hasExplicitBracket };
+        };
+
         let hasCleanRhythmOpen = false;
         let hasReadyHookLateral = false;
         let rhythmTarget: SimAgent | null = null;
+        let bestOpenSep = 0;
         if (!throwHot) {
           const orderedRouteIdx = routes
             .map((rec, i) => ({ rec, i, order: rec.readOrder ?? 3 }))
             .sort((a, b) => a.order - b.order);
           for (const { rec, i } of orderedRouteIdx) {
             if (timeSec < routeReadyTimes[i]) continue;
-            let minDbDist = 12.0;
-            for (const d of defAgents) {
-              const dDist = Math.hypot(d.x - rec.x, d.y - rec.y);
-              if (dDist < minDbDist) minDbDist = dDist;
-            }
+            const { minDbDist, secondDbDist, hasExplicitBracket } = getRecCovDists(rec);
+            if (minDbDist > bestOpenSep) bestOpenSep = minDbDist;
             if (rec.lateralConfig?.enabled && minDbDist >= 1.85) {
               hasReadyHookLateral = true;
               if (!rhythmTarget) rhythmTarget = rec;
             }
+            const isBracketed =
+              (hasExplicitBracket && minDbDist < 3.40) || (secondDbDist < 2.55 && minDbDist < 2.40);
             const baseCleanThresh = isBlitzLook || isQuickConcept || isGoalLine ? 2.15 : 2.65;
             const cleanThresh = Math.max(1.80, baseCleanThresh + awrCleanThreshMod);
-            if (minDbDist >= cleanThresh) {
+            // High-versatility QB skips a genuinely double-covered primary read to progress to open backside reads
+            if (minDbDist >= cleanThresh && !(isBracketed && awrBracketDiag >= 0.55)) {
               hasCleanRhythmOpen = true;
               if (!rhythmTarget) rhythmTarget = rec;
             }
+          }
+        }
+
+        // Improvised Dropback Scramble Escape (calibrated to 2022-2024 nflverse: ~3% pocket, ~7% mid-mobile, ~9% raw-mobile)
+        // Triggers when pocket is collapsing or coverage clamps down past 2.25s; directly deterred by an active QB_SPY!
+        const hasActiveSpy = defAgents.some(
+          (d) => d.defAssignment?.role === 'QB_SPY' && !d.engagedWithId && Math.hypot(d.x - qb.x, d.y - qb.y) < 7.5
+        );
+        const scrambleWindow =
+          routes.length >= 2 &&
+          !isQuickConcept &&
+          !isGoalLine &&
+          !imminentSack &&
+          !throwHot &&
+          !hasCleanRhythmOpen &&
+          !hasReadyHookLateral &&
+          timeSec >= 2.25 &&
+          (closestRusherDist < 2.60 || (timeSec >= maxProgressionTime - 0.15 && bestOpenSep < 2.35));
+
+        if (scrambleWindow && noiseAmp > 0) {
+          const spdFactor = Math.max(0.08, Math.min(1.0, (qb.ratings.speed - 71) / 21));
+          const spyDamp = hasActiveSpy ? 0.38 : 1.0;
+          // Per-tick (20 Hz) hazard across ~6-12 eligible late-dropback ticks yields ~3% pocket / ~7-9% mobile scramble rate
+          const scrambleProb = (0.008 + spdFactor * 0.036) * spyDamp;
+          if (Math.random() < scrambleProb) {
+            let nearRusherX = 0;
+            let nearRusherD = 99;
+            for (const d of defAgents) {
+              if (d.y < 3.5) {
+                const dist = Math.hypot(d.x - qb.x, d.y - qb.y);
+                if (dist < nearRusherD) {
+                  nearRusherD = dist;
+                  nearRusherX = d.x;
+                }
+              }
+            }
+            const escapeDir = nearRusherX >= qb.x ? -1 : 1;
+            const laneX = Math.max(-14.0, Math.min(14.0, qb.x + escapeDir * 4.8));
+            qb.assignment.role = 'BALL_CARRIER';
+            qb.assignment.waypoints = [
+              { x: laneX, y: Math.max(-2.0, qb.y + 3.5) },
+              { x: Math.max(-18.0, Math.min(18.0, laneX + escapeDir * 2.5)), y: 6.5 },
+              { x: Math.max(-20.0, Math.min(20.0, laneX + escapeDir * 3.5)), y: 18.0 },
+            ];
+            qb.waypointOriginX = qb.x;
+            qb.waypointOriginY = qb.y;
+            qb.waypointResetTimeSec = timeSec;
+            return {
+              terminated: false,
+              reason: null,
+              tackledYards: null,
+              timeToEventSec: timeSec,
+              exoticEvent: 'QB_SCRAMBLE',
+            };
           }
         }
 
@@ -3360,11 +3524,7 @@ export class All22KinematicEngine {
 
             for (let i = 0; i < routes.length; i++) {
               const rec = routes[i];
-              let minDbDist = 12.0;
-              for (const d of defAgents) {
-                const dDist = Math.hypot(d.x - rec.x, d.y - rec.y);
-                if (dDist < minDbDist) minDbDist = dDist;
-              }
+              const { minDbDist, secondDbDist, hasExplicitBracket } = getRecCovDists(rec);
               const routeDepth = Math.max(0, ...rec.assignment.waypoints.map((w) => w.y));
               const deepDiffPenalty = -Math.max(0, (rec.y - 8.0) * 0.10);
               const hookPriorityBonus =
@@ -3373,17 +3533,24 @@ export class All22KinematicEngine {
                 throwHot && (rec.lateralConfig?.enabled || routeDepth <= 10.5) ? 2.25 : 0.0;
               const notYetReadyPenalty =
                 !throwHot && timeSec < routeReadyTimes[i] ? -1.40 : 0.0;
+              // Bracket avoidance scales with QB Read Versatility (awareness): elite processors pivot cleanly off doubled WR1
+              const isBracketed =
+                (hasExplicitBracket && minDbDist < 3.50) || (secondDbDist < 2.65 && minDbDist < 2.55);
+              const bracketAvoidPenalty = isBracketed ? -3.10 * awrBracketDiag : 0.0;
               const readOrd = rec.readOrder ?? 3;
+              // Tunnel-vision low-awareness QBs overweight Read #1; elite processors evaluate Reads #2/#3 evenly
+              const read1Weight = 1.90 + Math.max(0, 86 - qb.ratings.awareness) * 0.045;
+              const read2Weight = 1.05 + Math.max(0, qb.ratings.awareness - 85) * 0.035;
               const readBonus =
                 (readOrd === 1
-                  ? 1.90
+                  ? read1Weight
                   : readOrd === 2
-                  ? 1.05
+                  ? read2Weight
                   : readOrd >= 4 && throwHot
                   ? 0.70
-                  : 0.35) + hookPriorityBonus;
+                  : 0.35 + Math.max(0, qb.ratings.awareness - 88) * 0.030) + hookPriorityBonus;
               const targetScore =
-                minDbDist + readBonus + deepDiffPenalty + hotOutletBonus + notYetReadyPenalty;
+                minDbDist + readBonus + deepDiffPenalty + hotOutletBonus + notYetReadyPenalty + bracketAvoidPenalty;
               if (targetScore > bestTargetScore) {
                 bestTargetScore = targetScore;
                 bestRec = rec;
@@ -3407,13 +3574,14 @@ export class All22KinematicEngine {
             const role = d.defAssignment?.role;
             if (
               role &&
-              ['HOOK_CURL', 'CURL_FLAT', 'DEEP_ZONE', 'DEEP_THIRD', 'DEEP_HALF', 'QUARTERS_MATCH', 'ROBBER'].includes(role)
+              ['HOOK_CURL', 'CURL_FLAT', 'DEEP_ZONE', 'DEEP_THIRD', 'DEEP_HALF', 'QUARTERS_MATCH', 'ROBBER', 'BRACKET_TOP'].includes(role)
             ) {
               continue;
             }
             if (role === 'MAN_COV' && d.defAssignment?.manTargetId !== 'QB') continue;
             if (d.y < 3.0) {
               const dist = Math.hypot(d.x - qb.x, d.y - qb.y);
+              // Calibrated QB pressure halo matching ~30% NFL/BDB pressure rate
               if (dist < 1.65 || ((!d.engagedWithId || d.leverageScore >= 0.30) && dist < 2.35)) {
                 pressuredAtThrow = true;
                 break;

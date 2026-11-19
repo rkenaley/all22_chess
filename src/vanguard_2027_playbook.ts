@@ -1246,9 +1246,9 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('NT', 'NT', -1.0, 0.5, 'RUSH_GAP', -0.6, -4.0, undefined, { speed: 72, power: 93, finesse: 76 }),
         def('3T', 'DT', 1.8, 0.5, 'RUSH_GAP', 1.5, -4.0, undefined, { speed: 76, power: 91, finesse: 84 }),
         def('LDE', 'DE', 4.5, 0.6, 'CONTAIN_EDGE', 4.0, -5.0),
-        def('WILL', 'WLB', -2.5, 4.5, 'READ_RUN_PASS', -2.5, 3.8),
+        def('WILL', 'WLB', -2.5, 4.5, 'MAN_COV', -2.5, 3.8, 'SL'),
         def('MIKE', 'MLB', 0.5, 4.5, 'READ_RUN_PASS', 2.5, 3.8),
-        def('SAM', 'SLB', 5.2, 1.5, 'FORCE_ALLEY', 5.0, 2.5),
+        def('SAM', 'SLB', 5.2, 1.8, 'MAN_COV', 5.0, 2.5, 'TE'),
         def('SS', 'SS', 4.8, 4.8, 'ROBBER', 0.0, 5.5, undefined, { speed: 89, power: 78 }),
         def('CB1', 'CB', -14.2, 4.2, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 92, power: 65 }),
         def('CB2', 'CB', 14.2, 4.2, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, power: 65 }),
@@ -1346,4 +1346,95 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('FS', 'FS', 0.0, 12.5, 'DEEP_THIRD', 0.0, 18.0, undefined, { speed: 91, power: 72 }),
       ];
   }
+}
+
+// ============================================================================
+// 4. ADAPTIVE NFL GAMEPLAN COUNTER DEFENSES (QB SPY & ELITE WR1 DOUBLE BRACKET)
+// ============================================================================
+export const ADAPTIVE_COUNTER_DEF_FRONTS = [
+  'NICKEL_QB_SPY_CONTAIN_C1',
+  'NICKEL_CALVIN_BRACKET_WR1',
+] as const;
+
+export type AdaptiveCounterDefFrontId = (typeof ADAPTIVE_COUNTER_DEF_FRONTS)[number];
+
+export function buildAdaptiveCounterDefense(call: AdaptiveCounterDefFrontId): SimAgent[] {
+  const def = (
+    id: string,
+    pos: string,
+    x: number,
+    y: number,
+    role: NonNullable<SimAgent['defAssignment']>['role'],
+    targetX: number,
+    targetY: number,
+    manTargetId?: string,
+    customRatings?: Partial<SimAgent['ratings']>
+  ): SimAgent => ({
+    id,
+    label: id,
+    side: 'DEF',
+    pos,
+    startX: x,
+    startY: y,
+    x,
+    y,
+    vx: 0,
+    vy: 0,
+    fx: 0,
+    fy: 0,
+    engagedWithId: null,
+    leverageScore: 0,
+    ratings: {
+      speed: customRatings?.speed ?? 86,
+      accel: customRatings?.accel ?? 88,
+      power: customRatings?.power ?? 85,
+      finesse: customRatings?.finesse ?? 85,
+      awareness: customRatings?.awareness ?? 87,
+    },
+    assignment: {
+      role: 'MAN_BLOCK',
+      primaryTargetId: null,
+      secondaryTargetId: null,
+      gapOrSet: 'VERTICAL_DEEP',
+      leverage: 'NEUTRAL',
+      climbOrChipDelaySec: 0,
+      waypoints: [],
+    },
+    defAssignment: { role, targetX, targetY, manTargetId },
+  });
+
+  if (call === 'NICKEL_QB_SPY_CONTAIN_C1') {
+    // Dedicated Anti-Mobile Counter: MIKE spies the QB (ignores PA, mirrors laterally, closes scrambles & QB runs),
+    // WILL sets weakside alley force, edges keep disciplined rush contain, Cover 1 Man behind.
+    return [
+      def('LDE', 'DE', -4.4, 0.6, 'CONTAIN_EDGE', -4.0, -4.5, undefined, { speed: 86, power: 86 }),
+      def('3T', 'DT', -1.8, 0.5, 'RUSH_GAP', -1.5, -4.0, undefined, { speed: 76, power: 91 }),
+      def('NT', 'NT', 1.1, 0.5, 'RUSH_GAP', 1.0, -4.0, undefined, { speed: 73, power: 93 }),
+      def('RDE', 'EDGE', 4.8, 0.6, 'CONTAIN_EDGE', 4.2, -4.5, undefined, { speed: 87, power: 85 }),
+      def('WILL', 'WILL', -6.0, 2.4, 'FORCE_ALLEY', -6.8, 1.2, undefined, { speed: 89, accel: 91, power: 86 }),
+      def('MIKE', 'MIKE', 0.0, 3.8, 'QB_SPY', 0.0, 3.8, 'QB', { speed: 90, accel: 92, power: 86, awareness: 91 }),
+      def('NCB', 'NI', -7.0, 3.8, 'MAN_COV', -7.0, 1.0, 'SL', { speed: 91, accel: 91, power: 72 }),
+      def('CB1', 'CB', -14.2, 4.2, 'MAN_COV', -14.2, 1.0, 'WR1', { speed: 92, accel: 91, power: 66 }),
+      def('CB2', 'CB', 14.2, 4.2, 'MAN_COV', 14.2, 1.0, 'WR2', { speed: 92, accel: 91, power: 66 }),
+      def('SS', 'SS', 5.6, 4.2, 'MAN_COV', 5.2, 1.0, 'TE', { speed: 89, accel: 89, power: 80 }),
+      def('FS', 'FS', 0.0, 13.5, 'DEEP_ZONE', 0.0, 17.5, undefined, { speed: 91, accel: 90, power: 72 }),
+    ];
+  }
+
+  // NICKEL_CALVIN_BRACKET_WR1: Dedicated Double-Team on Elite X-WR ("Calvin Johnson Cone Bracket"):
+  // CB1 trails underneath in tight press-man while FS rolls over-the-top/inside (BRACKET_TOP) on WR1,
+  // forcing the QB to demonstrate read versatility to beat 1-on-1 coverage elsewhere!
+  return [
+    def('LDE', 'DE', -4.2, 0.6, 'CONTAIN_EDGE', -3.6, -5.0),
+    def('3T', 'DT', -1.8, 0.5, 'RUSH_GAP', -1.5, -4.0, undefined, { speed: 76, power: 90, finesse: 84 }),
+    def('NT', 'NT', 1.0, 0.5, 'RUSH_GAP', 1.0, -4.0, undefined, { speed: 72, power: 92, finesse: 76 }),
+    def('RDE', 'EDGE', 4.8, 0.6, 'CONTAIN_EDGE', 4.0, -5.0),
+    def('WILL', 'WILL', -1.0, 4.2, 'MAN_COV', -1.0, 1.5, 'RB', { speed: 88, accel: 89, power: 84 }),
+    def('MIKE', 'MIKE', 2.0, 4.4, 'HOOK_CURL', 2.0, 6.5, undefined, { speed: 87, accel: 88, power: 86, awareness: 89 }),
+    def('NCB', 'NI', -6.8, 3.8, 'MAN_COV', -6.8, 0.5, 'SL', { speed: 91, accel: 90, power: 70 }),
+    def('CB1', 'CB', -14.2, 2.2, 'MAN_COV', -14.2, 0.0, 'WR1', { speed: 92, accel: 92, power: 68 }),
+    def('CB2', 'CB', 14.2, 4.3, 'MAN_COV', 14.2, 0.0, 'WR2', { speed: 92, accel: 91, power: 66 }),
+    def('SS', 'SS', 5.8, 4.4, 'MAN_COV', 5.2, 0.5, 'TE', { speed: 89, accel: 88, power: 78 }),
+    def('FS', 'FS', -9.0, 11.5, 'BRACKET_TOP', -12.0, 15.0, 'WR1', { speed: 92, accel: 91, power: 74, awareness: 91 }),
+  ];
 }
