@@ -37,7 +37,8 @@
     "src/validate_10hz_replay.ts",
     "src/trial_nfl_benchmarks.ts",
     "src/test_realism_and_defensive_psychology.ts",
-    "src/test_voronoi_coverage.ts"
+    "src/test_voronoi_coverage.ts",
+    "src/analyze_qb_archetype_sensitivity.ts"
   ],
   "exclude": [
     "src/legacy_v1"

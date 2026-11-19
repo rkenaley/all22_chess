@@ -87,8 +87,9 @@ npm run test:realism
 # 3. Run Voronoi-Complete Zone Coverage & Kinematic Audit
 npm run test:voronoi
 
-# 4. Run Ultimate 2027 Offense Monte Carlo Playtest Suite
+# 4. Run Ultimate 2027 Offense Monte Carlo Playtest Suite & QB Archetype Sensitivity Study
 npm run simulate:ultimate2027
+npm run analyze:qb
 
 # 5. Run NFL Benchmark Audit, Evolutionary Tournament & Blitz/Macro-RPS Counters
 npm run benchmark

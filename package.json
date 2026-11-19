@@ -23,7 +23,8 @@
     "generate:gifs": "npx tsx src/generate_play_gifs.ts",
     "generate:apex-gifs": "npx tsx src/generate_apex_gifs.ts",
     "build:apex-html": "npx tsx src/build_apex_whitepaper_html.ts",
-    "validate:tracking": "npx tsx src/validate_10hz_replay.ts"
+    "validate:tracking": "npx tsx src/validate_10hz_replay.ts",
+    "analyze:qb": "npx tsx src/analyze_qb_archetype_sensitivity.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
