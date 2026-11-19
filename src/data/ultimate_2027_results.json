@@ -1,0 +1,742 @@
+{
+  "generatedAt": "2026-11-19T13:30:52.325Z",
+  "capSummary": {
+    "elevenPersCapM": 119.8,
+    "twelvePersCapM": 117.4,
+    "twentyOnePersCapM": 119.5,
+    "savingsVsConv11M": 18.7,
+    "savingsVsShanahan12M": 26.2,
+    "savingsVsSupermaxM": 52.2,
+    "defReinvestedSuppressionPpg": 1.6
+  },
+  "rosterPlayers": [
+    {
+      "slotKey": "QB",
+      "name": "Dual-Threat Mid-Market QB1",
+      "pos": "QB",
+      "jersey": 7,
+      "capHitM": 13.5,
+      "archetype": "Athletic Edge/Counter Trigger (6'2\" 226 lbs, 4.48 40)",
+      "bdbCombineBasis": "Anchored to NFL Combine / NGS (4.48s 40, 1.54s 10y; BDB 2027 510-player cohort covers DB/OL/DL/WR/TE with 0 QBs)",
+      "scoutingNotes": "Explosive 11v11 runner (SPD 89, ACC 90, PWR 86) & quick-rhythm thrower (THA 84), but slower 4-read full-field dropback processor (AWR 83).",
+      "throwerRating": 84,
+      "blockRating": 50,
+      "ratings": {
+        "speed": 89,
+        "accel": 90,
+        "power": 86,
+        "finesse": 84,
+        "awareness": 83
+      }
+    },
+    {
+      "slotKey": "RB",
+      "name": "Day-2 Explosive Slasher RB1",
+      "pos": "RB",
+      "jersey": 24,
+      "capHitM": 3.6,
+      "archetype": "Round-2 One-Cut Burner (5'11\" 212 lbs, 4.41 40)",
+      "bdbCombineBasis": "Anchored to NFL Combine / NGS burst tier (1.51s 10y split, 6.89s 3-cone; BDB 2027 510-player cohort has 1 RB / 0 RB 3-cone)",
+      "scoutingNotes": "Elite perimeter cut acceleration (SPD 92, ACC 93, FIN 87), but light 1v1 pass protector (BLK 66, PWR 82) vs A-gap blitzers.",
+      "throwerRating": 45,
+      "blockRating": 66,
+      "ratings": {
+        "speed": 92,
+        "accel": 93,
+        "power": 82,
+        "finesse": 87,
+        "awareness": 83
+      }
+    },
+    {
+      "slotKey": "WR1",
+      "name": "Franchise Separator WR1",
+      "pos": "WR",
+      "jersey": 11,
+      "capHitM": 22,
+      "archetype": "3-Cone Technician Cornerstone (Pillar #2 of 2)",
+      "bdbCombineBasis": "Modeled on BDB 2027 Jaxon Smith-Njigba cohort (6.77s 3-cone, 3.93s shuttle)",
+      "scoutingNotes": "Sudden break deceleration & zone-void feel (ACC 93, FIN 93, AWR 91); modest 196-lb inline crack-blocking (BLK 58).",
+      "throwerRating": 52,
+      "blockRating": 58,
+      "ratings": {
+        "speed": 91,
+        "accel": 93,
+        "power": 73,
+        "finesse": 93,
+        "awareness": 91
+      }
+    },
+    {
+      "slotKey": "WR2",
+      "name": "Day-2 Vertical Lid-Lifter WR2",
+      "pos": "WR",
+      "jersey": 83,
+      "capHitM": 4.8,
+      "archetype": "Raw 4.32 Combine Vertical Threat (6'2\" 192 lbs)",
+      "bdbCombineBasis": "BDB 2027 top-decile WR 40-yd dash (11.2+ yd/s Combine peak)",
+      "scoutingNotes": "Taxes 2-high safeties vertically (SPD 96, ACC 95), but narrow route tree (FIN 83, AWR 81) and light blocking (BLK 54).",
+      "throwerRating": 45,
+      "blockRating": 54,
+      "ratings": {
+        "speed": 96,
+        "accel": 95,
+        "power": 64,
+        "finesse": 83,
+        "awareness": 81
+      }
+    },
+    {
+      "slotKey": "SL",
+      "name": "Ex-QB Orbit Multiplier SL",
+      "pos": "SL",
+      "jersey": 18,
+      "capHitM": 6.9,
+      "archetype": "Former College QB / Jet-Orbit Weapon (5'11\" 199 lbs)",
+      "bdbCombineBasis": "BDB 2027 slot agility profile (6.84s 3-cone, 4.44s 40, 18.2 mph in-game p99)",
+      "scoutingNotes": "Crisp space quickness (SPD 92, ACC 93, AWR 87), perimeter stalker (BLK 73), and legitimate option passer (throwerRating 78).",
+      "throwerRating": 78,
+      "blockRating": 73,
+      "ratings": {
+        "speed": 92,
+        "accel": 93,
+        "power": 72,
+        "finesse": 87,
+        "awareness": 87
+      }
+    },
+    {
+      "slotKey": "TE",
+      "name": "Two-Way Seam Hybrid TE1",
+      "pos": "TE",
+      "jersey": 88,
+      "capHitM": 10.8,
+      "archetype": "Complete In-Line / Seam Y-TE (6'5\" 256 lbs, 4.61 40)",
+      "bdbCombineBasis": "BDB 2027 TE upper-quartile (4.61s 40, 1.56s 10y, 7.02s 3-cone)",
+      "scoutingNotes": "Clears NFL edge-sealing threshold (BLK 86, PWR 86) while threatening Cover-2/3 seams at 84 SPD / 86 ACC.",
+      "throwerRating": 56,
+      "blockRating": 86,
+      "ratings": {
+        "speed": 84,
+        "accel": 86,
+        "power": 86,
+        "finesse": 85,
+        "awareness": 86
+      }
+    },
+    {
+      "slotKey": "TE2",
+      "name": "Heavy Wing Bulldozer TE2",
+      "pos": "TE",
+      "jersey": 84,
+      "capHitM": 4.5,
+      "archetype": "6'6\" 268-lb H-Wing / Eligible 6th OL",
+      "bdbCombineBasis": "BDB 2027 heavy TE/OL hybrid mass tier (268 lbs, 34.0\" arms)",
+      "scoutingNotes": "Market arbitrage in 12/21 packages: erases DEs and overhang safeties (BLK 89, PWR 88) while sneaking into red-zone flats.",
+      "throwerRating": 55,
+      "blockRating": 89,
+      "ratings": {
+        "speed": 81,
+        "accel": 83,
+        "power": 88,
+        "finesse": 81,
+        "awareness": 85
+      }
+    },
+    {
+      "slotKey": "LT",
+      "name": "Franchise Blindside LT",
+      "pos": "LT",
+      "jersey": 70,
+      "capHitM": 23.5,
+      "archetype": "Long-Arm Blindside Anchor (Pillar #1 of 2)",
+      "bdbCombineBasis": "Modeled on BDB 2027 Paris Johnson (6'6\" 313 lbs, 36.1\" arms, 1.72s 10y)",
+      "scoutingNotes": "True weakside island pass protector (BLK 91, FIN 91, PWR 89, AWR 89) enabling strongside slide protections.",
+      "throwerRating": 30,
+      "blockRating": 91,
+      "ratings": {
+        "speed": 75,
+        "accel": 81,
+        "power": 89,
+        "finesse": 91,
+        "awareness": 89
+      }
+    },
+    {
+      "slotKey": "LG",
+      "name": "Core Interior Anchor LG",
+      "pos": "LG",
+      "jersey": 69,
+      "capHitM": 13.8,
+      "archetype": "Pro-Bowl Power Guard (6'5\" 326 lbs)",
+      "bdbCombineBasis": "BDB 2027 Guard mass/anchor tier (326 lbs, 28+ bench reps)",
+      "scoutingNotes": "Stonewalls 335-lb Bear NTs on A-left combos (PWR 90, BLK 89, AWR 87) and caves C-gaps on weak sweeps.",
+      "throwerRating": 30,
+      "blockRating": 89,
+      "ratings": {
+        "speed": 73,
+        "accel": 79,
+        "power": 90,
+        "finesse": 84,
+        "awareness": 87
+      }
+    },
+    {
+      "slotKey": "C",
+      "name": "Athletic Pull-Center C",
+      "pos": "C",
+      "jersey": 51,
+      "capHitM": 5.4,
+      "archetype": "High-Agility Reach/Pull Center (6'3\" 298 lbs)",
+      "bdbCombineBasis": "BDB 2027 C athletic tier (1.74s 10y, 7.45s 3-cone, 9.7 yd/s Combine peak)",
+      "scoutingNotes": "Elite lateral pull speed (SPD 80, ACC 86, FIN 86, AWR 87) for D-alley sweeps; lighter frame (PWR 82) needs LG combo help vs 0T NTs.",
+      "throwerRating": 30,
+      "blockRating": 86,
+      "ratings": {
+        "speed": 80,
+        "accel": 86,
+        "power": 82,
+        "finesse": 86,
+        "awareness": 87
+      }
+    },
+    {
+      "slotKey": "RG",
+      "name": "Day-3 Developmental RG",
+      "pos": "RG",
+      "jersey": 65,
+      "capHitM": 3.2,
+      "archetype": "Second-Year Developmental RG (6'4\" 316 lbs)",
+      "bdbCombineBasis": "BDB 2027 Day-3 Guard mean (5.17s 40, 315 lbs)",
+      "scoutingNotes": "Solid drive power (PWR 84, BLK 83), lower blitz-pickup processing (AWR 82, FIN 82); protected by C-right slides & boot launches.",
+      "throwerRating": 30,
+      "blockRating": 83,
+      "ratings": {
+        "speed": 74,
+        "accel": 80,
+        "power": 84,
+        "finesse": 82,
+        "awareness": 82
+      }
+    },
+    {
+      "slotKey": "RT",
+      "name": "Ascending Edge Tackle RT",
+      "pos": "RT",
+      "jersey": 66,
+      "capHitM": 12.3,
+      "archetype": "Year-4 Balanced Right Tackle (6'6\" 314 lbs)",
+      "bdbCombineBasis": "BDB 2027 OT Combine tier (5.10s 40, 34.4\" arms, 314 lbs)",
+      "scoutingNotes": "Reliable pass-set edge & down-blocker (BLK 88, PWR 87, FIN 86, AWR 86) pairing cleanly with TE1/TE2 wings.",
+      "throwerRating": 30,
+      "blockRating": 88,
+      "ratings": {
+        "speed": 75,
+        "accel": 81,
+        "power": 87,
+        "finesse": 86,
+        "awareness": 86
+      }
+    }
+  ],
+  "legalityAndBiomechanicsAudit": {
+    "snapsAudited": 6025,
+    "legal7OnLosPct": 100,
+    "legalUncoveredEndsPct": 100,
+    "legalIneligibleBufferPct": 100,
+    "strictlyBackwardLateralsPct": 100,
+    "unengagedGForceViolations": 0,
+    "peakUnengagedGForce": 1.455,
+    "overlapViolationsUnder020y": 0,
+    "minPlayerSeparationYds": 0.361
+  },
+  "omegaPlayTelemetry": [
+    {
+      "id": "OMEGA_DISPLACED_ORBIT_LASER",
+      "name": "OMEGA // DISPLACED ORBIT LASER CONTINUUM",
+      "personnel": "21 OMEGA",
+      "category": "RUN",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "TWO_MINUTE"
+      ],
+      "featuredDefense": "NICKEL_SIM_C2",
+      "overallMeanYards": 3.4,
+      "overallMeanEpa": -0.284,
+      "successRatePct": 42.2,
+      "explosiveRatePct": 3.1,
+      "sackRatePct": 0,
+      "turnoverRatePct": 1.1,
+      "optPassRatePct": 13.3,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": -0.197,
+        "NICKEL_UNDER_C1": 0.303,
+        "NICKEL_SIM_C2": -0.37,
+        "BASE_34_BEAR_C4": -0.539,
+        "BASE_43_OVER_C1": 0.166,
+        "DIME_MUG_C0": -0.367,
+        "DIME_QUARTERS_MATCH": -0.693,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.055,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.804,
+        "GOAL_LINE_62_PINCH": 0.143
+      }
+    },
+    {
+      "id": "OMEGA_CHIRAL_JET_OPTION",
+      "name": "OMEGA // CHIRAL JET-LEFT OPTION CONTINUUM",
+      "personnel": "12 OMEGA",
+      "category": "RUN",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "FOUR_MINUTE"
+      ],
+      "featuredDefense": "NICKEL_OVER_C3",
+      "overallMeanYards": 4.62,
+      "overallMeanEpa": -0.075,
+      "successRatePct": 69.6,
+      "explosiveRatePct": 0.2,
+      "sackRatePct": 0,
+      "turnoverRatePct": 0.7,
+      "optPassRatePct": 5.1,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.078,
+        "NICKEL_UNDER_C1": -0.219,
+        "NICKEL_SIM_C2": 0.17,
+        "BASE_34_BEAR_C4": 0.332,
+        "BASE_43_OVER_C1": 0.012,
+        "DIME_MUG_C0": -0.573,
+        "DIME_QUARTERS_MATCH": 0.328,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.52,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.28,
+        "GOAL_LINE_62_PINCH": 0.056
+      }
+    },
+    {
+      "id": "OMEGA_ORBIT_GLANCE_FLOOD",
+      "name": "OMEGA // ORBIT GLANCE-SAIL TRIANGLE (HOT RELIEF)",
+      "personnel": "11 OMEGA",
+      "category": "PASS",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "TWO_MINUTE"
+      ],
+      "featuredDefense": "NICKEL_OVER_C3",
+      "overallMeanYards": 9.32,
+      "overallMeanEpa": 0.347,
+      "successRatePct": 68.9,
+      "explosiveRatePct": 30.4,
+      "sackRatePct": 4.9,
+      "turnoverRatePct": 0.9,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.471,
+        "NICKEL_UNDER_C1": 0.324,
+        "NICKEL_SIM_C2": 0.953,
+        "BASE_34_BEAR_C4": 0.443,
+        "BASE_43_OVER_C1": -0.32,
+        "DIME_MUG_C0": 0.381,
+        "DIME_QUARTERS_MATCH": 0.574,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.222,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.079,
+        "GOAL_LINE_62_PINCH": 0.228
+      }
+    },
+    {
+      "id": "OMEGA_064S_FLASH_PA_BOOT",
+      "name": "OMEGA // 0.64s FLASH PA BOOT CROSS",
+      "personnel": "12 OMEGA",
+      "category": "PASS",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "FOUR_MINUTE"
+      ],
+      "featuredDefense": "NICKEL_SIM_C2",
+      "overallMeanYards": 6.98,
+      "overallMeanEpa": 0.02,
+      "successRatePct": 56.2,
+      "explosiveRatePct": 30.4,
+      "sackRatePct": 4.9,
+      "turnoverRatePct": 3.1,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.623,
+        "NICKEL_UNDER_C1": -0.483,
+        "NICKEL_SIM_C2": 0.651,
+        "BASE_34_BEAR_C4": 0.551,
+        "BASE_43_OVER_C1": -0.571,
+        "DIME_MUG_C0": -0.696,
+        "DIME_QUARTERS_MATCH": 0.034,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.252,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.323,
+        "GOAL_LINE_62_PINCH": 0.263
+      }
+    },
+    {
+      "id": "OMEGA_3RD9_SWITCH_STICKS",
+      "name": "OMEGA // 3RD & 9 SWITCH-MESH & STICKS",
+      "personnel": "11 OMEGA",
+      "category": "PASS",
+      "menuBuckets": [
+        "THIRD_LONG",
+        "OPEN_FIELD"
+      ],
+      "featuredDefense": "VIKINGS_MUG_CROSSDOG_C0",
+      "overallMeanYards": 8.13,
+      "overallMeanEpa": 0.184,
+      "successRatePct": 57.3,
+      "explosiveRatePct": 20.4,
+      "sackRatePct": 6.4,
+      "turnoverRatePct": 1.6,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": -0.483,
+        "NICKEL_UNDER_C1": -0.49,
+        "NICKEL_SIM_C2": 0.772,
+        "BASE_34_BEAR_C4": 0.394,
+        "BASE_43_OVER_C1": -0.126,
+        "DIME_MUG_C0": 0.317,
+        "DIME_QUARTERS_MATCH": 0.362,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.465,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.444,
+        "GOAL_LINE_62_PINCH": 0.171
+      }
+    },
+    {
+      "id": "OMEGA_2MIN_BOUNDARY_OOB",
+      "name": "OMEGA // 2-MIN BOUNDARY OUT-STRETCH (OOB)",
+      "personnel": "11 OMEGA",
+      "category": "PASS",
+      "menuBuckets": [
+        "TWO_MINUTE",
+        "THIRD_LONG"
+      ],
+      "featuredDefense": "DIME_QUARTERS_MATCH",
+      "overallMeanYards": 8.71,
+      "overallMeanEpa": 0.152,
+      "successRatePct": 43.8,
+      "explosiveRatePct": 22.7,
+      "sackRatePct": 3.8,
+      "turnoverRatePct": 2.2,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.503,
+        "NICKEL_UNDER_C1": -0.002,
+        "NICKEL_SIM_C2": 1.156,
+        "BASE_34_BEAR_C4": 0.198,
+        "BASE_43_OVER_C1": -0.62,
+        "DIME_MUG_C0": 0.087,
+        "DIME_QUARTERS_MATCH": 0.336,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.183,
+        "VIKINGS_SAFETY_BLITZ_C1": -0.107,
+        "GOAL_LINE_62_PINCH": -0.494
+      }
+    },
+    {
+      "id": "OMEGA_11V11_RHINO_PIN_PULL",
+      "name": "OMEGA // 11v11 RHINO PIN-PULL QB SWEEP",
+      "personnel": "12 OMEGA",
+      "category": "RUN",
+      "menuBuckets": [
+        "OPEN_FIELD",
+        "FOUR_MINUTE"
+      ],
+      "featuredDefense": "BASE_43_OVER_C1",
+      "overallMeanYards": 10.12,
+      "overallMeanEpa": 0.56,
+      "successRatePct": 92,
+      "explosiveRatePct": 10.4,
+      "sackRatePct": 0,
+      "turnoverRatePct": 0,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": 0.652,
+        "NICKEL_UNDER_C1": 0.662,
+        "NICKEL_SIM_C2": 0.471,
+        "BASE_34_BEAR_C4": 0.275,
+        "BASE_43_OVER_C1": 0.648,
+        "DIME_MUG_C0": 0.692,
+        "DIME_QUARTERS_MATCH": 0.635,
+        "VIKINGS_MUG_CROSSDOG_C0": 0.719,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.29,
+        "GOAL_LINE_62_PINCH": -0.305
+      }
+    },
+    {
+      "id": "OMEGA_GOALLINE_SPRINT_SMASH",
+      "name": "OMEGA // GL +4y HEAVY WING SPRINT SMASH",
+      "personnel": "12 OMEGA",
+      "category": "PASS",
+      "menuBuckets": [
+        "GOAL_LINE"
+      ],
+      "featuredDefense": "GOAL_LINE_62_PINCH",
+      "overallMeanYards": 2.55,
+      "overallMeanEpa": 0.027,
+      "successRatePct": 60.7,
+      "explosiveRatePct": 0,
+      "sackRatePct": 0,
+      "turnoverRatePct": 2,
+      "optPassRatePct": 0,
+      "epaByDefense": {
+        "NICKEL_OVER_C3": -0.166,
+        "NICKEL_UNDER_C1": -0.29,
+        "NICKEL_SIM_C2": 0.168,
+        "BASE_34_BEAR_C4": 0.051,
+        "BASE_43_OVER_C1": 0.315,
+        "DIME_MUG_C0": -0.073,
+        "DIME_QUARTERS_MATCH": 0.277,
+        "VIKINGS_MUG_CROSSDOG_C0": -0.321,
+        "VIKINGS_SAFETY_BLITZ_C1": 0.199,
+        "GOAL_LINE_62_PINCH": 0.086
+      }
+    }
+  ],
+  "nashEquilibrium": {
+    "omegaNashEpa": 0.325,
+    "omegaMix": {
+      "OMEGA_DISPLACED_ORBIT_LASER": 0,
+      "OMEGA_CHIRAL_JET_OPTION": 0,
+      "OMEGA_ORBIT_GLANCE_FLOOD": 0.01,
+      "OMEGA_064S_FLASH_PA_BOOT": 8.99,
+      "OMEGA_3RD9_SWITCH_STICKS": 20.12,
+      "OMEGA_11V11_RHINO_PIN_PULL": 70.88
+    },
+    "adversarialDcCounterMix": {
+      "NICKEL_OVER_C3": 0,
+      "NICKEL_UNDER_C1": 9.63,
+      "NICKEL_SIM_C2": 0,
+      "BASE_34_BEAR_C4": 40.17,
+      "BASE_43_OVER_C1": 1.63,
+      "DIME_MUG_C0": 0.01,
+      "DIME_QUARTERS_MATCH": 0,
+      "VIKINGS_MUG_CROSSDOG_C0": 0,
+      "VIKINGS_SAFETY_BLITZ_C1": 48.57
+    },
+    "apexNashEpa": 0.3064,
+    "argonNashEpa": 0.3681,
+    "hydraNashEpa": 0.1263,
+    "baselinesNashEpa": {
+      "CONV_11_SPREAD": 0.0423,
+      "SHANAHAN_12_PA": 0.3557,
+      "SUPERMAX_STARS": -0.0774
+    }
+  },
+  "fullGameBenchmarks": [
+    {
+      "philosophyName": "2027 OMEGA Continuum ($119.8M BDB-Calibrated)",
+      "offCapM": 119.8,
+      "ppgStandardDc": 42.93,
+      "ppgAdversarialNashDc": 35.5,
+      "ppdStandard": 3.9,
+      "tdDrivePct": 51.1,
+      "fgDrivePct": 11.5,
+      "turnoverDrivePct": 12.2,
+      "explosiveRatePct": 15,
+      "ppgPer10MCap": 3.58,
+      "projectedTeamNetDiffPerGame": 22.13
+    },
+    {
+      "philosophyName": "2027 Philadelphia APEX ($122.9M Realistic Cap)",
+      "offCapM": 122.9,
+      "ppgStandardDc": 54.09,
+      "ppgAdversarialNashDc": 42.76,
+      "ppdStandard": 4.92,
+      "tdDrivePct": 66.6,
+      "fgDrivePct": 9.5,
+      "turnoverDrivePct": 8.5,
+      "explosiveRatePct": 12.9,
+      "ppgPer10MCap": 4.4,
+      "projectedTeamNetDiffPerGame": 33.19
+    },
+    {
+      "philosophyName": "2027 Google Argon ($81.1M Moneyball)",
+      "offCapM": 81.1,
+      "ppgStandardDc": 56.12,
+      "ppgAdversarialNashDc": 51.5,
+      "ppdStandard": 5.1,
+      "tdDrivePct": 69.8,
+      "fgDrivePct": 8.2,
+      "turnoverDrivePct": 10,
+      "explosiveRatePct": 15.5,
+      "ppgPer10MCap": 6.92,
+      "projectedTeamNetDiffPerGame": 37.82
+    },
+    {
+      "philosophyName": "2027 Hydra Vanguard ($85.5M Moneyball)",
+      "offCapM": 85.5,
+      "ppgStandardDc": 38.22,
+      "ppgAdversarialNashDc": 27.22,
+      "ppdStandard": 3.47,
+      "tdDrivePct": 44.3,
+      "fgDrivePct": 13.2,
+      "turnoverDrivePct": 12.9,
+      "explosiveRatePct": 14.4,
+      "ppgPer10MCap": 4.47,
+      "projectedTeamNetDiffPerGame": 19.62
+    },
+    {
+      "philosophyName": "Conventional 11-Pers Dropback Spread ($138.5M Cap)",
+      "offCapM": 138.5,
+      "ppgStandardDc": 32.42,
+      "ppgAdversarialNashDc": 22.97,
+      "ppdStandard": 2.95,
+      "tdDrivePct": 36.7,
+      "fgDrivePct": 13.1,
+      "turnoverDrivePct": 13.9,
+      "explosiveRatePct": 27,
+      "ppgPer10MCap": 2.34,
+      "projectedTeamNetDiffPerGame": 10.42
+    },
+    {
+      "philosophyName": "Shanahan/McVay 12-Pers Play-Action ($146.0M Cap)",
+      "offCapM": 146,
+      "ppgStandardDc": 44.75,
+      "ppgAdversarialNashDc": 27.6,
+      "ppdStandard": 4.07,
+      "tdDrivePct": 53,
+      "fgDrivePct": 12.7,
+      "turnoverDrivePct": 11.1,
+      "explosiveRatePct": 17.6,
+      "ppgPer10MCap": 3.06,
+      "projectedTeamNetDiffPerGame": 22.35
+    },
+    {
+      "philosophyName": "Top-Heavy Supermax Stars / Cap-Starved OL ($172.0M Cap)",
+      "offCapM": 172,
+      "ppgStandardDc": 27.11,
+      "ppgAdversarialNashDc": 16.12,
+      "ppdStandard": 2.46,
+      "tdDrivePct": 29.2,
+      "fgDrivePct": 14.4,
+      "turnoverDrivePct": 16.2,
+      "explosiveRatePct": 25.5,
+      "ppgPer10MCap": 1.58,
+      "projectedTeamNetDiffPerGame": 2.61
+    }
+  ],
+  "situationalDrills": {
+    "twoMinute": {
+      "omega": {
+        "tdWinPct": 69.7,
+        "ydsPerClockSec": 0.96,
+        "oobStopsPerDrive": 0.73,
+        "sackRatePct": 0.4
+      },
+      "apex": {
+        "tdWinPct": 78.7,
+        "ydsPerClockSec": 1.69,
+        "oobStopsPerDrive": 0.9,
+        "sackRatePct": 1.1
+      },
+      "argon": {
+        "tdWinPct": 86.8,
+        "ydsPerClockSec": 1.42,
+        "oobStopsPerDrive": 1.92,
+        "sackRatePct": 0
+      },
+      "conv11": {
+        "tdWinPct": 73.5,
+        "ydsPerClockSec": 1.16,
+        "oobStopsPerDrive": 0.65,
+        "sackRatePct": 9.2
+      },
+      "supermax": {
+        "tdWinPct": 69.7,
+        "ydsPerClockSec": 1.2,
+        "oobStopsPerDrive": 0.5,
+        "sackRatePct": 10.8
+      }
+    },
+    "fourMinute": {
+      "omega": {
+        "gameSealPct": 92.8,
+        "meanClockBledSec": 190,
+        "firstDownsPerDrive": 3.19,
+        "clockGiftMistakePct": 1.4
+      },
+      "apex": {
+        "gameSealPct": 87.9,
+        "meanClockBledSec": 208.3,
+        "firstDownsPerDrive": 3.8,
+        "clockGiftMistakePct": 0
+      },
+      "argon": {
+        "gameSealPct": 89.9,
+        "meanClockBledSec": 220.7,
+        "firstDownsPerDrive": 3.59,
+        "clockGiftMistakePct": 0
+      },
+      "shanahan12": {
+        "gameSealPct": 59.2,
+        "meanClockBledSec": 184,
+        "firstDownsPerDrive": 2.37,
+        "clockGiftMistakePct": 0
+      },
+      "conv11": {
+        "gameSealPct": 7.9,
+        "meanClockBledSec": 89.7,
+        "firstDownsPerDrive": 0.55,
+        "clockGiftMistakePct": 0
+      }
+    },
+    "goalLine": {
+      "omega": {
+        "fourDownTdPct": 97.6,
+        "singleSnapTdPct": 70.7,
+        "expectedGoalLinePts": 6.79
+      },
+      "apex": {
+        "fourDownTdPct": 96.8,
+        "singleSnapTdPct": 68.5,
+        "expectedGoalLinePts": 6.74
+      },
+      "argon": {
+        "fourDownTdPct": 91.8,
+        "singleSnapTdPct": 55.6,
+        "expectedGoalLinePts": 6.39
+      },
+      "shanahan12": {
+        "fourDownTdPct": 68.2,
+        "singleSnapTdPct": 28.4,
+        "expectedGoalLinePts": 5.53
+      },
+      "conv11": {
+        "fourDownTdPct": 79.5,
+        "singleSnapTdPct": 42.9,
+        "expectedGoalLinePts": 6.04
+      }
+    },
+    "thirdAndNine": {
+      "omega": {
+        "conversionPct": 56.3,
+        "explosive18Pct": 15.7,
+        "sackPct": 4.1,
+        "meanEpa": 0.207
+      },
+      "apex": {
+        "conversionPct": 54,
+        "explosive18Pct": 24,
+        "sackPct": 5,
+        "meanEpa": 0.269
+      },
+      "argon": {
+        "conversionPct": 43.2,
+        "explosive18Pct": 36.6,
+        "sackPct": 0,
+        "meanEpa": 0.723
+      },
+      "conv11": {
+        "conversionPct": 42.5,
+        "explosive18Pct": 37.8,
+        "sackPct": 11.3,
+        "meanEpa": 0.095
+      },
+      "supermax": {
+        "conversionPct": 39.3,
+        "explosive18Pct": 32.8,
+        "sackPct": 16.1,
+        "meanEpa": 0.03
+      }
+    }
+  }
+}

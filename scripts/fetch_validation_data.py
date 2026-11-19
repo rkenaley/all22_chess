@@ -47,6 +47,7 @@ KAGGLE_COMPETITIONS = {
     "bdb2023": "nfl-big-data-bowl-2023",
     "bdb2025": "nfl-big-data-bowl-2025",
     "bdb2026": "nfl-big-data-bowl-2026-prediction",
+    "bdb2027": "nfl-big-data-bowl-2027",
 }
 
 
@@ -89,8 +90,12 @@ def check_bdb_local() -> dict[str, list[str]]:
 
 def has_kaggle_creds() -> bool:
     kaggle_json = Path.home() / ".kaggle" / "kaggle.json"
-    env_creds = bool(os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"))
-    return kaggle_json.exists() or env_creds
+    access_token = Path.home() / ".kaggle" / "access_token"
+    env_creds = bool(
+        os.environ.get("KAGGLE_API_TOKEN")
+        or (os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"))
+    )
+    return kaggle_json.exists() or access_token.exists() or env_creds
 
 
 def fetch_kaggle_bdb() -> bool:

@@ -21,6 +21,7 @@ import {
 } from './vanguard_2027_playbook';
 import { ARGON_2027_PLAYBOOK } from './argon_2027_playbook';
 import { APEX_2027_PLAYBOOK } from './apex_2027_playbook';
+import { OMEGA_2027_PLAYBOOK } from './ultimate_2027_offense';
 
 // ============================================================================
 // TYPES & EMPIRICAL BENCHMARK STRUCTURES
@@ -128,9 +129,11 @@ interface PlayTelemetry {
   pressured: boolean;
   touchdown: boolean;
   timeToThrowSec: number | null;
+  ballFlightDurationSec: number | null;
   timeToPressureSec: number | null;
   pocketIntegrityMin: number;
   separationAtThrowYds: number | null;
+  separationAtArrivalYds: number | null;
   preSnapCushionYds: number | null;
   airYards: number | null;
   yacYards: number | null;
@@ -160,7 +163,9 @@ interface AggregatedPassMetrics {
   tttP25: number;
   tttP50: number;
   tttP75: number;
+  flightDurationMean: number;
   sepAtThrowMean: number;
+  sepAtArrivalMean: number;
   preSnapCushionMean: number;
   timeToPressureMean: number;
   olEngagedRateMean: number;
@@ -234,10 +239,9 @@ function classifyDefenseFromSnap(snap0: PlayTickSnapshot): {
   for (const d of defs) {
     const r = d.defAssignment?.role ?? '';
     if (RUSH_DEF_ROLES.has(r)) passRushers++;
-    const isTrueBoxPos = ['DE', 'DT', 'NT', 'EDGE', 'LB', 'ILB', 'MLB', 'WLB', 'SLB', 'OLB', 'LOLB', 'ROLB', 'WILL', 'MIKE', 'SAM'].includes(d.pos);
     const isDownDl = ['DE', 'DT', 'NT', 'EDGE', 'LOLB', 'ROLB'].includes(d.pos) && d.y <= 1.2;
     if (isDownDl) downDlBox++;
-    if (Math.abs(d.x) <= 6.5 && d.y <= 5.5 && (isTrueBoxPos || (Math.abs(d.x) <= 5.8 && r !== 'MAN_COV'))) {
+    if (Math.abs(d.x) <= 6.0 && d.y <= 5.5) {
       boxCount++;
     }
     if (r === 'MAN_COV') manCount++;
@@ -249,9 +253,11 @@ function classifyDefenseFromSnap(snap0: PlayTickSnapshot): {
 
   let shell: ShellType = 'COVER_3';
   if (quarters >= 3) shell = 'COVER_4';
+  else if (manCount >= 2 && deepZone >= 1 && deepThird === 0) shell = 'COVER_1';
+  else if (manCount >= 3 && deepHalf >= 2) shell = 'COVER_1';
   else if (deepHalf >= 2) shell = 'COVER_2';
   else if (deepThird >= 2) shell = 'COVER_3';
-  else if (manCount >= 3 && deepZone >= 1) shell = 'COVER_1';
+  else if (manCount >= 2 && deepZone === 0 && deepHalf === 0 && deepThird === 0 && quarters === 0) shell = 'COVER_0';
   else if (manCount >= 4 && deepZone === 0) shell = 'COVER_0';
 
   const coarseCov: CoarseCoverage =
@@ -290,24 +296,30 @@ function simulatePlayWithTelemetry(
   const term = traj.find((s) => s.playOver) || traj[traj.length - 1];
   const defClass = classifyDefenseFromSnap(snap0);
 
-  // Pre-snap cushion across outer/slot receivers at snap
+  // Pre-snap cushion across outer/slot receivers vs aligned coverage DB
+  const wrPositions = new Set(['WR', 'WR1', 'WR2', 'SL', 'SLOT']);
+  const dbPositions = new Set(['CB', 'CB1', 'CB2', 'NCB', 'NI', 'NB', 'FS', 'SS', 'DB']);
   const recIds0 = snap0.agents
-    .filter((a) => a.side === 'OFF' && (a.assignment.role === 'ROUTE' || a.assignment.role === 'CHIP_RELEASE'))
+    .filter((a) => a.side === 'OFF' && wrPositions.has(a.pos.toUpperCase()) && (a.assignment.role === 'ROUTE' || a.assignment.role === 'CHIP_RELEASE'))
     .map((r) => {
-      let minD = 99;
+      let minAlignedD = 99;
+      let minAnyDbD = 99;
       for (const d of snap0.agents) {
-        if (d.side !== 'DEF') continue;
+        if (d.side !== 'DEF' || !dbPositions.has(d.pos.toUpperCase()) || d.y <= r.y) continue;
         const dist = Math.hypot(d.x - r.x, d.y - r.y);
-        if (dist < minD) minD = dist;
+        if (dist < minAnyDbD) minAnyDbD = dist;
+        if (Math.abs(d.x - r.x) <= 5.5 && dist < minAlignedD) minAlignedD = dist;
       }
-      return minD;
-    });
+      return minAlignedD < 99 ? minAlignedD : minAnyDbD;
+    })
+    .filter((d) => d < 99);
   const preSnapCushionYds =
     recIds0.length > 0 ? recIds0.reduce((a, b) => a + b, 0) / recIds0.length : null;
 
   let minPocket = 100;
   let timeToFirstPressureSec: number | null = null;
   let throwSnap: PlayTickSnapshot | null = null;
+  let arrivalSnap: PlayTickSnapshot | null = null;
   let legalIneligibleOlBuffer = true;
   let legalBackwardLateralsOnly = true;
   let maxUnengagedGForce = 0;
@@ -319,7 +331,7 @@ function simulatePlayWithTelemetry(
   for (let i = 0; i < traj.length; i++) {
     const snap = traj[i];
     if (snap.pocketIntegrity < minPocket) minPocket = snap.pocketIntegrity;
-    if (timeToFirstPressureSec === null && (snap.pocketIntegrity < 52 || snap.terminationReason === 'SACK')) {
+    if (timeToFirstPressureSec === null && snap.timeSec >= 0.65 && (snap.pocketIntegrity < 52 || snap.terminationReason === 'SACK')) {
       timeToFirstPressureSec = snap.timeSec;
     }
 
@@ -337,6 +349,9 @@ function simulatePlayWithTelemetry(
         if (ol.y > 1.05) legalIneligibleOlBuffer = false;
       }
       if ((snap.ball.launchY ?? 0) > 0.05) legalIneligibleOlBuffer = false;
+    }
+    if (throwSnap !== null && arrivalSnap === null && snap.ball?.state !== 'IN_FLIGHT') {
+      arrivalSnap = snap;
     }
 
     if (
@@ -392,19 +407,31 @@ function simulatePlayWithTelemetry(
   }
 
   let separationAtThrowYds: number | null = null;
+  let separationAtArrivalYds: number | null = null;
   let airYards: number | null = null;
+  const ballFlightDurationSec = throwSnap?.ball?.flightDurationSec ?? null;
   if (throwSnap && throwSnap.ball?.targetReceiverId) {
     const tid = throwSnap.ball.targetReceiverId;
     const rec = throwSnap.agents.find((a) => a.id === tid);
     airYards = throwSnap.ball.targetY ?? (rec ? rec.y : null);
     if (rec) {
-      let minD = 99;
+      let distAtThrow = 99;
       for (const d of throwSnap.agents) {
         if (d.side !== 'DEF') continue;
         const dist = Math.hypot(d.x - rec.x, d.y - rec.y);
-        if (dist < minD) minD = dist;
+        if (dist < distAtThrow) distAtThrow = dist;
       }
-      if (minD < 99) separationAtThrowYds = minD;
+      let distAtArrival = 99;
+      const recArr = arrivalSnap?.agents.find((a) => a.id === tid);
+      if (arrivalSnap && recArr) {
+        for (const d of arrivalSnap.agents) {
+          if (d.side !== 'DEF') continue;
+          const dist = Math.hypot(d.x - recArr.x, d.y - recArr.y);
+          if (dist < distAtArrival) distAtArrival = dist;
+        }
+      }
+      if (distAtThrow < 99) separationAtThrowYds = +distAtThrow.toFixed(3);
+      if (distAtArrival < 99) separationAtArrivalYds = +distAtArrival.toFixed(3);
     }
   }
 
@@ -446,9 +473,11 @@ function simulatePlayWithTelemetry(
     pressured,
     touchdown,
     timeToThrowSec,
+    ballFlightDurationSec,
     timeToPressureSec: timeToFirstPressureSec,
     pocketIntegrityMin: minPocket,
     separationAtThrowYds,
+    separationAtArrivalYds,
     preSnapCushionYds,
     airYards,
     yacYards,
@@ -478,9 +507,15 @@ function aggregatePass(rows: PlayTelemetry[]): AggregatedPassMetrics {
   const tttItems = dropbacks
     .filter((r) => r.timeToThrowSec !== null)
     .map((r) => ({ v: r.timeToThrowSec as number, w: r.weight }));
+  const fltItems = dropbacks
+    .filter((r) => r.ballFlightDurationSec !== null)
+    .map((r) => ({ v: r.ballFlightDurationSec as number, w: r.weight }));
   const sepItems = dropbacks
     .filter((r) => r.separationAtThrowYds !== null)
     .map((r) => ({ v: r.separationAtThrowYds as number, w: r.weight }));
+  const sepArrItems = dropbacks
+    .filter((r) => r.separationAtArrivalYds !== null)
+    .map((r) => ({ v: r.separationAtArrivalYds as number, w: r.weight }));
   const cushItems = dropbacks
     .filter((r) => r.preSnapCushionYds !== null)
     .map((r) => ({ v: r.preSnapCushionYds as number, w: r.weight }));
@@ -511,7 +546,9 @@ function aggregatePass(rows: PlayTelemetry[]): AggregatedPassMetrics {
     tttP25: +weightedQuantile(tttItems, 0.25).toFixed(3),
     tttP50: +weightedQuantile(tttItems, 0.5).toFixed(3),
     tttP75: +weightedQuantile(tttItems, 0.75).toFixed(3),
+    flightDurationMean: +weightedMean(fltItems).toFixed(3),
     sepAtThrowMean: +weightedMean(sepItems).toFixed(3),
+    sepAtArrivalMean: +weightedMean(sepArrItems).toFixed(3),
     preSnapCushionMean: +weightedMean(cushItems).toFixed(3),
     timeToPressureMean: +weightedMean(ttpItems).toFixed(3),
     olEngagedRateMean: +weightedMean(dropbacks.map((r) => ({ v: 100 * r.olEngagedRate, w: r.weight }))).toFixed(1),
@@ -567,7 +604,12 @@ function parseCsvLine(line: string): string[] {
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
     if (ch === '"') {
-      inQuotes = !inQuotes;
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
     } else if (ch === ',' && !inQuotes) {
       res.push(cur);
       cur = '';
@@ -577,6 +619,58 @@ function parseCsvLine(line: string): string[] {
   }
   res.push(cur);
   return res;
+}
+
+/** RFC-4180 streaming CSV parser that preserves embedded newlines inside quoted fields. */
+async function* streamCsvRecords(filePath: string): AsyncGenerator<string[]> {
+  const stream = fs.createReadStream(filePath, { encoding: 'utf8', highWaterMark: 1024 * 1024 });
+  let row: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+  let prevWasQuoteInQuotes = false;
+
+  for await (const chunk of stream) {
+    const str = chunk as string;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str[i];
+      if (prevWasQuoteInQuotes) {
+        prevWasQuoteInQuotes = false;
+        if (ch === '"') {
+          cur += '"';
+          continue;
+        }
+        inQuotes = false;
+      }
+
+      if (ch === '"') {
+        if (inQuotes) {
+          prevWasQuoteInQuotes = true;
+        } else {
+          inQuotes = true;
+        }
+      } else if (ch === ',' && !inQuotes) {
+        row.push(cur);
+        cur = '';
+      } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+        if (ch === '\r') continue;
+        if (cur.length > 0 || row.length > 0) {
+          row.push(cur);
+          yield row;
+          row = [];
+          cur = '';
+        }
+      } else {
+        cur += ch;
+      }
+    }
+  }
+  if (prevWasQuoteInQuotes) {
+    inQuotes = false;
+  }
+  if (cur.length > 0 || row.length > 0) {
+    row.push(cur);
+    yield row;
+  }
 }
 
 function findTrackingCsvs(dirPath: string): string[] {
@@ -593,20 +687,646 @@ function findTrackingCsvs(dirPath: string): string[] {
   return found;
 }
 
-async function runBdb10HzMode(engine: All22KinematicEngine): Promise<{
+interface Bdb2027Summary {
+  dataset: 'nfl-big-data-bowl-2027';
+  cohortPlayers: number;
+  combineDrills: Record<string, { n: number; p95SpeedYps: number; maxSpeedYps: number; p95AccelYps2: number; p99AccelYps2: number }>;
+  playerPlayBenchmarks: {
+    rowsParsed: number;
+    cleanRowsParsed: number;
+    dropbackDurationMean: number;
+    timeToPressureMean: number;
+    playerGetOffMean: number;
+    separationOverallMean: number;
+    separationManMean: number;
+    separationZoneMean: number;
+    targetedSeparationOverallMean: number;
+    targetedSeparationManMean: number;
+    targetedSeparationZoneMean: number;
+    cushionOverallMean: number;
+    cushionManMean: number;
+    cushionZoneMean: number;
+    yacMean: number;
+    expectedYacMean: number;
+    ballFlightMeanSec: number;
+    ballFlightGt085Pct: number;
+    byCoverageType: Record<string, { cushionMean: number; sepMean: number; nSep: number }>;
+    targetedByCoverageType: Record<string, { cushionMean: number; sepMean: number; nSep: number }>;
+  };
+}
+
+async function runBdb2027Mode(
+  engine: All22KinematicEngine,
+  bdb2027Dir: string,
+  allCsvs: string[]
+): Promise<{
   status: 'BDB_10HZ_SKIPPED_CREDENTIALS_MISSING' | 'BDB_10HZ_EXECUTED';
   filesDetected: number;
-  kinematicsSummary?: Record<string, { n: number; p95SpeedYps: number; p95AccelYps2: number }>;
+  kinematicsSummary?: Record<string, { n: number; p95SpeedYps: number; p99SpeedYps: number; p95AccelYps2: number; p99AccelYps2: number }>;
   replayChecks?: {
     playsReplayed: number;
     l1PocketDepthMaeYds: number | null;
+    l1PocketDepth2sMaeYds: number | null;
+    l2PassRushMaeYds: number | null;
     l3RunDispMaeYds: number | null;
     c1ShellDriftMaeYds: number | null;
     c2ManSepRmseYds: number | null;
+    wr1sDispMaeYds: number | null;
   };
+  bdb2027Summary?: Bdb2027Summary;
+}> {
+  const playersPath = path.join(bdb2027Dir, 'players.csv');
+  const gamesPath = path.join(bdb2027Dir, 'games.csv');
+  const combineTrackingPath = path.join(bdb2027Dir, 'combine_tracking.csv');
+  const playerPlayPath = path.join(bdb2027Dir, 'player_play.csv');
+  const gameTrackingPaths = ['game_tracking_2023.csv', 'game_tracking_2024.csv', 'game_tracking_2025.csv']
+    .map((fn) => path.join(bdb2027Dir, fn))
+    .filter((p) => fs.existsSync(p));
+
+  const playersPosMap = new Map<string, string>();
+  if (fs.existsSync(playersPath)) {
+    let idx: Record<string, number> = {};
+    let first = true;
+    for await (const cols of streamCsvRecords(playersPath)) {
+      if (first) {
+        cols.forEach((h, i) => (idx[h.trim()] = i));
+        first = false;
+        continue;
+      }
+      playersPosMap.set(cols[idx['nfl_id']], cols[idx['nfl_position']] || 'UNK');
+    }
+  }
+
+  const gameSeasonType = new Map<string, string>();
+  if (fs.existsSync(gamesPath)) {
+    let idx: Record<string, number> = {};
+    let first = true;
+    for await (const cols of streamCsvRecords(gamesPath)) {
+      if (first) {
+        cols.forEach((h, i) => (idx[h.trim()] = i));
+        first = false;
+        continue;
+      }
+      gameSeasonType.set(cols[idx['game_id']], (cols[idx['season_type']] || '').trim());
+    }
+  }
+
+  // 1. Combine 10 Hz Drill Envelopes (full combine_tracking.csv including SKILL_DRILLS_LB)
+  const drillKin: Record<string, { s: number[]; a: number[] }> = {};
+  if (fs.existsSync(combineTrackingPath)) {
+    const rl = readline.createInterface({ input: fs.createReadStream(combineTrackingPath), crlfDelay: Infinity });
+    let idx: Record<string, number> = {};
+    let lineNo = 0;
+    for await (const line of rl) {
+      if (!line.trim()) continue;
+      const cols = parseCsvLine(line);
+      if (lineNo === 0) {
+        cols.forEach((h, i) => (idx[h.trim()] = i));
+        lineNo++;
+        continue;
+      }
+      lineNo++;
+      if (cols[idx['entity_type']] !== 'PLAYER') continue;
+      const dt = cols[idx['drill_type']] || 'UNK';
+      const s = parseFloat(cols[idx['s']] || '');
+      const a = parseFloat(cols[idx['a']] || '');
+      if (Number.isFinite(s) && Number.isFinite(a)) {
+        drillKin[dt] ??= { s: [], a: [] };
+        if (drillKin[dt].s.length < 150000) {
+          drillKin[dt].s.push(s);
+          drillKin[dt].a.push(a);
+        }
+      }
+    }
+  }
+  const combineDrills: Bdb2027Summary['combineDrills'] = {};
+  for (const [dt, arr] of Object.entries(drillKin)) {
+    const ss = [...arr.s].sort((x, y) => x - y);
+    const aa = [...arr.a].sort((x, y) => x - y);
+    combineDrills[dt] = {
+      n: arr.s.length,
+      p95SpeedYps: +(ss[Math.floor(ss.length * 0.95)] || 0).toFixed(2),
+      maxSpeedYps: +(ss[ss.length - 1] || 0).toFixed(2),
+      p95AccelYps2: +(aa[Math.floor(aa.length * 0.95)] || 0).toFixed(2),
+      p99AccelYps2: +(aa[Math.floor(aa.length * 0.99)] || 0).toFixed(2),
+    };
+  }
+
+  // 2. Stream player_play.csv with RFC-4180 parser (handles 11,234 embedded newlines), filtered to REG+POST non-nullified
+  interface PlayMeta {
+    pos: string;
+    isPass: boolean;
+    isTrueRun: boolean;
+    dirSign: 1 | -1;
+    covType: string;
+    route: string;
+    sep: number;
+    dbBucket: 'QUICK' | 'STD' | 'DEEP';
+  }
+  const playMetaMap = new Map<string, PlayMeta>();
+  const dbDur: number[] = [];
+  const ttpArr: number[] = [];
+  const getOffArr: number[] = [];
+  const sepAll: number[] = [];
+  const sepMan: number[] = [];
+  const sepZone: number[] = [];
+  const tgtSepAll: number[] = [];
+  const tgtSepMan: number[] = [];
+  const tgtSepZone: number[] = [];
+  const cushAll: number[] = [];
+  const cushMan: number[] = [];
+  const cushZone: number[] = [];
+  const yacArr: number[] = [];
+  const xyacArr: number[] = [];
+  const byCovStats: Record<string, { cush: number[]; sep: number[] }> = {};
+  const tgtByCovStats: Record<string, { cush: number[]; sep: number[] }> = {};
+  let ppRows = 0;
+  let cleanPpRows = 0;
+
+  if (fs.existsSync(playerPlayPath)) {
+    let idx: Record<string, number> = {};
+    let first = true;
+    for await (const cols of streamCsvRecords(playerPlayPath)) {
+      if (first) {
+        cols.forEach((h, i) => (idx[h.trim()] = i));
+        first = false;
+        continue;
+      }
+      ppRows++;
+      const gid = cols[idx['game_id']];
+      const pid = cols[idx['play_id']];
+      const nid = cols[idx['nfl_id']];
+      const seasonType = gameSeasonType.get(gid) ?? 'REG';
+      const nullified = cols[idx['play_nullified_by_penalty']] || 'N';
+      if ((seasonType !== 'REG' && seasonType !== 'POST') || nullified !== 'N') {
+        continue;
+      }
+      cleanPpRows++;
+
+      const pos = cols[idx['lined_up_position']] || playersPosMap.get(nid) || 'UNK';
+      const pRes = cols[idx['pass_result']] || '';
+      const playDesc = cols[idx['play_description']] || '';
+      const isPass = pRes === 'C' || pRes === 'I' || pRes === 'S' || pRes === 'IN' || pRes === 'R';
+      const isTrueRun = !isPass && !/kneel|aborted/i.test(playDesc);
+      const isTargeted = (cols[idx['target']] === 'TRUE' || cols[idx['target']] === '1') && (pRes === 'C' || pRes === 'I' || pRes === 'IN');
+      const dirSign: 1 | -1 = cols[idx['play_direction']] === 'left' ? -1 : 1;
+      const covType = cols[idx['team_coverage_type']] || 'NA';
+      const covMz = cols[idx['team_coverage_man_zone']] || 'NA';
+      const route = cols[idx['route_ran']] || 'NA';
+      const sep = parseFloat(cols[idx['separation_at_pass_forward']] || '');
+      const cush = parseFloat(cols[idx['cushion']] || '');
+      const db = parseFloat(cols[idx['dropback_duration']] || '');
+      const ttp = parseFloat(cols[idx['time_to_pressure']] || '');
+      const goff = parseFloat(cols[idx['player_get_off']] || '');
+      const yac = parseFloat(cols[idx['yards_after_catch']] || '');
+      const xyac = parseFloat(cols[idx['expected_yards_after_catch']] || '');
+
+      const dbBucket: 'QUICK' | 'STD' | 'DEEP' = Number.isFinite(db) ? (db <= 2.3 ? 'QUICK' : db <= 3.1 ? 'STD' : 'DEEP') : 'STD';
+      if (isPass || isTrueRun) {
+        playMetaMap.set(`${gid}_${pid}_${nid}`, { pos, isPass, isTrueRun, dirSign, covType, route, sep, dbBucket });
+      }
+
+      if (Number.isFinite(db)) dbDur.push(db);
+      if (Number.isFinite(ttp)) ttpArr.push(ttp);
+      if (Number.isFinite(goff)) getOffArr.push(goff);
+      if (Number.isFinite(yac)) yacArr.push(yac);
+      if (Number.isFinite(xyac)) xyacArr.push(xyac);
+      if (Number.isFinite(sep)) {
+        sepAll.push(sep);
+        if (covMz === 'MAN_COVERAGE') sepMan.push(sep);
+        else if (covMz === 'ZONE_COVERAGE') sepZone.push(sep);
+        byCovStats[covType] ??= { cush: [], sep: [] };
+        byCovStats[covType].sep.push(sep);
+        if (isTargeted) {
+          tgtSepAll.push(sep);
+          if (covMz === 'MAN_COVERAGE') tgtSepMan.push(sep);
+          else if (covMz === 'ZONE_COVERAGE') tgtSepZone.push(sep);
+          tgtByCovStats[covType] ??= { cush: [], sep: [] };
+          tgtByCovStats[covType].sep.push(sep);
+        }
+      }
+      if (Number.isFinite(cush)) {
+        cushAll.push(cush);
+        if (covMz === 'MAN_COVERAGE') cushMan.push(cush);
+        else if (covMz === 'ZONE_COVERAGE') cushZone.push(cush);
+        byCovStats[covType] ??= { cush: [], sep: [] };
+        byCovStats[covType].cush.push(cush);
+        if (isTargeted) {
+          tgtByCovStats[covType] ??= { cush: [], sep: [] };
+          tgtByCovStats[covType].cush.push(cush);
+        }
+      }
+    }
+  }
+
+  const meanNum = (arr: number[]) => (arr.length ? +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(3) : 0);
+  const byCoverageType: Record<string, { cushionMean: number; sepMean: number; nSep: number }> = {};
+  for (const [ct, st] of Object.entries(byCovStats)) {
+    if (st.sep.length >= 100) {
+      byCoverageType[ct] = { cushionMean: meanNum(st.cush), sepMean: meanNum(st.sep), nSep: st.sep.length };
+    }
+  }
+  const targetedByCoverageType: Record<string, { cushionMean: number; sepMean: number; nSep: number }> = {};
+  for (const [ct, st] of Object.entries(tgtByCovStats)) {
+    if (st.sep.length >= 30) {
+      targetedByCoverageType[ct] = { cushionMean: meanNum(st.cush), sepMean: meanNum(st.sep), nSep: st.sep.length };
+    }
+  }
+
+  // 3. Stream 10 Hz game_tracking_2023..2025 (active play frames only, REG+POST clean plays)
+  const END_EVENTS = new Set([
+    'tackle',
+    'out_of_bounds',
+    'pass_outcome_incomplete',
+    'touchdown',
+    'qb_sack',
+    'qb_strip_sack',
+    'qb_slide',
+    'fumble',
+    'pass_outcome_interception',
+    'pass_outcome_touchdown',
+  ]);
+  const posKinematics: Record<string, { s: number[]; a: number[] }> = {};
+  interface TrajPt { x: number; y: number; s: number; a: number; event: string }
+  interface CollectedTraj { meta: PlayMeta; snapIdx: number; pts: TrajPt[] }
+  const olPassTrajs: CollectedTraj[] = [];
+  const olRunTrajs: CollectedTraj[] = [];
+  const dlPassTrajs: CollectedTraj[] = [];
+  const dbPassTrajs: CollectedTraj[] = [];
+  const wrPassTrajs: CollectedTraj[] = [];
+  const seenFlightPlays = new Set<string>();
+  const ballFlightDurs: number[] = [];
+
+  for (const tf of gameTrackingPaths) {
+    const rl = readline.createInterface({ input: fs.createReadStream(tf), crlfDelay: Infinity });
+    let idx: Record<string, number> = {};
+    let lineCount = 0;
+    let curKey = '';
+    let curPlayKey = '';
+    let curPts: TrajPt[] = [];
+
+    const flushTraj = () => {
+      if (!curKey || curPts.length === 0) return;
+      const meta = playMetaMap.get(curKey);
+      if (!meta) return;
+      const snapIdx = curPts.findIndex((p) => p.event === 'ball_snap');
+      if (snapIdx < 0) return;
+
+      let endIdx = curPts.length - 1;
+      for (let i = snapIdx; i < curPts.length; i++) {
+        if (END_EVENTS.has(curPts[i].event)) {
+          endIdx = i;
+          break;
+        }
+      }
+
+      if (meta.pos !== 'UNK') {
+        const pk = (posKinematics[meta.pos] ??= { s: [], a: [] });
+        for (let i = snapIdx; i <= endIdx; i++) {
+          if (pk.s.length < 60000) {
+            pk.s.push(curPts[i].s);
+            pk.a.push(curPts[i].a);
+          }
+        }
+      }
+
+      if (meta.isPass && !seenFlightPlays.has(curPlayKey)) {
+        const pfIdx = curPts.findIndex((p) => p.event === 'pass_forward');
+        const paIdx = curPts.findIndex((p) => p.event === 'pass_arrived');
+        if (pfIdx >= 0 && paIdx > pfIdx) {
+          const dtSec = (paIdx - pfIdx) * 0.1;
+          if (dtSec > 0.05 && dtSec < 4.5) {
+            seenFlightPlays.add(curPlayKey);
+            ballFlightDurs.push(dtSec);
+          }
+        }
+      }
+
+      if (snapIdx + 20 >= curPts.length) return;
+      if (['T', 'G', 'C'].includes(meta.pos)) {
+        if (meta.isPass && olPassTrajs.length < 300) olPassTrajs.push({ meta, snapIdx, pts: curPts });
+        else if (meta.isTrueRun && olRunTrajs.length < 300) olRunTrajs.push({ meta, snapIdx, pts: curPts });
+      } else if (['EDGE', 'INTERIOR_LINE'].includes(meta.pos) && meta.isPass && dlPassTrajs.length < 300) {
+        dlPassTrajs.push({ meta, snapIdx, pts: curPts });
+      } else if (['CB', 'SLOT_CB', 'HIGH_SAFETY'].includes(meta.pos) && meta.isPass && dbPassTrajs.length < 300) {
+        dbPassTrajs.push({ meta, snapIdx, pts: curPts });
+      } else if (['WR', 'SLOT_WR', 'TE'].includes(meta.pos) && meta.isPass && wrPassTrajs.length < 300) {
+        wrPassTrajs.push({ meta, snapIdx, pts: curPts });
+      }
+    };
+
+    for await (const line of rl) {
+      if (!line.trim()) continue;
+      const cols = parseCsvLine(line);
+      if (lineCount === 0) {
+        cols.forEach((h, i) => (idx[h.trim()] = i));
+        lineCount++;
+        continue;
+      }
+      lineCount++;
+      const gid = cols[idx['game_id']];
+      const pid = cols[idx['play_id']];
+      const nid = cols[idx['nfl_id']];
+      const k = `${gid}_${pid}_${nid}`;
+      if (k !== curKey) {
+        flushTraj();
+        curKey = k;
+        curPlayKey = `${gid}_${pid}`;
+        curPts = [];
+      }
+      const x = parseFloat(cols[idx['x']] || '');
+      const y = parseFloat(cols[idx['y']] || '');
+      const s = parseFloat(cols[idx['s']] || '');
+      const a = parseFloat(cols[idx['a']] || '');
+      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(s) && Number.isFinite(a)) {
+        curPts.push({ x, y, s, a, event: cols[idx['event']] || 'NA' });
+      }
+      if (lineCount > 1200000) break;
+    }
+    flushTraj();
+  }
+
+  const kinematicsSummary: Record<string, { n: number; p95SpeedYps: number; p99SpeedYps: number; p95AccelYps2: number; p99AccelYps2: number }> = {};
+  for (const [pos, arr] of Object.entries(posKinematics)) {
+    const sSorted = [...arr.s].sort((x, y) => x - y);
+    const aSorted = [...arr.a].sort((x, y) => x - y);
+    kinematicsSummary[pos] = {
+      n: arr.s.length,
+      p95SpeedYps: +(sSorted[Math.floor(sSorted.length * 0.95)] || 0).toFixed(2),
+      p99SpeedYps: +(sSorted[Math.floor(sSorted.length * 0.99)] || 0).toFixed(2),
+      p95AccelYps2: +(aSorted[Math.floor(aSorted.length * 0.95)] || 0).toFixed(2),
+      p99AccelYps2: +(aSorted[Math.floor(aSorted.length * 0.99)] || 0).toFixed(2),
+    };
+  }
+
+  // 4. Score Honest Unfiltered 10 Hz Replay Checks at exact t=1.0s (tick 20) & t=2.0s (tick 40)
+  const convProf = BASELINE_PHILOSOPHIES[0];
+  const getSimDyAtTick = (traj: PlayTickSnapshot[], posIds: string[], targetTick: number): number => {
+    const s0 = traj[0];
+    const sT = traj[Math.min(targetTick, traj.length - 1)];
+    const vals: number[] = [];
+    for (const id of posIds) {
+      const a0 = s0.agents.find((a) => a.id === id);
+      const a1 = sT.agents.find((a) => a.id === id);
+      if (a0 && a1) vals.push(a1.y - a0.y);
+    }
+    return vals.length ? vals.reduce((x, y) => x + y, 0) / vals.length : 0;
+  };
+
+  const passSchemeByBucket: Record<'QUICK' | 'STD' | 'DEEP', CanonicalPlayId> = {
+    QUICK: 'QUICK_SLANT',
+    STD: 'DAGGER',
+    DEEP: 'FOUR_VERTS',
+  };
+  const simOlPassByBucket1s: Record<string, Record<string, number>> = {};
+  const simOlPassByBucket2s: Record<string, Record<string, number>> = {};
+  const simDlPass1s: Record<string, number> = { EDGE: 0, INTERIOR_LINE: 0 };
+  const passBktKeys = Object.keys(passSchemeByBucket) as ('QUICK' | 'STD' | 'DEEP')[];
+  for (const bkt of passBktKeys) {
+    const pid = passSchemeByBucket[bkt];
+    const tr = engine.simulatePlay([...buildBaselinePlay(convProf, pid), ...buildModern2027Defense('NICKEL_OVER_C3')], 0.0);
+    simOlPassByBucket1s[bkt] = {
+      T: getSimDyAtTick(tr, ['LT', 'RT'], 20),
+      G: getSimDyAtTick(tr, ['LG', 'RG'], 20),
+      C: getSimDyAtTick(tr, ['C'], 20),
+    };
+    simOlPassByBucket2s[bkt] = {
+      T: getSimDyAtTick(tr, ['LT', 'RT'], 40),
+      G: getSimDyAtTick(tr, ['LG', 'RG'], 40),
+      C: getSimDyAtTick(tr, ['C'], 40),
+    };
+    simDlPass1s.EDGE += getSimDyAtTick(tr, ['RDE', 'LDE'], 20) / passBktKeys.length;
+    simDlPass1s.INTERIOR_LINE += getSimDyAtTick(tr, ['NT', '3T'], 20) / passBktKeys.length;
+  }
+
+  const runSchemes: CanonicalPlayId[] = ['INSIDE_ZONE', 'DUO', 'OUTSIDE_ZONE'];
+  const simOlRunByPos: Record<string, number> = { T: 0, G: 0, C: 0 };
+  for (const pid of runSchemes) {
+    const tr = engine.simulatePlay([...buildBaselinePlay(convProf, pid), ...buildModern2027Defense('NICKEL_OVER_C3')], 0.0);
+    simOlRunByPos.T += getSimDyAtTick(tr, ['LT', 'RT'], 20) / runSchemes.length;
+    simOlRunByPos.G += getSimDyAtTick(tr, ['LG', 'RG'], 20) / runSchemes.length;
+    simOlRunByPos.C += getSimDyAtTick(tr, ['C'], 20) / runSchemes.length;
+  }
+
+  const getSimDbPedal1s = (front: ModernDefFrontId, ids: string[]): number | null => {
+    const tr = engine.simulatePlay([...buildBaselinePlay(convProf, 'DAGGER'), ...buildModern2027Defense(front)], 0.0);
+    const s0 = tr[0];
+    const s20 = tr[Math.min(20, tr.length - 1)];
+    const pedals: number[] = [];
+    for (const id of ids) {
+      const a0 = s0.agents.find((a) => a.id === id);
+      const a1 = s20.agents.find((a) => a.id === id);
+      if (a0 && a1 && !RUSH_DEF_ROLES.has(a0.defAssignment?.role ?? '')) {
+        pedals.push(a1.y - a0.y);
+      }
+    }
+    return pedals.length ? pedals.reduce((x, y) => x + y, 0) / pedals.length : null;
+  };
+  const simDbPedalMap: Record<string, Record<string, number | null>> = {
+    COVER_3_ZONE: { HIGH_SAFETY: getSimDbPedal1s('NICKEL_OVER_C3', ['FS', 'SS']), CB: getSimDbPedal1s('NICKEL_OVER_C3', ['CB1', 'CB2']), SLOT_CB: getSimDbPedal1s('NICKEL_OVER_C3', ['NCB']) },
+    COVER_1_MAN: { HIGH_SAFETY: getSimDbPedal1s('NICKEL_UNDER_C1', ['FS', 'SS']), CB: getSimDbPedal1s('NICKEL_UNDER_C1', ['CB1', 'CB2']), SLOT_CB: getSimDbPedal1s('NICKEL_UNDER_C1', ['NCB']) },
+    COVER_4_ZONE: { HIGH_SAFETY: getSimDbPedal1s('DIME_QUARTERS_MATCH', ['FS', 'SS']), CB: getSimDbPedal1s('DIME_QUARTERS_MATCH', ['CB1', 'CB2']), SLOT_CB: getSimDbPedal1s('DIME_QUARTERS_MATCH', ['NCB']) },
+    COVER_2_ZONE: { HIGH_SAFETY: getSimDbPedal1s('NICKEL_SIM_C2', ['FS', 'SS']), CB: getSimDbPedal1s('NICKEL_SIM_C2', ['CB1', 'CB2']), SLOT_CB: getSimDbPedal1s('NICKEL_SIM_C2', ['NCB']) },
+  };
+
+  const simWrPass1s: Record<string, number> = { WR: 0, SLOT_WR: 0, TE: 0 };
+  for (const pid of ['DAGGER', 'FOUR_VERTS'] as CanonicalPlayId[]) {
+    const tr = engine.simulatePlay([...buildBaselinePlay(convProf, pid), ...buildModern2027Defense('NICKEL_OVER_C3')], 0.0);
+    simWrPass1s.WR += getSimDyAtTick(tr, ['WR1', 'WR2'], 20) / 2;
+    simWrPass1s.SLOT_WR += getSimDyAtTick(tr, ['SL'], 20) / 2;
+    simWrPass1s.TE += getSimDyAtTick(tr, ['TE'], 20) / 2;
+  }
+
+  const l1Groups1s = new Map<string, number[]>();
+  const l1Groups2s = new Map<string, number[]>();
+  for (const t of olPassTrajs) {
+    const obsDy1 = (t.pts[t.snapIdx + 10].x - t.pts[t.snapIdx].x) * t.meta.dirSign;
+    const gk = `${t.meta.pos}__${t.meta.dbBucket}`;
+    (l1Groups1s.get(gk) ?? (() => { const a: number[] = []; l1Groups1s.set(gk, a); return a; })()).push(obsDy1);
+    if (t.snapIdx + 20 < t.pts.length) {
+      const obsDy2 = (t.pts[t.snapIdx + 20].x - t.pts[t.snapIdx].x) * t.meta.dirSign;
+      (l1Groups2s.get(gk) ?? (() => { const a: number[] = []; l1Groups2s.set(gk, a); return a; })()).push(obsDy2);
+    }
+  }
+  const l1Errors: number[] = [];
+  for (const [gk, vals] of l1Groups1s.entries()) {
+    const [pos, bkt] = gk.split('__');
+    const obsMean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const simDy = simOlPassByBucket1s[bkt]?.[pos];
+    if (simDy !== undefined) l1Errors.push(Math.abs(obsMean - simDy));
+  }
+  const l1Errors2s: number[] = [];
+  for (const [gk, vals] of l1Groups2s.entries()) {
+    const [pos, bkt] = gk.split('__');
+    const obsMean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const simDy = simOlPassByBucket2s[bkt]?.[pos];
+    if (simDy !== undefined) l1Errors2s.push(Math.abs(obsMean - simDy));
+  }
+
+  const l2Groups = new Map<string, number[]>();
+  for (const t of dlPassTrajs) {
+    const obsDy = (t.pts[t.snapIdx + 10].x - t.pts[t.snapIdx].x) * t.meta.dirSign;
+    (l2Groups.get(t.meta.pos) ?? (() => { const a: number[] = []; l2Groups.set(t.meta.pos, a); return a; })()).push(obsDy);
+  }
+  const l2Errors: number[] = [];
+  for (const [pos, vals] of l2Groups.entries()) {
+    const obsMean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const simDy = simDlPass1s[pos];
+    if (simDy !== undefined) l2Errors.push(Math.abs(obsMean - simDy));
+  }
+
+  const l3Groups = new Map<string, number[]>();
+  for (const t of olRunTrajs) {
+    const obsDy = (t.pts[t.snapIdx + 10].x - t.pts[t.snapIdx].x) * t.meta.dirSign;
+    (l3Groups.get(t.meta.pos) ?? (() => { const a: number[] = []; l3Groups.set(t.meta.pos, a); return a; })()).push(obsDy);
+  }
+  const l3Errors: number[] = [];
+  for (const [pos, vals] of l3Groups.entries()) {
+    const obsMean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const simDy = simOlRunByPos[pos];
+    if (simDy !== undefined) l3Errors.push(Math.abs(obsMean - simDy));
+  }
+
+  const c1Groups = new Map<string, number[]>();
+  for (const t of dbPassTrajs) {
+    const obsPedal = (t.pts[t.snapIdx + 10].x - t.pts[t.snapIdx].x) * t.meta.dirSign;
+    const covKey = simDbPedalMap[t.meta.covType] ? t.meta.covType : 'COVER_3_ZONE';
+    const gk = `${t.meta.pos}__${covKey}`;
+    (c1Groups.get(gk) ?? (() => { const a: number[] = []; c1Groups.set(gk, a); return a; })()).push(obsPedal);
+  }
+  const c1Errors: number[] = [];
+  for (const [gk, vals] of c1Groups.entries()) {
+    if (vals.length < 3) continue;
+    const [pos, covKey] = gk.split('__');
+    const obsMean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const simPedal = simDbPedalMap[covKey]?.[pos];
+    if (simPedal !== null && simPedal !== undefined) c1Errors.push(Math.abs(obsMean - simPedal));
+  }
+
+  const wrGroups = new Map<string, number[]>();
+  for (const t of wrPassTrajs) {
+    const obsDy = (t.pts[t.snapIdx + 10].x - t.pts[t.snapIdx].x) * t.meta.dirSign;
+    (wrGroups.get(t.meta.pos) ?? (() => { const a: number[] = []; wrGroups.set(t.meta.pos, a); return a; })()).push(obsDy);
+  }
+  const wrErrors: number[] = [];
+  for (const [pos, vals] of wrGroups.entries()) {
+    const obsMean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const simDy = simWrPass1s[pos];
+    if (simDy !== undefined) wrErrors.push(Math.abs(obsMean - simDy));
+  }
+
+  // Coverage-level separation RMSE across COVER_0 / COVER_1 / COVER_2 / COVER_3 / COVER_4 (pure throw sep!)
+  const covProbeFronts: [string, ModernDefFrontId][] = [
+    ['COVER_0_MAN', 'DIME_MUG_C0'],
+    ['COVER_1_MAN', 'NICKEL_UNDER_C1'],
+    ['COVER_2_ZONE', 'NICKEL_SIM_C2'],
+    ['COVER_3_ZONE', 'NICKEL_OVER_C3'],
+    ['COVER_4_ZONE', 'DIME_QUARTERS_MATCH'],
+  ];
+  const sepSqErrs: number[] = [];
+  for (const [covKey, df] of covProbeFronts) {
+    const obsSep = targetedByCoverageType[covKey]?.sepMean ?? byCoverageType[covKey]?.sepMean;
+    if (!obsSep) continue;
+    const seps: number[] = [];
+    for (const pid of ['DAGGER', 'QUICK_SLANT', 'MESH', 'FOUR_VERTS'] as CanonicalPlayId[]) {
+      for (let r = 0; r < 6; r++) {
+        const res = simulatePlayWithTelemetry(engine, buildBaselinePlay(convProf, pid), buildModern2027Defense(df));
+        if (res.separationAtThrowYds !== null) seps.push(res.separationAtThrowYds);
+      }
+    }
+    if (seps.length > 0) {
+      const simSep = seps.reduce((a, b) => a + b, 0) / seps.length;
+      sepSqErrs.push((simSep - obsSep) ** 2);
+    }
+  }
+
+  const mae = (arr: number[]) => (arr.length ? +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : null);
+  const playsReplayed = olPassTrajs.length + olRunTrajs.length + dlPassTrajs.length + dbPassTrajs.length + wrPassTrajs.length;
+  const replayChecks = {
+    playsReplayed,
+    l1PocketDepthMaeYds: mae(l1Errors),
+    l1PocketDepth2sMaeYds: mae(l1Errors2s),
+    l2PassRushMaeYds: mae(l2Errors),
+    l3RunDispMaeYds: mae(l3Errors),
+    c1ShellDriftMaeYds: mae(c1Errors),
+    c2ManSepRmseYds: sepSqErrs.length ? +Math.sqrt(sepSqErrs.reduce((a, b) => a + b, 0) / sepSqErrs.length).toFixed(2) : null,
+    wr1sDispMaeYds: mae(wrErrors),
+  };
+
+  const ballFlightGt085Pct = ballFlightDurs.length
+    ? +((100 * ballFlightDurs.filter((d) => d > 0.85).length) / ballFlightDurs.length).toFixed(1)
+    : 0;
+
+  const bdb2027Summary: Bdb2027Summary = {
+    dataset: 'nfl-big-data-bowl-2027',
+    cohortPlayers: playersPosMap.size,
+    combineDrills,
+    playerPlayBenchmarks: {
+      rowsParsed: ppRows,
+      cleanRowsParsed: cleanPpRows,
+      dropbackDurationMean: meanNum(dbDur),
+      timeToPressureMean: meanNum(ttpArr),
+      playerGetOffMean: meanNum(getOffArr),
+      separationOverallMean: meanNum(sepAll),
+      separationManMean: meanNum(sepMan),
+      separationZoneMean: meanNum(sepZone),
+      targetedSeparationOverallMean: meanNum(tgtSepAll),
+      targetedSeparationManMean: meanNum(tgtSepMan),
+      targetedSeparationZoneMean: meanNum(tgtSepZone),
+      cushionOverallMean: meanNum(cushAll),
+      cushionManMean: meanNum(cushMan),
+      cushionZoneMean: meanNum(cushZone),
+      yacMean: meanNum(yacArr),
+      expectedYacMean: meanNum(xyacArr),
+      ballFlightMeanSec: meanNum(ballFlightDurs),
+      ballFlightGt085Pct,
+      byCoverageType,
+      targetedByCoverageType,
+    },
+  };
+
+  console.log(`\n[Mode 1: BDB 2027 10 Hz Combine-to-Pro Replay] STATUS: BDB_10HZ_EXECUTED (${allCsvs.length} CSVs, ${ppRows} total / ${cleanPpRows} REG+POST clean player-plays, ${playsReplayed} trajectories)`);
+  console.log(
+    `  Replay Checks (Zero Fudge Factors @ 1.0s/2.0s): L1_Pocket1sMAE=${replayChecks.l1PocketDepthMaeYds}y | L1_Pocket2sMAE=${replayChecks.l1PocketDepth2sMaeYds}y | L2_PassRush1sMAE=${replayChecks.l2PassRushMaeYds}y | L3_RunOL1sMAE=${replayChecks.l3RunDispMaeYds}y | C1_ShellDrift1sMAE=${replayChecks.c1ShellDriftMaeYds}y | C2_TgtCovSepRMSE=${replayChecks.c2ManSepRmseYds}y | WR1sMAE=${replayChecks.wr1sDispMaeYds}y`
+  );
+  console.log(
+    `  BDB 2027 Clean Benchmarks: Cushion=${bdb2027Summary.playerPlayBenchmarks.cushionOverallMean}y (Man ${bdb2027Summary.playerPlayBenchmarks.cushionManMean}y / Zone ${bdb2027Summary.playerPlayBenchmarks.cushionZoneMean}y) | TargetedSep=${bdb2027Summary.playerPlayBenchmarks.targetedSeparationOverallMean}y (Man ${bdb2027Summary.playerPlayBenchmarks.targetedSeparationManMean}y / Zone ${bdb2027Summary.playerPlayBenchmarks.targetedSeparationZoneMean}y) | AllSep=${bdb2027Summary.playerPlayBenchmarks.separationOverallMean}y | YAC=${bdb2027Summary.playerPlayBenchmarks.yacMean}y | Flight=${bdb2027Summary.playerPlayBenchmarks.ballFlightMeanSec}s (>0.85s: ${ballFlightGt085Pct}%) | TTP=${bdb2027Summary.playerPlayBenchmarks.timeToPressureMean}s`
+  );
+
+  return {
+    status: 'BDB_10HZ_EXECUTED',
+    filesDetected: allCsvs.length,
+    kinematicsSummary,
+    replayChecks,
+    bdb2027Summary,
+  };
+}
+
+async function runBdb10HzMode(engine: All22KinematicEngine): Promise<{
+  status: 'BDB_10HZ_SKIPPED_CREDENTIALS_MISSING' | 'BDB_10HZ_EXECUTED';
+  filesDetected: number;
+  kinematicsSummary?: Record<string, { n: number; p95SpeedYps: number; p99SpeedYps: number; p95AccelYps2: number; p99AccelYps2: number }>;
+  replayChecks?: {
+    playsReplayed: number;
+    l1PocketDepthMaeYds: number | null;
+    l1PocketDepth2sMaeYds: number | null;
+    l2PassRushMaeYds: number | null;
+    l3RunDispMaeYds: number | null;
+    c1ShellDriftMaeYds: number | null;
+    c2ManSepRmseYds: number | null;
+    wr1sDispMaeYds: number | null;
+  };
+  bdb2027Summary?: Bdb2027Summary;
 }> {
   const bdbRoot = path.join(process.cwd(), 'data', 'bdb');
   const allCsvs = findTrackingCsvs(bdbRoot);
+
+  const playersCsv = allCsvs.find((f) => path.basename(f).toLowerCase() === 'players.csv');
+  const playerPlayCsv = allCsvs.find((f) => path.basename(f).toLowerCase() === 'player_play.csv');
+  if (playersCsv && playerPlayCsv) {
+    return runBdb2027Mode(engine, path.dirname(playersCsv), allCsvs);
+  }
+
   const trackingFiles = allCsvs.filter((f) => {
     const bn = path.basename(f).toLowerCase();
     return bn.includes('tracking') || bn.startsWith('week') || bn.startsWith('input_');
@@ -614,8 +1334,8 @@ async function runBdb10HzMode(engine: All22KinematicEngine): Promise<{
 
   if (trackingFiles.length === 0) {
     console.log('\n[Mode 1: BDB 10 Hz Frame Replay] STATUS: BDB_10HZ_SKIPPED_CREDENTIALS_MISSING');
-    console.log('  - No Kaggle 10 Hz CSVs present in data/bdb/{bdb2023,bdb2025,bdb2026}.');
-    console.log('  - Sanctioned unlock path: place ~/.kaggle/kaggle.json (accept competition rules on Kaggle),');
+    console.log('  - No Kaggle 10 Hz CSVs present in data/bdb/{bdb2023,bdb2025,bdb2026,bdb2027}.');
+    console.log('  - Sanctioned unlock path: place ~/.kaggle/access_token or kaggle.json (accept competition rules on Kaggle),');
     console.log('    then run: py -3.12 scripts/fetch_validation_data.py  OR unzip Kaggle tracking CSVs into data/bdb/.');
     return { status: 'BDB_10HZ_SKIPPED_CREDENTIALS_MISSING', filesDetected: allCsvs.length };
   }
@@ -680,14 +1400,16 @@ async function runBdb10HzMode(engine: All22KinematicEngine): Promise<{
     }
   }
 
-  const kinematicsSummary: Record<string, { n: number; p95SpeedYps: number; p95AccelYps2: number }> = {};
+  const kinematicsSummary: Record<string, { n: number; p95SpeedYps: number; p99SpeedYps: number; p95AccelYps2: number; p99AccelYps2: number }> = {};
   for (const [pos, arr] of Object.entries(posKinematics)) {
     const sSorted = [...arr.s].sort((x, y) => x - y);
     const aSorted = [...arr.a].sort((x, y) => x - y);
     kinematicsSummary[pos] = {
       n: arr.s.length,
       p95SpeedYps: +(sSorted[Math.floor(sSorted.length * 0.95)] || 0).toFixed(2),
+      p99SpeedYps: +(sSorted[Math.floor(sSorted.length * 0.99)] || 0).toFixed(2),
       p95AccelYps2: +(aSorted[Math.floor(aSorted.length * 0.95)] || 0).toFixed(2),
+      p99AccelYps2: +(aSorted[Math.floor(aSorted.length * 0.99)] || 0).toFixed(2),
     };
   }
 
@@ -787,27 +1509,103 @@ async function runBdb10HzMode(engine: All22KinematicEngine): Promise<{
       playsReplayed,
       l1PocketDepthMaeYds:
         pocketErrors.length > 0 ? +(pocketErrors.reduce((a, b) => a + b, 0) / pocketErrors.length).toFixed(2) : null,
+      l1PocketDepth2sMaeYds: null,
+      l2PassRushMaeYds: null,
       l3RunDispMaeYds: null,
       c1ShellDriftMaeYds:
         shellDrifts.length > 0 ? +(shellDrifts.reduce((a, b) => a + b, 0) / shellDrifts.length).toFixed(2) : null,
       c2ManSepRmseYds: null,
+      wr1sDispMaeYds: null,
     },
   };
+}
+
+interface RawTeamPlayer {
+  id?: string;
+  label: string;
+  name: string;
+  ratings: Record<string, number>;
+  scouting?: { ovr?: number; jersey?: number; fortyYdDash?: number; ngsMaxSpeedMph?: number; weightLbs?: number };
+}
+
+interface RawTeamEntry {
+  offense: RawTeamPlayer[];
+  defense: RawTeamPlayer[];
+}
+
+function loadRawNflTeams(): Record<string, RawTeamEntry> {
+  const teamsPath = path.join(process.cwd(), 'src', 'data', 'nfl_teams_32.json');
+  return JSON.parse(fs.readFileSync(teamsPath, 'utf8')) as Record<string, RawTeamEntry>;
+}
+
+function applyTeamRosterToAgents(
+  offAgents: SimAgent[],
+  defAgents: SimAgent[],
+  offTeam: RawTeamEntry | undefined,
+  defTeam: RawTeamEntry | undefined
+): void {
+  if (offTeam) {
+    for (const a of offAgents) {
+      const match =
+        offTeam.offense.find((p) => p.id === a.id) ||
+        (a.id === 'SL' ? offTeam.offense.find((p) => p.id === 'SLOT' || p.label === 'SLOT') : undefined) ||
+        offTeam.offense.find((p) => p.label === a.pos);
+      if (!match) continue;
+      a.name = match.name || a.id;
+      const r = match.ratings || {};
+      const isOl = ['LT', 'LG', 'C', 'RG', 'RT'].includes(a.pos);
+      a.ratings = {
+        speed: r.spd ?? a.ratings.speed,
+        accel: r.acc ?? a.ratings.accel,
+        power: isOl
+          ? Math.round((r.str ?? 88) * 0.4 + (r.pbk_anchor ?? 86) * 0.3 + (r.rbk_power ?? 86) * 0.3)
+          : Math.round((r.str ?? 76) * 0.5 + (r.btk_power ?? r.rbk_power ?? 78) * 0.5),
+        finesse: isOl
+          ? Math.round((r.agi ?? 74) * 0.3 + (r.pbk_lateral ?? 85) * 0.35 + (r.rbk_reach ?? 85) * 0.35)
+          : Math.round((r.agi ?? 86) * 0.45 + (r.rr_short ?? r.elusiveness ?? r.tha_short ?? 85) * 0.55),
+        awareness: r.pre_snap_read ?? match.scouting?.ovr ?? a.ratings.awareness,
+      };
+    }
+  }
+  if (defTeam) {
+    const defRoster = defTeam.defense;
+    const mapDef = (agent: SimAgent): RawTeamPlayer | undefined => {
+      const direct = defRoster.find((p) => p.id === agent.id || p.label === agent.id);
+      if (direct) return direct;
+      if (agent.id === 'NT' || agent.id === '0T_NT' || agent.id === '4i_L') return defRoster.find((p) => p.id === 'DT1') || defRoster[1];
+      if (agent.id === '3T' || agent.id === '4i_R') return defRoster.find((p) => p.id === 'DT2') || defRoster[2];
+      if (agent.id === 'LOLB' || agent.id === 'DE_L') return defRoster.find((p) => p.id === 'LDE') || defRoster[0];
+      if (agent.id === 'ROLB' || agent.id === 'DE_R') return defRoster.find((p) => p.id === 'RDE') || defRoster[3];
+      if (agent.id === 'WILL') return defRoster.find((p) => p.id === 'WLB') || defRoster[4];
+      if (agent.id === 'MIKE') return defRoster.find((p) => p.id === 'MLB') || defRoster[5];
+      if (agent.id === 'NCB' || agent.id === 'DIME') return defRoster.find((p) => p.id === 'NB' || p.label === 'NB') || defRoster[8];
+      return undefined;
+    };
+    for (const d of defAgents) {
+      const match = mapDef(d);
+      if (!match) continue;
+      d.name = match.name || d.id;
+      const r = match.ratings || {};
+      const isFront = ['DE', 'DT', 'NT', 'EDGE'].includes(d.pos);
+      d.ratings = {
+        speed: r.spd ?? d.ratings.speed,
+        accel: r.acc ?? d.ratings.accel,
+        power: isFront
+          ? Math.round((r.str ?? 86) * 0.45 + (r.rush_power ?? 86) * 0.55)
+          : Math.round((r.str ?? 74) * 0.45 + (r.tak_hit_power ?? 82) * 0.55),
+        finesse: isFront
+          ? Math.round((r.rush_speed ?? 84) * 0.5 + (r.bsh_shed ?? 85) * 0.5)
+          : Math.round((r.cov_man ?? 82) * 0.5 + (r.cov_zone ?? 84) * 0.5),
+        awareness: r.play_rec ?? match.scouting?.ovr ?? d.ratings.awareness,
+      };
+    }
+  }
 }
 
 // ============================================================================
 // MODE 2: NFLVERSE EMPIRICAL TELEMETRY AUDIT & STAGE 4 RE-AUDIT
 // ============================================================================
-function auditRosterKinematics(engine: All22KinematicEngine) {
-  const teamsPath = path.join(process.cwd(), 'src', 'data', 'nfl_teams_32.json');
-  const rawTeams = JSON.parse(fs.readFileSync(teamsPath, 'utf8')) as Record<
-    string,
-    {
-      offense: { label: string; name: string; ratings: Record<string, number>; scouting?: { fortyYdDash?: number; ngsMaxSpeedMph?: number; weightLbs?: number } }[];
-      defense: { label: string; name: string; ratings: Record<string, number>; scouting?: { fortyYdDash?: number; ngsMaxSpeedMph?: number; weightLbs?: number } }[];
-    }
-  >;
-
+function auditRosterKinematics(engine: All22KinematicEngine, rawTeams: Record<string, RawTeamEntry>) {
   const byPos: Record<string, { spd: number[]; acc: number[]; forty: number[]; mph: number[]; wt: number[]; exact475Count: number }> = {};
   for (const team of Object.values(rawTeams)) {
     for (const p of [...team.offense, ...team.defense]) {
@@ -823,8 +1621,27 @@ function auditRosterKinematics(engine: All22KinematicEngine) {
     }
   }
 
+  const posSummary = Object.entries(byPos).map(([pos, vals]) => {
+    const avg = (a: number[]) => (a.length ? +(a.reduce((x, y) => x + y, 0) / a.length).toFixed(2) : 0);
+    return {
+      pos,
+      n: vals.spd.length,
+      meanSpd: avg(vals.spd),
+      meanAcc: avg(vals.acc),
+      meanForty: avg(vals.forty),
+      meanMph: avg(vals.mph),
+      meanWtLbs: avg(vals.wt),
+      imputed475Count: vals.exact475Count,
+    };
+  });
+  const posByKey = new Map(posSummary.map((p) => [p.pos, p]));
+
   // Also empirically measure Engine 0->10y split & max speed for rating profiles in a clean sprint
-  const measureSprint = (pos: string, speedRating: number, accelRating: number, weightLbs?: number) => {
+  const measureSprint = (pos: string, rosterPosKey: string) => {
+    const rp = posByKey.get(rosterPosKey);
+    const speedRating = rp ? Math.round(rp.meanSpd) : 85;
+    const accelRating = rp ? Math.round(rp.meanAcc) : 85;
+    const weightLbs = rp ? Math.round(rp.meanWtLbs) : undefined;
     const off: SimAgent = {
       id: 'TEST_RUNNER',
       label: pos,
@@ -907,14 +1724,17 @@ function auditRosterKinematics(engine: All22KinematicEngine) {
 
     const traj = engine.simulatePlay([off, dummyQb, dummyCb], 0.0);
     let maxV = 0;
+    let tFirstMove: number | null = null;
     let t10y: number | null = null;
     for (const snap of traj) {
       const a = snap.agents.find((ag) => ag.id === 'TEST_RUNNER');
       if (!a) continue;
       const v = Math.hypot(a.vx, a.vy);
       if (v > maxV) maxV = v;
+      if (tFirstMove === null && v >= 0.5) tFirstMove = snap.timeSec;
       if (t10y === null && a.y - off.startY >= 10.0) t10y = snap.timeSec;
     }
+    const burst10y = t10y !== null && tFirstMove !== null ? +(t10y - tFirstMove).toFixed(2) : null;
     return {
       pos,
       weightLbs,
@@ -923,34 +1743,21 @@ function auditRosterKinematics(engine: All22KinematicEngine) {
       simMaxYps: +maxV.toFixed(2),
       simMaxMph: +(maxV * 2.04545).toFixed(2),
       sim10YdSplitSec: t10y !== null ? +t10y.toFixed(2) : null,
+      sim10YdBurstSec: burst10y,
     };
   };
 
   const sprintProbes = [
-    measureSprint('WR', 92, 92, 192),
-    measureSprint('CB', 92, 91, 197),
-    measureSprint('FS', 83, 83, 205),
-    measureSprint('RB', 89, 89, 217),
-    measureSprint('LB', 82, 82, 234),
-    measureSprint('TE', 81, 81, 249),
-    measureSprint('EDGE', 80, 80, 262),
-    measureSprint('LT', 71, 71, 311),
-    measureSprint('DT', 73, 73, 305),
+    measureSprint('WR', 'WR1'),
+    measureSprint('CB', 'CB1'),
+    measureSprint('FS', 'FS'),
+    measureSprint('RB', 'RB'),
+    measureSprint('LB', 'MLB'),
+    measureSprint('TE', 'TE'),
+    measureSprint('EDGE', 'EDGE1'),
+    measureSprint('LT', 'LT'),
+    measureSprint('DT', 'DT1'),
   ];
-
-  const posSummary = Object.entries(byPos).map(([pos, vals]) => {
-    const avg = (a: number[]) => (a.length ? +(a.reduce((x, y) => x + y, 0) / a.length).toFixed(2) : 0);
-    return {
-      pos,
-      n: vals.spd.length,
-      meanSpd: avg(vals.spd),
-      meanAcc: avg(vals.acc),
-      meanForty: avg(vals.forty),
-      meanMph: avg(vals.mph),
-      meanWtLbs: avg(vals.wt),
-      imputed475Count: vals.exact475Count,
-    };
-  });
 
   return { posSummary, sprintProbes };
 }
@@ -975,13 +1782,14 @@ export async function runTrackingAndChartedValidation(): Promise<void> {
 
   // 1. MODE 1: BDB 10 Hz Frame Replay
   const bdbRes = await runBdb10HzMode(engine);
+  const rawTeams = loadRawNflTeams();
 
   // 2. MODE 2A: Roster & Positional Kinematics Envelope Audit
-  const kinAudit = auditRosterKinematics(engine);
+  const kinAudit = auditRosterKinematics(engine, rawTeams);
   console.log('\n[Mode 2A: Roster & Engine Kinematics Audit (32 NFL Teams + Sprint Envelope)]');
   for (const s of kinAudit.sprintProbes) {
     console.log(
-      `  Sprint[${s.pos.padEnd(4)} spd=${s.speedRating} acc=${s.accelRating}] => SimMax=${s.simMaxYps} yd/s (${s.simMaxMph} mph) | 10ySplit=${s.sim10YdSplitSec}s`
+      `  Sprint[${s.pos.padEnd(4)} spd=${s.speedRating} acc=${s.accelRating}] => SimMax=${s.simMaxYps} yd/s (${s.simMaxMph} mph) | 10ySnap=${s.sim10YdSplitSec}s | 10yBurst=${s.sim10YdBurstSec}s`
     );
   }
   const anomalyPositions = kinAudit.posSummary.filter((p) => p.imputed475Count >= 4 || p.pos === 'FS' || p.pos === 'SS' || p.pos === 'EDGE1');
@@ -1155,7 +1963,7 @@ export async function runTrackingAndChartedValidation(): Promise<void> {
   console.log(formatLineDiff('Pre-Snap Cushion', simPassAll.preSnapCushionMean, ngs.receivingWeekly.avgCushionYds.mean, null, 'y'));
   console.log(formatLineDiff('Mean Air Yards', simPassAll.meanAirYards, tr.dropbacks.nonScreenDropbacks.meanAirYards, ho.dropbacks.nonScreenDropbacks.meanAirYards, 'y'));
   console.log(formatLineDiff('Mean YAC on Comp', simPassAll.meanYacOnComp, tr.dropbacks.nonScreenDropbacks.meanYacOnComp, ho.dropbacks.nonScreenDropbacks.meanYacOnComp, 'y'));
-  console.log(`  TTT Quantiles: Sim p25=${simPassAll.tttP25}s / p50=${simPassAll.tttP50}s / p75=${simPassAll.tttP75}s (NFL 22-23: 2.10 / 2.60 / 3.24s) | OL Engaged=${simPassAll.olEngagedRateMean}% | MeanTTP=${simPassAll.timeToPressureMean}s`);
+  console.log(`  TTT Quantiles: Sim p25=${simPassAll.tttP25}s / p50=${simPassAll.tttP50}s / p75=${simPassAll.tttP75}s (NFL 22-23: 2.10 / 2.60 / 3.24s) | Flight=${simPassAll.flightDurationMean}s | Sep@Arr=${simPassAll.sepAtArrivalMean}y | OL Engaged=${simPassAll.olEngagedRateMean}% | MeanTTP=${simPassAll.timeToPressureMean}s`);
 
   console.log('\n[Line Play Splits: 4-Man Rush vs 5+ Blitz | Play-Action vs Straight Dropback | 3rd & 7-11]');
   console.log(formatLineDiff('4-Man Rush Sack %', simPass4Man.sackPct, tr.dropbacks.fourManOrFewerRush.sackPct, ho.dropbacks.fourManOrFewerRush.sackPct, '%'));
@@ -1233,15 +2041,23 @@ export async function runTrackingAndChartedValidation(): Promise<void> {
     const passRows: PlayTelemetry[] = [];
     const runRows: PlayTelemetry[] = [];
     const prof = BASELINE_PHILOSOPHIES[0];
+    const offRoster = rawTeams[ag.offense];
+    const defRoster = rawTeams[ag.defense];
     for (const [df, w] of defMix) {
       for (const pid of ['DAGGER', 'QUICK_SLANT', 'MESH', 'PA_FLOOD'] as CanonicalPlayId[]) {
         for (let r = 0; r < AUTOPSY_REPS; r++) {
-          passRows.push(simulatePlayWithTelemetry(engine, buildBaselinePlay(prof, pid), buildModern2027Defense(df), w));
+          const off = buildBaselinePlay(prof, pid);
+          const def = buildModern2027Defense(df);
+          applyTeamRosterToAgents(off, def, offRoster, defRoster);
+          passRows.push(simulatePlayWithTelemetry(engine, off, def, w));
         }
       }
       for (const pid of ['INSIDE_ZONE', 'OUTSIDE_ZONE', 'DUO'] as CanonicalPlayId[]) {
         for (let r = 0; r < AUTOPSY_REPS; r++) {
-          runRows.push(simulatePlayWithTelemetry(engine, buildBaselinePlay(prof, pid), buildModern2027Defense(df), w));
+          const off = buildBaselinePlay(prof, pid);
+          const def = buildModern2027Defense(df);
+          applyTeamRosterToAgents(off, def, offRoster, defRoster);
+          runRows.push(simulatePlayWithTelemetry(engine, off, def, w));
         }
       }
     }
@@ -1287,11 +2103,13 @@ export async function runTrackingAndChartedValidation(): Promise<void> {
     return { name, epa, yds, legal, maxUnengG, minSepP };
   };
 
+  const omegaAudits = OMEGA_2027_PLAYBOOK.map((p) => evalPlay(p.id, p.buildOffense));
   const apexAudits = APEX_2027_PLAYBOOK.map((p) => evalPlay(p.id, p.buildOffense));
   const hydraAudits = HYDRA_2027_PLAYBOOK.map((p) => evalPlay(p.id, p.buildOffense));
   const argonAudits = ARGON_2027_PLAYBOOK.map((p) => evalPlay(p.id, p.buildOffense));
 
   const meanArr = (arr: number[]) => +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(4);
+  console.log(`  OMEGA Mean Open-Field EPA:  ${meanArr(omegaAudits.map((x) => x.epa))} (${omegaAudits.map((x) => `${x.name.replace('OMEGA_', '')}:${x.epa}`).join(' | ')})`);
   console.log(`  APEX Mean Open-Field EPA:   ${meanArr(apexAudits.map((x) => x.epa))} (${apexAudits.map((x) => `${x.name.replace('APEX_', '')}:${x.epa}`).join(' | ')})`);
   console.log(`  HYDRA Mean Open-Field EPA:  ${meanArr(hydraAudits.map((x) => x.epa))}`);
   console.log(`  ARGON Mean Open-Field EPA:  ${meanArr(argonAudits.map((x) => x.epa))}`);
@@ -1322,9 +2140,11 @@ export async function runTrackingAndChartedValidation(): Promise<void> {
     },
     autopsyResults,
     playbookAudits: {
+      omegaMeanEpa: meanArr(omegaAudits.map((x) => x.epa)),
       apexMeanEpa: meanArr(apexAudits.map((x) => x.epa)),
       hydraMeanEpa: meanArr(hydraAudits.map((x) => x.epa)),
       argonMeanEpa: meanArr(argonAudits.map((x) => x.epa)),
+      omegaPlays: omegaAudits,
       apexPlays: apexAudits,
       hydraPlays: hydraAudits,
       argonPlays: argonAudits,

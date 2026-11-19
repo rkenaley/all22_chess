@@ -1203,10 +1203,10 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('RDE', 'EDGE', 4.8, 0.6, 'CONTAIN_EDGE', 4.0, -5.0),
         def('WILL', 'WILL', -0.5, 4.2, 'READ_RUN_PASS', -0.5, 1.5),
         def('MIKE', 'MIKE', 2.5, 4.2, 'READ_RUN_PASS', 2.0, 1.5),
-        def('NCB', 'NI', -6.8, 2.5, 'MAN_COV', -6.5, 0.0, 'SL', { speed: 91, accel: 90, power: 70 }),
-        def('CB1', 'CB', -14.2, 2.5, 'MAN_COV', -14.0, 0.0, 'WR1', { speed: 92, accel: 91, power: 66 }),
-        def('CB2', 'CB', 14.2, 2.5, 'MAN_COV', 14.0, 0.0, 'WR2', { speed: 92, accel: 91, power: 66 }),
-        def('SS', 'SS', 5.8, 3.0, 'MAN_COV', 5.0, 0.0, 'TE', { speed: 89, accel: 88, power: 78 }),
+        def('NCB', 'NI', -6.8, 3.8, 'MAN_COV', -6.5, 0.0, 'SL', { speed: 91, accel: 90, power: 70 }),
+        def('CB1', 'CB', -14.2, 4.3, 'MAN_COV', -14.0, 0.0, 'WR1', { speed: 92, accel: 91, power: 66 }),
+        def('CB2', 'CB', 14.2, 4.3, 'MAN_COV', 14.0, 0.0, 'WR2', { speed: 92, accel: 91, power: 66 }),
+        def('SS', 'SS', 5.8, 4.5, 'MAN_COV', 5.0, 0.0, 'TE', { speed: 89, accel: 88, power: 78 }),
         def('FS', 'FS', 0.0, 14.0, 'DEEP_ZONE', 0.0, 18.0, undefined, { speed: 91, accel: 90, power: 72 }),
       ];
 
@@ -1216,11 +1216,11 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('NT', 'NT', -0.8, 0.5, 'RUSH_GAP', -0.5, -4.0, undefined, { speed: 72, power: 92, finesse: 76 }),
         def('3T', 'DT', 2.1, 0.5, 'RUSH_GAP', 1.8, -4.0, undefined, { speed: 76, power: 90, finesse: 84 }),
         def('RDE', 'EDGE', 4.8, 0.6, 'CONTAIN_EDGE', 4.0, -5.0, undefined, { speed: 86, power: 85, finesse: 88 }),
-        def('NCB', 'NI', -6.8, 2.5, 'BLITZ_EDGE', -3.5, -4.5, undefined, { speed: 91, accel: 92, power: 70 }),
+        def('NCB', 'NI', -6.8, 3.2, 'BLITZ_EDGE', -3.5, -4.5, undefined, { speed: 91, accel: 92, power: 70 }),
         def('WILL', 'WILL', -2.5, 4.2, 'HOOK_CURL', 8.0, 4.5),
         def('MIKE', 'MIKE', 0.0, 4.2, 'HOOK_CURL', 0.0, 10.0, undefined, { speed: 87, power: 84, awareness: 90 }),
-        def('CB1', 'CB', -14.2, 4.5, 'CURL_FLAT', -18.5, 4.5, undefined, { speed: 92, power: 65 }),
-        def('CB2', 'CB', 14.2, 4.5, 'CURL_FLAT', 18.5, 4.5, undefined, { speed: 92, power: 65 }),
+        def('CB1', 'CB', -14.2, 5.2, 'CURL_FLAT', -18.5, 5.0, undefined, { speed: 92, power: 65 }),
+        def('CB2', 'CB', 14.2, 5.2, 'CURL_FLAT', 18.5, 5.0, undefined, { speed: 92, power: 65 }),
         def('FS', 'FS', -7.5, 12.5, 'DEEP_HALF', -12.0, 17.0, undefined, { speed: 91, power: 68 }),
         def('SS', 'SS', 7.5, 12.5, 'DEEP_HALF', 12.0, 17.0, undefined, { speed: 89, power: 76 }),
       ];
@@ -1250,8 +1250,8 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('MIKE', 'MLB', 0.5, 4.5, 'READ_RUN_PASS', 2.5, 3.8),
         def('SAM', 'SLB', 5.2, 1.5, 'FORCE_ALLEY', 5.0, 2.5),
         def('SS', 'SS', 4.8, 4.8, 'ROBBER', 0.0, 5.5, undefined, { speed: 89, power: 78 }),
-        def('CB1', 'CB', -14.2, 2.0, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 92, power: 65 }),
-        def('CB2', 'CB', 14.2, 2.0, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, power: 65 }),
+        def('CB1', 'CB', -14.2, 4.2, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 92, power: 65 }),
+        def('CB2', 'CB', 14.2, 4.2, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, power: 65 }),
         def('FS', 'FS', 0.0, 14.0, 'DEEP_ZONE', 0.0, 18.0, undefined, { speed: 91, power: 70 }),
       ];
 
@@ -1262,11 +1262,11 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('RDE', 'DE', 3.8, 0.6, 'RUSH_GAP', 3.0, -5.0),
         def('WILL', 'WILL', -0.8, 1.1, 'BLITZ_A', -0.5, -4.5, undefined, { speed: 88, accel: 90, power: 82 }),
         def('MIKE', 'MIKE', 0.8, 1.1, 'BLITZ_A', 0.5, -4.5, undefined, { speed: 88, accel: 90, power: 84 }),
-        def('NCB', 'NI', -6.8, 2.2, 'MAN_COV', -7.5, 1.5, 'SL', { speed: 91, accel: 90, power: 68 }),
-        def('CB1', 'CB', -14.2, 2.0, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 93, accel: 92, power: 65 }),
-        def('CB2', 'CB', 14.2, 2.0, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, accel: 91, power: 65 }),
-        def('SS', 'SS', 5.8, 2.8, 'MAN_COV', 5.0, 1.5, 'TE', { speed: 89, accel: 88, power: 78 }),
-        def('FS', 'FS', -2.5, 3.2, 'MAN_COV', -2.0, 1.5, 'RB', { speed: 91, accel: 89, power: 68 }),
+        def('NCB', 'NI', -6.8, 3.8, 'MAN_COV', -7.5, 1.5, 'SL', { speed: 91, accel: 90, power: 68 }),
+        def('CB1', 'CB', -14.2, 4.2, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 93, accel: 92, power: 65 }),
+        def('CB2', 'CB', 14.2, 4.2, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, accel: 91, power: 65 }),
+        def('SS', 'SS', 5.8, 4.2, 'MAN_COV', 5.0, 1.5, 'TE', { speed: 89, accel: 88, power: 78 }),
+        def('FS', 'FS', -2.5, 4.5, 'MAN_COV', -2.0, 1.5, 'RB', { speed: 91, accel: 89, power: 68 }),
         def('DIME', 'DB', 5.2, 4.0, 'BLITZ_EDGE', 4.5, -5.0, undefined, { speed: 90, accel: 90, power: 72 }),
       ];
 
@@ -1277,8 +1277,8 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('3T', 'DT', 2.1, 0.5, 'RUSH_GAP', 1.8, -4.0, undefined, { speed: 77, power: 89 }),
         def('LDE', 'EDGE', 4.8, 0.6, 'CONTAIN_EDGE', 4.0, -5.0),
         def('MIKE', 'MLB', 0.0, 4.2, 'HOOK_CURL', 0.0, 4.5, undefined, { speed: 88, power: 83 }),
-        def('NCB', 'NI', -6.5, 3.5, 'CURL_FLAT', -16.0, 5.0, undefined, { speed: 91, power: 68 }),
-        def('DIME', 'DB', 6.5, 3.5, 'CURL_FLAT', 16.0, 5.0, undefined, { speed: 90, power: 68 }),
+        def('NCB', 'NI', -6.5, 4.5, 'CURL_FLAT', -16.0, 5.0, undefined, { speed: 91, power: 68 }),
+        def('DIME', 'DB', 6.5, 4.5, 'CURL_FLAT', 16.0, 5.0, undefined, { speed: 90, power: 68 }),
         def('CB1', 'CB', -14.2, 6.8, 'QUARTERS_MATCH', -18.5, 15.0, undefined, { speed: 92, power: 65 }),
         def('CB2', 'CB', 14.2, 6.8, 'QUARTERS_MATCH', 18.5, 15.0, undefined, { speed: 92, power: 65 }),
         def('FS', 'FS', -5.5, 11.0, 'QUARTERS_MATCH', -6.0, 16.0, undefined, { speed: 91, power: 70 }),
@@ -1293,11 +1293,11 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('WILL', 'WILL', -0.7, 1.1, 'BLITZ_RUN_GAP', -0.6, -1.5, undefined, { speed: 90, accel: 92, power: 84 }),
         def('MIKE', 'MIKE', 0.7, 1.1, 'CROSS_DOG', 0.6, -1.5, undefined, { speed: 89, accel: 91, power: 84 }),
         def('SS', 'SS', 5.2, 2.2, 'BLITZ_EDGE_CRASH', 3.5, -5.0, undefined, { speed: 90, accel: 90, power: 78 }),
-        def('NCB', 'NI', -6.8, 1.8, 'MAN_COV', -7.5, 1.5, 'SL', { speed: 91, accel: 90, power: 68 }),
-        def('CB1', 'CB', -14.2, 1.8, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 93, accel: 92, power: 65 }),
-        def('CB2', 'CB', 14.2, 1.8, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, accel: 91, power: 65 }),
-        def('FS', 'FS', -2.5, 2.8, 'MAN_COV', -2.0, 1.5, 'RB', { speed: 91, accel: 89, power: 68 }),
-        def('DIME', 'DB', 5.8, 2.2, 'MAN_COV', 5.0, 1.5, 'TE', { speed: 89, accel: 88, power: 78 }),
+        def('NCB', 'NI', -6.8, 3.6, 'MAN_COV', -7.5, 1.5, 'SL', { speed: 91, accel: 90, power: 68 }),
+        def('CB1', 'CB', -14.2, 4.0, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 93, accel: 92, power: 65 }),
+        def('CB2', 'CB', 14.2, 4.0, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, accel: 91, power: 65 }),
+        def('FS', 'FS', -2.5, 4.2, 'MAN_COV', -2.0, 1.5, 'RB', { speed: 91, accel: 89, power: 68 }),
+        def('DIME', 'DB', 5.8, 3.8, 'MAN_COV', 5.0, 1.5, 'TE', { speed: 89, accel: 88, power: 78 }),
       ];
 
     case 'VIKINGS_SAFETY_BLITZ_C1':
@@ -1309,9 +1309,9 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('SS', 'SS', 5.6, 1.2, 'BLITZ_EDGE_CRASH', 3.5, -5.0, undefined, { speed: 91, accel: 92, power: 80 }),
         def('WILL', 'WILL', -1.2, 4.2, 'MAN_COV', -1.5, 1.5, 'RB'),
         def('MIKE', 'MIKE', 2.2, 4.2, 'ROBBER', 0.0, 6.0),
-        def('NCB', 'NI', -6.8, 2.2, 'MAN_COV', -7.5, 1.5, 'SL', { speed: 91, power: 68 }),
-        def('CB1', 'CB', -14.2, 2.0, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 92, power: 65 }),
-        def('CB2', 'CB', 14.2, 2.0, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, power: 65 }),
+        def('NCB', 'NI', -6.8, 3.8, 'MAN_COV', -7.5, 1.5, 'SL', { speed: 91, power: 68 }),
+        def('CB1', 'CB', -14.2, 4.2, 'MAN_COV', -14.2, 1.5, 'WR1', { speed: 92, power: 65 }),
+        def('CB2', 'CB', 14.2, 4.2, 'MAN_COV', 14.2, 1.5, 'WR2', { speed: 92, power: 65 }),
         def('FS', 'FS', 0.0, 14.0, 'DEEP_ZONE', 0.0, 18.0, undefined, { speed: 91, power: 70 }),
       ];
 
@@ -1322,12 +1322,12 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('NT_L', 'NT', -0.9, 0.5, 'RUSH_GAP', -0.5, -2.5, undefined, { speed: 70, power: 95 }),
         def('NT_R', 'NT', 0.9, 0.5, 'RUSH_GAP', 0.5, -2.5, undefined, { speed: 70, power: 95 }),
         def('DT_R', 'DT', 2.8, 0.5, 'SPILL', 2.0, -1.0, undefined, { speed: 72, power: 93 }),
-        def('DE_R', 'DE', 4.8, 0.5, 'CONTAIN_EDGE', 4.2, -3.5, undefined, { speed: 76, power: 90 }),
-        def('WILL', 'ILB', -1.5, 3.2, 'READ_RUN_PASS', -1.2, 1.8, undefined, { speed: 84, power: 86 }),
-        def('MIKE', 'ILB', 1.5, 3.2, 'READ_RUN_PASS', 1.2, 1.8, undefined, { speed: 84, power: 86 }),
-        def('CB1', 'CB', -13.5, 1.5, 'MAN_COV', -13.5, 1.0, 'WR1', { speed: 92, power: 65 }),
-        def('CB2', 'CB', 13.5, 1.5, 'MAN_COV', 13.5, 1.0, 'WR2', { speed: 92, power: 65 }),
-        def('FS', 'FS', 0.0, 6.5, 'ROBBER', 0.0, 5.0, undefined, { speed: 89, power: 76 }),
+        def('DE_R', 'DE', 4.8, 0.5, 'FORCE_ALLEY', 5.2, 1.2, undefined, { speed: 76, power: 90 }),
+        def('WILL', 'ILB', -3.5, 2.8, 'MAN_COV', -4.0, 1.0, 'SL', { speed: 86, power: 86 }),
+        def('MIKE', 'ILB', 4.2, 2.8, 'MAN_COV', 4.5, 1.0, 'TE', { speed: 86, power: 86 }),
+        def('CB1', 'CB', -13.5, 2.5, 'MAN_COV', -13.5, 1.0, 'WR1', { speed: 92, power: 65 }),
+        def('CB2', 'CB', 13.5, 2.5, 'MAN_COV', 13.5, 1.0, 'WR2', { speed: 92, power: 65 }),
+        def('FS', 'FS', 0.0, 4.8, 'ROBBER', 0.0, 4.0, undefined, { speed: 89, power: 76 }),
       ];
 
     case 'NICKEL_OVER_C3':
@@ -1339,10 +1339,10 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('LDE', 'EDGE', 4.8, 0.6, 'CONTAIN_EDGE', 4.0, -5.0),
         def('WILL', 'WILL', -2.2, 4.2, 'HOOK_CURL', -5.5, 4.5),
         def('MIKE', 'MIKE', 1.2, 4.2, 'HOOK_CURL', 5.5, 4.5),
-        def('NCB', 'NI', -6.8, 3.2, 'CURL_FLAT', -17.5, 5.0, undefined, { speed: 91, power: 70 }),
-        def('CB1', 'CB', -14.2, 6.0, 'DEEP_THIRD', -17.0, 16.0, undefined, { speed: 92, power: 66 }),
-        def('CB2', 'CB', 14.2, 6.0, 'DEEP_THIRD', 17.0, 16.0, undefined, { speed: 92, power: 66 }),
-        def('SS', 'SS', 5.8, 5.0, 'CURL_FLAT', 17.5, 5.0, undefined, { speed: 89, power: 78 }),
+        def('NCB', 'NI', -6.8, 4.2, 'CURL_FLAT', -17.5, 5.0, undefined, { speed: 91, power: 70 }),
+        def('CB1', 'CB', -14.2, 6.2, 'DEEP_THIRD', -17.0, 16.0, undefined, { speed: 92, power: 66 }),
+        def('CB2', 'CB', 14.2, 6.2, 'DEEP_THIRD', 17.0, 16.0, undefined, { speed: 92, power: 66 }),
+        def('SS', 'SS', 5.8, 5.4, 'CURL_FLAT', 17.5, 5.0, undefined, { speed: 89, power: 78 }),
         def('FS', 'FS', 0.0, 12.5, 'DEEP_THIRD', 0.0, 18.0, undefined, { speed: 91, power: 72 }),
       ];
   }

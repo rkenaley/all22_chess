@@ -86,7 +86,11 @@ def summarize_dropbacks(df: pd.DataFrame) -> dict[str, Any]:
     n = int(len(df))
     if n == 0:
         return {"n": 0}
-    pass_att = df[df["sack"] == 0]
+    pass_att = df[
+        (df["sack"] == 0)
+        & (df["qb_scramble"] != 1)
+        & ((df["complete_pass"] == 1) | (df["incomplete_pass"] == 1) | (df["interception"] == 1))
+    ]
     n_att = int(len(pass_att))
     rushers = pd.to_numeric(df["n_rushers"], errors="coerce")
     ttt = pd.to_numeric(df["time_to_throw"], errors="coerce")

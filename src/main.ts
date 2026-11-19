@@ -196,7 +196,7 @@ class All22WorkstationApp {
             finesse: isOl
               ? Math.round(((r.agi ?? 74) * 0.3 + (r.pbk_lateral ?? 85) * 0.35 + (r.rbk_reach ?? 85) * 0.35))
               : Math.round(((r.agi ?? 86) * 0.45 + (r.rr_short ?? r.elusiveness ?? r.tha_short ?? 85) * 0.55)),
-            awareness: match.scouting?.ovr ?? r.pre_snap_read ?? 86,
+            awareness: r.pre_snap_read ?? match.scouting?.ovr ?? 86,
           };
         }
       }
@@ -247,7 +247,7 @@ class All22WorkstationApp {
             finesse: isFront
               ? Math.round(((r.rush_speed ?? 84) * 0.5 + (r.bsh_shed ?? 85) * 0.5))
               : Math.round(((r.cov_man ?? 82) * 0.5 + (r.cov_zone ?? 84) * 0.5)),
-            awareness: match.scouting?.ovr ?? r.play_rec ?? 85,
+            awareness: r.play_rec ?? match.scouting?.ovr ?? 85,
           };
         }
       }

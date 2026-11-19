@@ -78,20 +78,22 @@ npm run build
 The engine includes turnkey TypeScript execution scripts to replicate all empirical research findings:
 
 ```bash
-# 1. Simulate the Pet Theoretical Optimum Offense (6 OL + 2 Inserts + Mobile QB)
-npm run simulate:optimum
+# 1. Run 10 Hz Kaggle BDB 2027 & nflverse Empirical Tracking Validation Suite
+npm run validate:tracking
 
-# 2. Run NFL Baseline Calibration Audit vs nflfastR EPA distributions
+# 2. Run Engine Realism, Defensive Psychology & Biomechanical Tests
+npm run test:realism
+
+# 3. Run Voronoi-Complete Zone Coverage & Kinematic Audit
+npm run test:voronoi
+
+# 4. Run Ultimate 2027 Offense Monte Carlo Playtest Suite
+npm run simulate:ultimate2027
+
+# 5. Run NFL Benchmark Audit, Evolutionary Tournament & Blitz/Macro-RPS Counters
 npm run benchmark
-
-# 3. Evolve and benchmark pulling run schemes (Pin-Pull, Counter, Power-G)
 npm run evolve:schemes
-
-# 4. Analyze defensive counter-adaptation and coverage sensitivity
 npm run analyze:counters
-
-# 5. Evaluate offensive personnel groupings against defensive responses
-npm run analyze:personnel
 
 # 6. Generate 20 Hz animated All-22 GIFs for Google Argon & Hydra Vanguard
 npm run generate:gifs
@@ -126,18 +128,19 @@ all22-chess-oc-simulator/
 └── src/
     ├── engine.ts                # Unified 20Hz anisotropic physics, SDE trench, EPA & genetic search
     ├── main.ts                  # Interactive chalkboard renderer, canvas handlers & UI event loops
-    ├── nfl_rosters.ts           # 32 NFL team rosters, salaries, cap economics & matchup presets
-    ├── simulate_pet_optimum.ts  # Validation runner for 6-OL Pet Theoretical Optimum offense
-    ├── benchmark_audit.ts       # Empirical validation against NFL league averages
-    ├── evolve_running_schemes.ts# Evolutionary optimizer for pulling run schemes
-    ├── analyze_defensive_counters.ts # Systematic scheme-counter sensitivity audit
-    ├── analyze_personnel_sensitivity.ts # Personnel grouping matchup evaluation
-    └── data/                    # Empirical datasets, evolved catalogs & team registries
+    ├── canonical_baselines.ts   # League-weighted NFL benchmark offenses & canonical play catalog
+    ├── vanguard_2027_playbook.ts# Modern 2027 defensive fronts & disguised coverage builders
+    ├── ultimate_2027_offense.ts # Ultimate 2027 cap-compliant roster & 8-play packaged offense
+    ├── ultimate_2027_playtest.ts# Ultimate 2027 situational & 1,000-season playtest runner
+    ├── validate_10hz_replay.ts  # BDB 2027 10 Hz replay + nflverse charted telemetry validator
+    ├── test_realism_and_defensive_psychology.ts # Realism, anti-gaming & biomechanics tests
+    ├── test_voronoi_coverage.ts # Voronoi zone tessellation & kinematic matching tests
+    ├── legacy_v1/               # Archived v1 scripts preserved for historical reference
+    └── data/                    # Empirical datasets, validation telemetry & team registries
         ├── nfl_teams_32.json
-        ├── evolved_plays_catalog.json
-        ├── evolved_running_schemes.json
-        ├── defensive_counters_report.json
-        └── personnel_sensitivity_report.json
+        ├── nfl_empirical_benchmarks.json
+        ├── tracking_validation_report.json
+        └── ultimate_2027_results.json
 ```
 
 ---

@@ -1,109 +1,401 @@
 {
-  "generatedAt": "2026-11-18T01:09:55.436Z",
+  "generatedAt": "2026-11-19T13:35:45.118Z",
   "bdb10Hz": {
-    "status": "BDB_10HZ_SKIPPED_CREDENTIALS_MISSING",
-    "filesDetected": 0
+    "status": "BDB_10HZ_EXECUTED",
+    "filesDetected": 9,
+    "kinematicsSummary": {
+      "G": {
+        "n": 60000,
+        "p95SpeedYps": 4.13,
+        "p99SpeedYps": 5.36,
+        "p95AccelYps2": 2.62,
+        "p99AccelYps2": 3.37
+      },
+      "EDGE": {
+        "n": 60000,
+        "p95SpeedYps": 6.01,
+        "p99SpeedYps": 7.18,
+        "p95AccelYps2": 4.13,
+        "p99AccelYps2": 5.16
+      },
+      "T": {
+        "n": 60000,
+        "p95SpeedYps": 4.07,
+        "p99SpeedYps": 5.14,
+        "p95AccelYps2": 2.73,
+        "p99AccelYps2": 3.46
+      },
+      "SLOT_WR": {
+        "n": 60000,
+        "p95SpeedYps": 8.32,
+        "p99SpeedYps": 9.25,
+        "p95AccelYps2": 5.09,
+        "p99AccelYps2": 6.01
+      },
+      "CB": {
+        "n": 60000,
+        "p95SpeedYps": 6.93,
+        "p99SpeedYps": 8.4,
+        "p95AccelYps2": 4.71,
+        "p99AccelYps2": 5.87
+      },
+      "WR": {
+        "n": 60000,
+        "p95SpeedYps": 8.37,
+        "p99SpeedYps": 9.1,
+        "p95AccelYps2": 5.25,
+        "p99AccelYps2": 6.28
+      },
+      "C": {
+        "n": 60000,
+        "p95SpeedYps": 4.23,
+        "p99SpeedYps": 5.39,
+        "p95AccelYps2": 2.48,
+        "p99AccelYps2": 3.16
+      },
+      "TE": {
+        "n": 48900,
+        "p95SpeedYps": 7.67,
+        "p99SpeedYps": 8.57,
+        "p95AccelYps2": 4.44,
+        "p99AccelYps2": 5.58
+      },
+      "INTERIOR_LINE": {
+        "n": 60000,
+        "p95SpeedYps": 5.45,
+        "p99SpeedYps": 6.6,
+        "p95AccelYps2": 3.16,
+        "p99AccelYps2": 4.05
+      },
+      "HIGH_SAFETY": {
+        "n": 60000,
+        "p95SpeedYps": 7.07,
+        "p99SpeedYps": 8.28,
+        "p95AccelYps2": 4.84,
+        "p99AccelYps2": 5.88
+      },
+      "SLOT_CB": {
+        "n": 60000,
+        "p95SpeedYps": 7.18,
+        "p99SpeedYps": 8.63,
+        "p95AccelYps2": 4.79,
+        "p99AccelYps2": 5.94
+      },
+      "MLB": {
+        "n": 11070,
+        "p95SpeedYps": 7.1,
+        "p99SpeedYps": 8.35,
+        "p95AccelYps2": 4.64,
+        "p99AccelYps2": 5.78
+      },
+      "OLB": {
+        "n": 37196,
+        "p95SpeedYps": 6.88,
+        "p99SpeedYps": 8.3,
+        "p95AccelYps2": 4.51,
+        "p99AccelYps2": 5.68
+      },
+      "FB": {
+        "n": 2094,
+        "p95SpeedYps": 7.36,
+        "p99SpeedYps": 8.36,
+        "p95AccelYps2": 4.64,
+        "p99AccelYps2": 6.1
+      },
+      "RB": {
+        "n": 1990,
+        "p95SpeedYps": 7.71,
+        "p99SpeedYps": 8.26,
+        "p95AccelYps2": 4.87,
+        "p99AccelYps2": 5.82
+      },
+      "BOX_SAFETY": {
+        "n": 1550,
+        "p95SpeedYps": 6.99,
+        "p99SpeedYps": 7.54,
+        "p95AccelYps2": 4.62,
+        "p99AccelYps2": 5.68
+      }
+    },
+    "replayChecks": {
+      "playsReplayed": 1500,
+      "l1PocketDepthMaeYds": 0.45,
+      "l1PocketDepth2sMaeYds": 0.57,
+      "l2PassRushMaeYds": 0.43,
+      "l3RunDispMaeYds": 0.29,
+      "c1ShellDriftMaeYds": 0.52,
+      "c2ManSepRmseYds": 1.06,
+      "wr1sDispMaeYds": 0.34
+    },
+    "bdb2027Summary": {
+      "dataset": "nfl-big-data-bowl-2027",
+      "cohortPlayers": 510,
+      "combineDrills": {
+        "SKILL_DRILLS_OL": {
+          "n": 61129,
+          "p95SpeedYps": 7.03,
+          "maxSpeedYps": 8.49,
+          "p95AccelYps2": 5.11,
+          "p99AccelYps2": 5.93
+        },
+        "FORTY_YARD_DASH": {
+          "n": 41500,
+          "p95SpeedYps": 10.99,
+          "maxSpeedYps": 11.85,
+          "p95AccelYps2": 5.4,
+          "p99AccelYps2": 6.17
+        },
+        "THREE_CONE_DRILL": {
+          "n": 15951,
+          "p95SpeedYps": 6.05,
+          "maxSpeedYps": 8.11,
+          "p95AccelYps2": 6.55,
+          "p99AccelYps2": 7.34
+        },
+        "SHORT_SHUTTLE": {
+          "n": 11690,
+          "p95SpeedYps": 5.52,
+          "maxSpeedYps": 6.87,
+          "p95AccelYps2": 7.89,
+          "p99AccelYps2": 8.86
+        },
+        "SKILL_DRILLS_DL": {
+          "n": 77428,
+          "p95SpeedYps": 7.67,
+          "maxSpeedYps": 9.29,
+          "p95AccelYps2": 6.27,
+          "p99AccelYps2": 7.19
+        },
+        "SKILL_DRILLS_DB": {
+          "n": 94623,
+          "p95SpeedYps": 8.65,
+          "maxSpeedYps": 10.26,
+          "p95AccelYps2": 6.16,
+          "p99AccelYps2": 7.26
+        },
+        "SKILL_DRILLS_TE": {
+          "n": 29102,
+          "p95SpeedYps": 8.82,
+          "maxSpeedYps": 9.79,
+          "p95AccelYps2": 5.82,
+          "p99AccelYps2": 6.8
+        },
+        "SKILL_DRILLS_WR": {
+          "n": 96408,
+          "p95SpeedYps": 9.25,
+          "maxSpeedYps": 10.98,
+          "p95AccelYps2": 6.74,
+          "p99AccelYps2": 7.79
+        },
+        "SKILL_DRILLS_LB": {
+          "n": 3263,
+          "p95SpeedYps": 7.89,
+          "maxSpeedYps": 8.63,
+          "p95AccelYps2": 6.04,
+          "p99AccelYps2": 7.37
+        }
+      },
+      "playerPlayBenchmarks": {
+        "rowsParsed": 314197,
+        "cleanRowsParsed": 253105,
+        "dropbackDurationMean": 3.017,
+        "timeToPressureMean": 3.001,
+        "playerGetOffMean": 1.014,
+        "separationOverallMean": 3.148,
+        "separationManMean": 2.15,
+        "separationZoneMean": 3.526,
+        "targetedSeparationOverallMean": 3.765,
+        "targetedSeparationManMean": 2.622,
+        "targetedSeparationZoneMean": 4.242,
+        "cushionOverallMean": 6.052,
+        "cushionManMean": 4.901,
+        "cushionZoneMean": 6.515,
+        "yacMean": 4.743,
+        "expectedYacMean": 4.205,
+        "ballFlightMeanSec": 0.937,
+        "ballFlightGt085Pct": 44.6,
+        "byCoverageType": {
+          "COVER_2_ZONE": {
+            "cushionMean": 5.951,
+            "sepMean": 4.022,
+            "nSep": 5652
+          },
+          "COVER_4_ZONE": {
+            "cushionMean": 6.816,
+            "sepMean": 3.236,
+            "nSep": 6572
+          },
+          "COVER_3_ZONE": {
+            "cushionMean": 6.688,
+            "sepMean": 3.474,
+            "nSep": 12802
+          },
+          "COVER_1_MAN": {
+            "cushionMean": 4.777,
+            "sepMean": 2.034,
+            "nSep": 8389
+          },
+          "COVER_6_ZONE": {
+            "cushionMean": 6.017,
+            "sepMean": 3.413,
+            "nSep": 3636
+          },
+          "COVER_0_MAN": {
+            "cushionMean": 5.535,
+            "sepMean": 2.758,
+            "nSep": 1979
+          },
+          "COVER_2_MAN": {
+            "cushionMean": 4.126,
+            "sepMean": 1.72,
+            "nSep": 531
+          },
+          "PREVENT": {
+            "cushionMean": 7.622,
+            "sepMean": 4.679,
+            "nSep": 143
+          }
+        },
+        "targetedByCoverageType": {
+          "COVER_4_ZONE": {
+            "cushionMean": 7.046,
+            "sepMean": 3.941,
+            "nSep": 1393
+          },
+          "COVER_1_MAN": {
+            "cushionMean": 4.931,
+            "sepMean": 2.483,
+            "nSep": 1871
+          },
+          "COVER_3_ZONE": {
+            "cushionMean": 6.793,
+            "sepMean": 4.132,
+            "nSep": 2697
+          },
+          "COVER_6_ZONE": {
+            "cushionMean": 6.22,
+            "sepMean": 4.215,
+            "nSep": 682
+          },
+          "COVER_2_MAN": {
+            "cushionMean": 4.456,
+            "sepMean": 2.25,
+            "nSep": 97
+          },
+          "COVER_0_MAN": {
+            "cushionMean": 5.814,
+            "sepMean": 3.256,
+            "nSep": 467
+          },
+          "COVER_2_ZONE": {
+            "cushionMean": 6.088,
+            "sepMean": 4.916,
+            "nSep": 1045
+          }
+        }
+      }
+    }
   },
   "kinematicsAudit": {
     "posSummary": [
       {
         "pos": "QB",
         "n": 32,
-        "meanSpd": 79.22,
-        "meanAcc": 79.47,
-        "meanForty": 4.76,
-        "meanMph": 19.07,
+        "meanSpd": 79.31,
+        "meanAcc": 79.5,
+        "meanForty": 4.75,
+        "meanMph": 19.11,
         "meanWtLbs": 220.19,
-        "imputed475Count": 12
+        "imputed475Count": 0
       },
       {
         "pos": "LT",
         "n": 32,
-        "meanSpd": 70.59,
-        "meanAcc": 70.94,
+        "meanSpd": 71,
+        "meanAcc": 71.44,
         "meanForty": 5.07,
         "meanMph": 17.43,
-        "meanWtLbs": 310.88,
+        "meanWtLbs": 319.5,
         "imputed475Count": 0
       },
       {
         "pos": "LG",
         "n": 32,
-        "meanSpd": 67.31,
-        "meanAcc": 67.47,
+        "meanSpd": 67.44,
+        "meanAcc": 67.56,
         "meanForty": 5.15,
         "meanMph": 17,
-        "meanWtLbs": 312.75,
+        "meanWtLbs": 316.25,
         "imputed475Count": 0
       },
       {
         "pos": "C",
         "n": 32,
-        "meanSpd": 68.81,
-        "meanAcc": 68.84,
+        "meanSpd": 69.22,
+        "meanAcc": 69.06,
         "meanForty": 5.1,
         "meanMph": 17.22,
-        "meanWtLbs": 304.81,
+        "meanWtLbs": 306.16,
         "imputed475Count": 0
       },
       {
         "pos": "RG",
         "n": 32,
-        "meanSpd": 68.16,
-        "meanAcc": 67.94,
+        "meanSpd": 68.97,
+        "meanAcc": 68.72,
         "meanForty": 5.11,
         "meanMph": 17.2,
-        "meanWtLbs": 308.38,
+        "meanWtLbs": 316.41,
         "imputed475Count": 0
       },
       {
         "pos": "RT",
         "n": 32,
-        "meanSpd": 69.19,
-        "meanAcc": 70.03,
+        "meanSpd": 69.47,
+        "meanAcc": 70.41,
         "meanForty": 5.1,
         "meanMph": 17.24,
-        "meanWtLbs": 309.59,
+        "meanWtLbs": 315.88,
         "imputed475Count": 0
       },
       {
         "pos": "WR1",
         "n": 32,
-        "meanSpd": 92.28,
-        "meanAcc": 91.94,
+        "meanSpd": 92.44,
+        "meanAcc": 92.19,
         "meanForty": 4.42,
         "meanMph": 20.79,
-        "meanWtLbs": 191.28,
+        "meanWtLbs": 189.66,
         "imputed475Count": 0
       },
       {
         "pos": "SLOT",
         "n": 32,
-        "meanSpd": 90.94,
-        "meanAcc": 91.34,
-        "meanForty": 4.45,
+        "meanSpd": 90.78,
+        "meanAcc": 91.06,
+        "meanForty": 4.46,
         "meanMph": 20.63,
-        "meanWtLbs": 193.19,
+        "meanWtLbs": 192.09,
         "imputed475Count": 0
       },
       {
         "pos": "TE",
         "n": 32,
         "meanSpd": 82.78,
-        "meanAcc": 82.53,
+        "meanAcc": 82.47,
         "meanForty": 4.65,
         "meanMph": 19.61,
-        "meanWtLbs": 248.5,
+        "meanWtLbs": 249.63,
         "imputed475Count": 0
       },
       {
         "pos": "WR2",
         "n": 32,
-        "meanSpd": 90.88,
-        "meanAcc": 90.81,
+        "meanSpd": 90.81,
+        "meanAcc": 90.66,
         "meanForty": 4.45,
         "meanMph": 20.63,
-        "meanWtLbs": 192.63,
+        "meanWtLbs": 189.84,
         "imputed475Count": 0
       },
       {
@@ -119,41 +411,41 @@
       {
         "pos": "EDGE1",
         "n": 32,
-        "meanSpd": 83.94,
-        "meanAcc": 85.47,
+        "meanSpd": 84.84,
+        "meanAcc": 86.31,
         "meanForty": 4.63,
-        "meanMph": 19.68,
-        "meanWtLbs": 260.84,
+        "meanMph": 19.71,
+        "meanWtLbs": 264.75,
         "imputed475Count": 0
       },
       {
         "pos": "DT1",
         "n": 32,
-        "meanSpd": 71.63,
-        "meanAcc": 72.56,
+        "meanSpd": 71.78,
+        "meanAcc": 72.75,
         "meanForty": 5.01,
         "meanMph": 17.71,
-        "meanWtLbs": 305.94,
+        "meanWtLbs": 312.09,
         "imputed475Count": 0
       },
       {
         "pos": "DT2",
         "n": 32,
-        "meanSpd": 74.09,
-        "meanAcc": 74.38,
+        "meanSpd": 74.28,
+        "meanAcc": 74.59,
         "meanForty": 4.96,
         "meanMph": 17.96,
-        "meanWtLbs": 299.41,
+        "meanWtLbs": 305.47,
         "imputed475Count": 0
       },
       {
         "pos": "EDGE2",
         "n": 32,
-        "meanSpd": 83.81,
-        "meanAcc": 85.22,
-        "meanForty": 4.64,
-        "meanMph": 19.63,
-        "meanWtLbs": 264.09,
+        "meanSpd": 84.19,
+        "meanAcc": 85.56,
+        "meanForty": 4.65,
+        "meanMph": 19.61,
+        "meanWtLbs": 267.88,
         "imputed475Count": 0
       },
       {
@@ -163,7 +455,7 @@
         "meanAcc": 86.22,
         "meanForty": 4.57,
         "meanMph": 20.01,
-        "meanWtLbs": 234.13,
+        "meanWtLbs": 234.69,
         "imputed475Count": 0
       },
       {
@@ -173,834 +465,938 @@
         "meanAcc": 85.91,
         "meanForty": 4.58,
         "meanMph": 19.97,
-        "meanWtLbs": 233.5,
+        "meanWtLbs": 234.91,
         "imputed475Count": 0
       },
       {
         "pos": "CB1",
         "n": 32,
-        "meanSpd": 91.28,
-        "meanAcc": 90.91,
+        "meanSpd": 91.34,
+        "meanAcc": 90.88,
         "meanForty": 4.44,
         "meanMph": 20.67,
-        "meanWtLbs": 199.56,
+        "meanWtLbs": 194.78,
         "imputed475Count": 0
       },
       {
         "pos": "CB2",
         "n": 32,
-        "meanSpd": 91.91,
-        "meanAcc": 92.06,
+        "meanSpd": 91.97,
+        "meanAcc": 92.22,
         "meanForty": 4.43,
         "meanMph": 20.71,
-        "meanWtLbs": 195.41,
+        "meanWtLbs": 191.34,
         "imputed475Count": 0
       },
       {
         "pos": "NB",
         "n": 32,
-        "meanSpd": 91.41,
-        "meanAcc": 91.09,
+        "meanSpd": 91.34,
+        "meanAcc": 91.13,
         "meanForty": 4.44,
         "meanMph": 20.68,
-        "meanWtLbs": 193.84,
+        "meanWtLbs": 189.75,
         "imputed475Count": 0
       },
       {
         "pos": "FS",
         "n": 32,
-        "meanSpd": 87.94,
-        "meanAcc": 87.94,
+        "meanSpd": 88.28,
+        "meanAcc": 88.41,
         "meanForty": 4.5,
         "meanMph": 20.36,
-        "meanWtLbs": 205.56,
+        "meanWtLbs": 204.63,
         "imputed475Count": 0
       },
       {
         "pos": "SS",
         "n": 32,
-        "meanSpd": 87.84,
-        "meanAcc": 87.94,
-        "meanForty": 4.52,
-        "meanMph": 20.32,
-        "meanWtLbs": 203.25,
+        "meanSpd": 88,
+        "meanAcc": 88.06,
+        "meanForty": 4.51,
+        "meanMph": 20.33,
+        "meanWtLbs": 202.56,
         "imputed475Count": 0
       }
     ],
     "sprintProbes": [
       {
         "pos": "WR",
-        "weightLbs": 192,
+        "weightLbs": 190,
         "speedRating": 92,
         "accelRating": 92,
-        "simMaxYps": 10.05,
-        "simMaxMph": 20.56,
-        "sim10YdSplitSec": 1.4
+        "simMaxYps": 9.7,
+        "simMaxMph": 19.84,
+        "sim10YdSplitSec": 2.05,
+        "sim10YdBurstSec": 1.7
       },
       {
         "pos": "CB",
-        "weightLbs": 197,
-        "speedRating": 92,
+        "weightLbs": 195,
+        "speedRating": 91,
         "accelRating": 91,
-        "simMaxYps": 10.05,
-        "simMaxMph": 20.56,
-        "sim10YdSplitSec": 1.4
+        "simMaxYps": 9.64,
+        "simMaxMph": 19.72,
+        "sim10YdSplitSec": 2.05,
+        "sim10YdBurstSec": 1.7
       },
       {
         "pos": "FS",
         "weightLbs": 205,
-        "speedRating": 83,
-        "accelRating": 83,
-        "simMaxYps": 9.49,
-        "simMaxMph": 19.41,
-        "sim10YdSplitSec": 1.45
+        "speedRating": 88,
+        "accelRating": 88,
+        "simMaxYps": 9.47,
+        "simMaxMph": 19.37,
+        "sim10YdSplitSec": 2.05,
+        "sim10YdBurstSec": 1.7
       },
       {
         "pos": "RB",
         "weightLbs": 217,
         "speedRating": 89,
         "accelRating": 89,
-        "simMaxYps": 9.86,
-        "simMaxMph": 20.17,
-        "sim10YdSplitSec": 1.4
+        "simMaxYps": 9.53,
+        "simMaxMph": 19.49,
+        "sim10YdSplitSec": 2.05,
+        "sim10YdBurstSec": 1.7
       },
       {
         "pos": "LB",
-        "weightLbs": 234,
-        "speedRating": 82,
-        "accelRating": 82,
-        "simMaxYps": 8.82,
-        "simMaxMph": 18.04,
-        "sim10YdSplitSec": 1.55
+        "weightLbs": 235,
+        "speedRating": 85,
+        "accelRating": 86,
+        "simMaxYps": 8.34,
+        "simMaxMph": 17.06,
+        "sim10YdSplitSec": 2.25,
+        "sim10YdBurstSec": 1.85
       },
       {
         "pos": "TE",
-        "weightLbs": 249,
-        "speedRating": 81,
-        "accelRating": 81,
-        "simMaxYps": 8.76,
-        "simMaxMph": 17.93,
-        "sim10YdSplitSec": 1.55
+        "weightLbs": 250,
+        "speedRating": 83,
+        "accelRating": 82,
+        "simMaxYps": 8.25,
+        "simMaxMph": 16.88,
+        "sim10YdSplitSec": 2.25,
+        "sim10YdBurstSec": 1.85
       },
       {
         "pos": "EDGE",
-        "weightLbs": 262,
-        "speedRating": 80,
-        "accelRating": 80,
-        "simMaxYps": 8.71,
-        "simMaxMph": 17.82,
-        "sim10YdSplitSec": 1.55
+        "weightLbs": 265,
+        "speedRating": 85,
+        "accelRating": 86,
+        "simMaxYps": 8.34,
+        "simMaxMph": 17.06,
+        "sim10YdSplitSec": 2.25,
+        "sim10YdBurstSec": 1.85
       },
       {
         "pos": "LT",
-        "weightLbs": 311,
+        "weightLbs": 320,
         "speedRating": 71,
         "accelRating": 71,
-        "simMaxYps": 8.18,
-        "simMaxMph": 16.73,
-        "sim10YdSplitSec": 1.7
+        "simMaxYps": 6.32,
+        "simMaxMph": 12.93,
+        "sim10YdSplitSec": 2.6,
+        "sim10YdBurstSec": 2.2
       },
       {
         "pos": "DT",
-        "weightLbs": 305,
-        "speedRating": 73,
+        "weightLbs": 312,
+        "speedRating": 72,
         "accelRating": 73,
-        "simMaxYps": 8.21,
-        "simMaxMph": 16.79,
-        "sim10YdSplitSec": 1.7
+        "simMaxYps": 6.34,
+        "simMaxMph": 12.97,
+        "sim10YdSplitSec": 2.6,
+        "sim10YdBurstSec": 2.2
       }
     ]
   },
   "simulatedVsEmpirical": {
     "passAll": {
       "n": 1620,
-      "compPct": 59.46,
-      "sackPct": 6.91,
-      "pressurePct": 35.23,
-      "intPctOnAtt": 2.17,
-      "intPctOnDb": 2.02,
-      "explosive15Pct": 22.85,
-      "epaSuccessPct": 44.37,
-      "meanYardsPerDb": 7.18,
-      "meanEpa": -0.1931,
-      "meanAirYards": 10.68,
-      "meanYacOnComp": 3.37,
-      "tttMean": 2.505,
-      "tttP25": 2.05,
-      "tttP50": 2.55,
-      "tttP75": 3.05,
-      "sepAtThrowMean": 4.532,
-      "preSnapCushionMean": 3.484,
-      "timeToPressureMean": 1.385,
-      "olEngagedRateMean": 86.8
+      "compPct": 64.39,
+      "sackPct": 6.51,
+      "pressurePct": 22.94,
+      "intPctOnAtt": 2.49,
+      "intPctOnDb": 2.33,
+      "explosive15Pct": 24.04,
+      "epaSuccessPct": 57.93,
+      "meanYardsPerDb": 8.41,
+      "meanEpa": 0.1639,
+      "meanAirYards": 11.17,
+      "meanYacOnComp": 4.12,
+      "tttMean": 2.442,
+      "tttP25": 2.2,
+      "tttP50": 2.4,
+      "tttP75": 2.75,
+      "flightDurationMean": 1.072,
+      "sepAtThrowMean": 4.443,
+      "sepAtArrivalMean": 3.838,
+      "preSnapCushionMean": 5.825,
+      "timeToPressureMean": 1.91,
+      "olEngagedRateMean": 76.7
     },
     "pass4Man": {
-      "n": 857,
-      "compPct": 57.51,
-      "sackPct": 4.15,
-      "pressurePct": 31.74,
-      "intPctOnAtt": 2.71,
-      "intPctOnDb": 2.6,
-      "explosive15Pct": 24.81,
-      "epaSuccessPct": 44.2,
-      "meanYardsPerDb": 7.2,
-      "meanEpa": -0.177,
-      "meanAirYards": 10.58,
-      "meanYacOnComp": 3.03,
-      "tttMean": 2.825,
-      "tttP25": 2.4,
-      "tttP50": 2.75,
-      "tttP75": 3.15,
-      "sepAtThrowMean": 4.904,
-      "preSnapCushionMean": 3.627,
-      "timeToPressureMean": 1.544,
-      "olEngagedRateMean": 88.1
+      "n": 864,
+      "compPct": 65.15,
+      "sackPct": 4.63,
+      "pressurePct": 18.56,
+      "intPctOnAtt": 2.42,
+      "intPctOnDb": 2.3,
+      "explosive15Pct": 27.24,
+      "epaSuccessPct": 61.44,
+      "meanYardsPerDb": 9.32,
+      "meanEpa": 0.2563,
+      "meanAirYards": 12.39,
+      "meanYacOnComp": 4.06,
+      "tttMean": 2.621,
+      "tttP25": 2.3,
+      "tttP50": 2.4,
+      "tttP75": 3.05,
+      "flightDurationMean": 1.118,
+      "sepAtThrowMean": 4.539,
+      "sepAtArrivalMean": 3.749,
+      "preSnapCushionMean": 5.744,
+      "timeToPressureMean": 2.057,
+      "olEngagedRateMean": 77.8
     },
     "passBlitz": {
-      "n": 763,
-      "compPct": 63.11,
-      "sackPct": 11.67,
-      "pressurePct": 41.27,
-      "intPctOnAtt": 1.16,
-      "intPctOnDb": 1.02,
-      "explosive15Pct": 19.47,
-      "epaSuccessPct": 44.67,
-      "meanYardsPerDb": 7.15,
-      "meanEpa": -0.2208,
-      "meanAirYards": 10.87,
-      "meanYacOnComp": 3.96,
-      "tttMean": 1.953,
-      "tttP25": 1.65,
-      "tttP50": 1.9,
-      "tttP75": 2.05,
-      "sepAtThrowMean": 3.834,
-      "preSnapCushionMean": 3.238,
-      "timeToPressureMean": 1.168,
-      "olEngagedRateMean": 84.6
+      "n": 756,
+      "compPct": 62.97,
+      "sackPct": 9.84,
+      "pressurePct": 30.66,
+      "intPctOnAtt": 2.64,
+      "intPctOnDb": 2.38,
+      "explosive15Pct": 18.4,
+      "epaSuccessPct": 51.75,
+      "meanYardsPerDb": 6.8,
+      "meanEpa": 0.001,
+      "meanAirYards": 8.9,
+      "meanYacOnComp": 4.22,
+      "tttMean": 2.126,
+      "tttP25": 2,
+      "tttP50": 2.05,
+      "tttP75": 2.2,
+      "flightDurationMean": 0.985,
+      "sepAtThrowMean": 4.263,
+      "sepAtArrivalMean": 4.002,
+      "preSnapCushionMean": 5.967,
+      "timeToPressureMean": 1.751,
+      "olEngagedRateMean": 74.8
     },
     "passStraight": {
       "n": 1080,
-      "compPct": 55.99,
-      "sackPct": 4.04,
-      "pressurePct": 27.48,
-      "intPctOnAtt": 2.32,
-      "intPctOnDb": 2.23,
-      "explosive15Pct": 19.37,
-      "epaSuccessPct": 40.39,
-      "meanYardsPerDb": 6.69,
-      "meanEpa": -0.199,
-      "meanAirYards": 10.49,
-      "meanYacOnComp": 3.04,
-      "tttMean": 2.527,
-      "tttP25": 2.05,
-      "tttP50": 2.6,
-      "tttP75": 3.05,
-      "sepAtThrowMean": 4.225,
-      "preSnapCushionMean": 3.545,
-      "timeToPressureMean": 1.922,
-      "olEngagedRateMean": 87.8
+      "compPct": 63.95,
+      "sackPct": 7.67,
+      "pressurePct": 19.4,
+      "intPctOnAtt": 2.45,
+      "intPctOnDb": 2.26,
+      "explosive15Pct": 25.16,
+      "epaSuccessPct": 58.31,
+      "meanYardsPerDb": 8.62,
+      "meanEpa": 0.1742,
+      "meanAirYards": 12.13,
+      "meanYacOnComp": 4.09,
+      "tttMean": 2.493,
+      "tttP25": 2.2,
+      "tttP50": 2.4,
+      "tttP75": 2.8,
+      "flightDurationMean": 1.123,
+      "sepAtThrowMean": 4.449,
+      "sepAtArrivalMean": 3.804,
+      "preSnapCushionMean": 5.789,
+      "timeToPressureMean": 2.169,
+      "olEngagedRateMean": 77.1
     },
     "passPlayAction": {
       "n": 540,
-      "compPct": 75.75,
-      "sackPct": 18.39,
-      "pressurePct": 66.23,
-      "intPctOnAtt": 1.46,
-      "intPctOnDb": 1.19,
-      "explosive15Pct": 36.78,
-      "epaSuccessPct": 60.33,
-      "meanYardsPerDb": 9.16,
-      "meanEpa": -0.1693,
-      "meanAirYards": 11.58,
-      "meanYacOnComp": 4.51,
-      "tttMean": 2.42,
-      "tttP25": 1.9,
+      "compPct": 66.07,
+      "sackPct": 1.9,
+      "pressurePct": 37.11,
+      "intPctOnAtt": 2.66,
+      "intPctOnDb": 2.61,
+      "explosive15Pct": 19.56,
+      "epaSuccessPct": 56.4,
+      "meanYardsPerDb": 7.56,
+      "meanEpa": 0.1223,
+      "meanAirYards": 7.53,
+      "meanYacOnComp": 4.2,
+      "tttMean": 2.238,
+      "tttP25": 2.05,
       "tttP50": 2.4,
-      "tttP75": 2.75,
-      "sepAtThrowMean": 5.972,
-      "preSnapCushionMean": 3.244,
-      "timeToPressureMean": 0.458,
-      "olEngagedRateMean": 83
+      "tttP75": 2.4,
+      "flightDurationMean": 0.877,
+      "sepAtThrowMean": 4.421,
+      "sepAtArrivalMean": 3.966,
+      "preSnapCushionMean": 5.971,
+      "timeToPressureMean": 1.398,
+      "olEngagedRateMean": 75.3
     },
     "passMan": {
-      "n": 677,
-      "compPct": 48.41,
-      "sackPct": 12.01,
-      "pressurePct": 38.92,
-      "intPctOnAtt": 3.06,
-      "intPctOnDb": 2.7,
-      "explosive15Pct": 14.35,
-      "epaSuccessPct": 31.18,
-      "meanYardsPerDb": 5.08,
-      "meanEpa": -0.4235,
-      "meanAirYards": 10.68,
-      "meanYacOnComp": 3.36,
-      "tttMean": 2.278,
-      "tttP25": 1.65,
-      "tttP50": 2.05,
+      "n": 858,
+      "compPct": 58.15,
+      "sackPct": 10.56,
+      "pressurePct": 29.12,
+      "intPctOnAtt": 2.71,
+      "intPctOnDb": 2.43,
+      "explosive15Pct": 23.79,
+      "epaSuccessPct": 48.45,
+      "meanYardsPerDb": 6.96,
+      "meanEpa": -0.001,
+      "meanAirYards": 11.24,
+      "meanYacOnComp": 3.64,
+      "tttMean": 2.419,
+      "tttP25": 2.05,
+      "tttP50": 2.35,
       "tttP75": 2.7,
-      "sepAtThrowMean": 3.484,
-      "preSnapCushionMean": 2.407,
-      "timeToPressureMean": 1.301,
-      "olEngagedRateMean": 85.1
+      "flightDurationMean": 1.09,
+      "sepAtThrowMean": 4.151,
+      "sepAtArrivalMean": 3.297,
+      "preSnapCushionMean": 4.77,
+      "timeToPressureMean": 1.944,
+      "olEngagedRateMean": 75.8
     },
     "passZone": {
-      "n": 943,
-      "compPct": 63.82,
-      "sackPct": 4.73,
-      "pressurePct": 33.66,
-      "intPctOnAtt": 1.82,
-      "intPctOnDb": 1.73,
-      "explosive15Pct": 26.49,
-      "epaSuccessPct": 50.01,
-      "meanYardsPerDb": 8.09,
-      "meanEpa": -0.0947,
-      "meanAirYards": 10.68,
-      "meanYacOnComp": 3.38,
-      "tttMean": 2.602,
-      "tttP25": 2.25,
-      "tttP50": 2.7,
-      "tttP75": 3.05,
-      "sepAtThrowMean": 4.945,
-      "preSnapCushionMean": 3.945,
-      "timeToPressureMean": 1.425,
-      "olEngagedRateMean": 87.5
+      "n": 762,
+      "compPct": 68.39,
+      "sackPct": 3.73,
+      "pressurePct": 18.67,
+      "intPctOnAtt": 2.35,
+      "intPctOnDb": 2.27,
+      "explosive15Pct": 24.21,
+      "epaSuccessPct": 64.46,
+      "meanYardsPerDb": 9.4,
+      "meanEpa": 0.2775,
+      "meanAirYards": 11.12,
+      "meanYacOnComp": 4.38,
+      "tttMean": 2.458,
+      "tttP25": 2.3,
+      "tttP50": 2.4,
+      "tttP75": 2.8,
+      "flightDurationMean": 1.06,
+      "sepAtThrowMean": 4.63,
+      "sepAtArrivalMean": 4.184,
+      "preSnapCushionMean": 6.552,
+      "timeToPressureMean": 1.874,
+      "olEngagedRateMean": 77.4
     },
     "thirdAndLong": {
       "n": 432,
-      "compPct": 59.46,
-      "sackPct": 6.22,
-      "pressurePct": 23.95,
-      "intPctOnAtt": 3.05,
-      "intPctOnDb": 2.86,
-      "explosive15Pct": 26.32,
-      "epaSuccessPct": 39.04,
-      "meanYardsPerDb": 7.28,
-      "meanEpa": -0.2156,
-      "meanAirYards": 11.3,
-      "meanYacOnComp": 3.22,
-      "tttMean": 2.485,
-      "tttP25": 2.05,
-      "tttP50": 2.7,
-      "tttP75": 2.75,
-      "sepAtThrowMean": 4.078,
-      "preSnapCushionMean": 3.569,
-      "timeToPressureMean": 1.819,
-      "olEngagedRateMean": 88.3
+      "compPct": 55.19,
+      "sackPct": 7.87,
+      "pressurePct": 18.76,
+      "intPctOnAtt": 1.52,
+      "intPctOnDb": 1.4,
+      "explosive15Pct": 31.1,
+      "epaSuccessPct": 49.85,
+      "meanYardsPerDb": 8.22,
+      "meanEpa": 0.1448,
+      "meanAirYards": 13.76,
+      "meanYacOnComp": 3.98,
+      "tttMean": 2.474,
+      "tttP25": 2.2,
+      "tttP50": 2.4,
+      "tttP75": 2.7,
+      "flightDurationMean": 1.153,
+      "sepAtThrowMean": 4.721,
+      "sepAtArrivalMean": 3.792,
+      "preSnapCushionMean": 5.405,
+      "timeToPressureMean": 2.076,
+      "olEngagedRateMean": 77.3
     },
     "byShell": {
       "COVER_0": {
         "n": 360,
-        "compPct": 51.92,
-        "sackPct": 15.13,
-        "pressurePct": 45.89,
-        "intPctOnAtt": 2.33,
-        "intPctOnDb": 1.98,
-        "explosive15Pct": 19.54,
-        "epaSuccessPct": 29.21,
-        "meanYardsPerDb": 5.16,
-        "meanEpa": -0.4373,
-        "meanAirYards": 11.05,
-        "meanYacOnComp": 2.98,
-        "tttMean": 1.947,
-        "tttP25": 1.65,
-        "tttP50": 1.85,
+        "compPct": 52.17,
+        "sackPct": 16.67,
+        "pressurePct": 40.93,
+        "intPctOnAtt": 3.05,
+        "intPctOnDb": 2.54,
+        "explosive15Pct": 19.86,
+        "epaSuccessPct": 35.86,
+        "meanYardsPerDb": 4.87,
+        "meanEpa": -0.2452,
+        "meanAirYards": 9.44,
+        "meanYacOnComp": 3.31,
+        "tttMean": 2.138,
+        "tttP25": 2,
+        "tttP50": 2.1,
         "tttP75": 2.2,
-        "sepAtThrowMean": 2.452,
-        "preSnapCushionMean": 2.346,
-        "timeToPressureMean": 1.283,
-        "olEngagedRateMean": 85.7
+        "flightDurationMean": 1.013,
+        "sepAtThrowMean": 3.614,
+        "sepAtArrivalMean": 2.722,
+        "preSnapCushionMean": 4.504,
+        "timeToPressureMean": 1.803,
+        "olEngagedRateMean": 72.4
       },
       "COVER_1": {
-        "n": 317,
-        "compPct": 45.13,
-        "sackPct": 8.88,
-        "pressurePct": 31.91,
-        "intPctOnAtt": 3.75,
-        "intPctOnDb": 3.42,
-        "explosive15Pct": 9.12,
-        "epaSuccessPct": 33.16,
-        "meanYardsPerDb": 5,
-        "meanEpa": -0.4096,
-        "meanAirYards": 10.32,
-        "meanYacOnComp": 3.76,
-        "tttMean": 2.61,
-        "tttP25": 1.9,
-        "tttP50": 2.55,
-        "tttP75": 3.2,
-        "sepAtThrowMean": 4.45,
-        "preSnapCushionMean": 2.469,
-        "timeToPressureMean": 1.325,
-        "olEngagedRateMean": 84.6
+        "n": 498,
+        "compPct": 61.27,
+        "sackPct": 7,
+        "pressurePct": 22.26,
+        "intPctOnAtt": 2.54,
+        "intPctOnDb": 2.36,
+        "explosive15Pct": 26.07,
+        "epaSuccessPct": 55.77,
+        "meanYardsPerDb": 8.18,
+        "meanEpa": 0.141,
+        "meanAirYards": 12.18,
+        "meanYacOnComp": 3.79,
+        "tttMean": 2.583,
+        "tttP25": 2.3,
+        "tttP50": 2.4,
+        "tttP75": 3.05,
+        "flightDurationMean": 1.13,
+        "sepAtThrowMean": 4.43,
+        "sepAtArrivalMean": 3.597,
+        "preSnapCushionMean": 4.925,
+        "timeToPressureMean": 2.094,
+        "olEngagedRateMean": 77.8
       },
       "COVER_2": {
-        "n": 205,
-        "compPct": 55.47,
-        "sackPct": 5.07,
-        "pressurePct": 29.01,
-        "intPctOnAtt": 3.2,
-        "intPctOnDb": 3.04,
-        "explosive15Pct": 30.97,
-        "epaSuccessPct": 39.37,
-        "meanYardsPerDb": 7.15,
-        "meanEpa": -0.2047,
-        "meanAirYards": 11.13,
-        "meanYacOnComp": 3.19,
-        "tttMean": 2.686,
-        "tttP25": 2.4,
-        "tttP50": 2.7,
-        "tttP75": 3.05,
-        "sepAtThrowMean": 4.878,
-        "preSnapCushionMean": 3.568,
-        "timeToPressureMean": 1.562,
-        "olEngagedRateMean": 87.2
+        "n": 211,
+        "compPct": 65.85,
+        "sackPct": 2.62,
+        "pressurePct": 18.79,
+        "intPctOnAtt": 2.12,
+        "intPctOnDb": 2.06,
+        "explosive15Pct": 30.14,
+        "epaSuccessPct": 62.74,
+        "meanYardsPerDb": 9.94,
+        "meanEpa": 0.314,
+        "meanAirYards": 11.96,
+        "meanYacOnComp": 4.19,
+        "tttMean": 2.549,
+        "tttP25": 2.3,
+        "tttP50": 2.45,
+        "tttP75": 2.8,
+        "flightDurationMean": 1.096,
+        "sepAtThrowMean": 4.342,
+        "sepAtArrivalMean": 3.935,
+        "preSnapCushionMean": 5.621,
+        "timeToPressureMean": 1.92,
+        "olEngagedRateMean": 76.2
       },
       "COVER_3": {
-        "n": 460,
-        "compPct": 67.94,
-        "sackPct": 4.48,
-        "pressurePct": 35.9,
-        "intPctOnAtt": 1.8,
-        "intPctOnDb": 1.72,
-        "explosive15Pct": 28.87,
-        "epaSuccessPct": 57.5,
-        "meanYardsPerDb": 9.16,
-        "meanEpa": -0.0259,
-        "meanAirYards": 11.03,
-        "meanYacOnComp": 3.56,
-        "tttMean": 2.649,
-        "tttP25": 2.25,
-        "tttP50": 2.75,
-        "tttP75": 3.05,
-        "sepAtThrowMean": 5.498,
-        "preSnapCushionMean": 3.749,
-        "timeToPressureMean": 1.455,
-        "olEngagedRateMean": 87.5
+        "n": 289,
+        "compPct": 68.68,
+        "sackPct": 2.86,
+        "pressurePct": 16.21,
+        "intPctOnAtt": 2.37,
+        "intPctOnDb": 2.31,
+        "explosive15Pct": 21,
+        "epaSuccessPct": 65.25,
+        "meanYardsPerDb": 9.29,
+        "meanEpa": 0.2828,
+        "meanAirYards": 11,
+        "meanYacOnComp": 4.46,
+        "tttMean": 2.457,
+        "tttP25": 2.3,
+        "tttP50": 2.4,
+        "tttP75": 2.75,
+        "flightDurationMean": 1.032,
+        "sepAtThrowMean": 4.6,
+        "sepAtArrivalMean": 4.219,
+        "preSnapCushionMean": 6.355,
+        "timeToPressureMean": 1.835,
+        "olEngagedRateMean": 77.6
       },
       "COVER_4": {
-        "n": 278,
-        "compPct": 63.72,
-        "sackPct": 4.88,
-        "pressurePct": 33.74,
-        "intPctOnAtt": 0.52,
-        "intPctOnDb": 0.5,
-        "explosive15Pct": 17.41,
-        "epaSuccessPct": 45.56,
-        "meanYardsPerDb": 6.86,
-        "meanEpa": -0.1237,
-        "meanAirYards": 9.56,
-        "meanYacOnComp": 3.15,
-        "tttMean": 2.429,
-        "tttP25": 1.9,
-        "tttP50": 2.25,
-        "tttP75": 2.75,
-        "sepAtThrowMean": 3.91,
-        "preSnapCushionMean": 4.698,
-        "timeToPressureMean": 1.25,
-        "olEngagedRateMean": 87.9
+        "n": 262,
+        "compPct": 70.42,
+        "sackPct": 6.07,
+        "pressurePct": 22.26,
+        "intPctOnAtt": 2.55,
+        "intPctOnDb": 2.39,
+        "explosive15Pct": 23.44,
+        "epaSuccessPct": 64.9,
+        "meanYardsPerDb": 9.05,
+        "meanEpa": 0.2352,
+        "meanAirYards": 10.5,
+        "meanYacOnComp": 4.42,
+        "tttMean": 2.373,
+        "tttP25": 2.05,
+        "tttP50": 2.3,
+        "tttP75": 2.7,
+        "flightDurationMean": 1.068,
+        "sepAtThrowMean": 4.957,
+        "sepAtArrivalMean": 4.372,
+        "preSnapCushionMean": 7.724,
+        "timeToPressureMean": 1.879,
+        "olEngagedRateMean": 78.2
       }
     },
     "rushAll": {
       "n": 1620,
-      "meanYards": 3.62,
-      "medianYards": 2.43,
-      "stuffPct": 18.47,
-      "successPct": 41.19,
-      "explosive15Pct": 0.7,
-      "meanEpa": -0.0999,
-      "yardsToContactMean": 0.52
+      "meanYards": 4.44,
+      "medianYards": 2.16,
+      "stuffPct": 21.34,
+      "successPct": 39.62,
+      "explosive15Pct": 4.94,
+      "meanEpa": -0.0843,
+      "yardsToContactMean": -0.13
     },
     "rushLight": {
-      "n": 1034,
-      "meanYards": 3.52,
-      "medianYards": 2.46,
-      "stuffPct": 20.56,
-      "successPct": 40.18,
-      "explosive15Pct": 0.77,
-      "meanEpa": -0.1177,
-      "yardsToContactMean": 0.5
+      "n": 720,
+      "meanYards": 4.93,
+      "medianYards": 2.66,
+      "stuffPct": 16.63,
+      "successPct": 43.03,
+      "explosive15Pct": 5.78,
+      "meanEpa": -0.0284,
+      "yardsToContactMean": -0.05
     },
     "rushNormal": {
-      "n": 226,
-      "meanYards": 3.98,
-      "medianYards": 5.04,
-      "stuffPct": 22.46,
-      "successPct": 58.32,
-      "explosive15Pct": 0,
-      "meanEpa": -0.0748,
-      "yardsToContactMean": 0.83
+      "n": 180,
+      "meanYards": 5.1,
+      "medianYards": 5.36,
+      "stuffPct": 16.33,
+      "successPct": 51.92,
+      "explosive15Pct": 3.33,
+      "meanEpa": 0.0074,
+      "yardsToContactMean": -0.29
     },
     "rushHeavy": {
-      "n": 360,
-      "meanYards": 3.81,
-      "medianYards": 1.89,
-      "stuffPct": 10.28,
-      "successPct": 37.36,
-      "explosive15Pct": 0.76,
-      "meanEpa": -0.0543,
-      "yardsToContactMean": 0.46
+      "n": 720,
+      "meanYards": 3.56,
+      "medianYards": 1.19,
+      "stuffPct": 29.46,
+      "successPct": 30.94,
+      "explosive15Pct": 4.32,
+      "meanEpa": -0.1909,
+      "yardsToContactMean": -0.18
     },
     "goalLinePass": {
       "n": 120,
-      "compPct": 74.75,
-      "sackPct": 17.5,
-      "pressurePct": 44.17,
-      "intPctOnAtt": 1.01,
-      "intPctOnDb": 0.83,
+      "compPct": 65.49,
+      "sackPct": 5.83,
+      "pressurePct": 30,
+      "intPctOnAtt": 0,
+      "intPctOnDb": 0,
       "explosive15Pct": 0,
       "epaSuccessPct": 61.67,
-      "meanYardsPerDb": 1.46,
-      "meanEpa": -0.2593,
-      "meanAirYards": 5.7,
-      "meanYacOnComp": 0,
-      "tttMean": 1.576,
-      "tttP25": 1.55,
-      "tttP50": 1.55,
-      "tttP75": 1.75,
-      "sepAtThrowMean": 4.836,
-      "preSnapCushionMean": 3.517,
-      "timeToPressureMean": 1.129,
-      "olEngagedRateMean": 80
+      "meanYardsPerDb": 2.15,
+      "meanEpa": 0.0586,
+      "meanAirYards": 6.05,
+      "meanYacOnComp": 0.04,
+      "tttMean": 1.73,
+      "tttP25": 1.7,
+      "tttP50": 1.75,
+      "tttP75": 1.9,
+      "flightDurationMean": 0.836,
+      "sepAtThrowMean": 4.194,
+      "sepAtArrivalMean": 3.975,
+      "preSnapCushionMean": 6.482,
+      "timeToPressureMean": 1.45,
+      "olEngagedRateMean": 74.9
     },
     "goalLineRun": {
       "n": 120,
-      "meanYards": 1.48,
-      "medianYards": 1.49,
-      "stuffPct": 33.33,
-      "successPct": 26.67,
+      "meanYards": 1.1,
+      "medianYards": 0.52,
+      "stuffPct": 36.67,
+      "successPct": 27.5,
       "explosive15Pct": 0,
-      "meanEpa": -0.1478,
-      "yardsToContactMean": -0.36
+      "meanEpa": -0.3069,
+      "yardsToContactMean": -0.48
     }
   },
   "autopsyResults": [
     {
       "gameId": "2023_03_PHI_TB",
       "actual": {
-        "compPct": 58.97,
+        "compPct": 62.16,
         "sackPct": 2.5,
         "rushYpc": 5.05
       },
       "simulated": {
-        "compPct": 58.67,
-        "sackPct": 6.25,
-        "pressPct": 28,
-        "rushYpc": 2.09,
-        "rushStuffPct": 43
+        "compPct": 55.59,
+        "sackPct": 8.25,
+        "pressPct": 26.5,
+        "rushYpc": 2.16,
+        "rushStuffPct": 29.67
       }
     },
     {
       "gameId": "2023_07_SF_MIN",
       "actual": {
-        "compPct": 67.74,
+        "compPct": 72.41,
         "sackPct": 3.12,
         "rushYpc": 2.53
       },
       "simulated": {
-        "compPct": 74.46,
-        "sackPct": 8,
-        "pressPct": 31,
-        "rushYpc": 2.03,
-        "rushStuffPct": 42.67
+        "compPct": 62.84,
+        "sackPct": 8.5,
+        "pressPct": 21.75,
+        "rushYpc": 2.6,
+        "rushStuffPct": 29.67
       }
     },
     {
       "gameId": "2023_19_PHI_TB",
       "actual": {
-        "compPct": 69.44,
+        "compPct": 71.43,
         "sackPct": 7.69,
         "rushYpc": 2.64
       },
       "simulated": {
-        "compPct": 71.82,
-        "sackPct": 7.75,
-        "pressPct": 41,
-        "rushYpc": 1.72,
-        "rushStuffPct": 51.33
+        "compPct": 57.42,
+        "sackPct": 10.75,
+        "pressPct": 25,
+        "rushYpc": 2.14,
+        "rushStuffPct": 28
       }
     },
     {
       "gameId": "2023_21_KC_BAL",
       "actual": {
-        "compPct": 47.62,
+        "compPct": 54.05,
         "sackPct": 8.7,
         "rushYpc": 5.3
       },
       "simulated": {
-        "compPct": 50.77,
-        "sackPct": 2.5,
-        "pressPct": 11.25,
-        "rushYpc": 2.68,
-        "rushStuffPct": 24.67
+        "compPct": 62.11,
+        "sackPct": 5,
+        "pressPct": 13.75,
+        "rushYpc": 2.62,
+        "rushStuffPct": 33
       }
     },
     {
       "gameId": "2024_03_HOU_MIN",
       "actual": {
-        "compPct": 60.87,
+        "compPct": 65.12,
         "sackPct": 9.8,
         "rushYpc": 2.36
       },
       "simulated": {
-        "compPct": 55.59,
-        "sackPct": 6,
-        "pressPct": 35.5,
-        "rushYpc": 1.21,
-        "rushStuffPct": 51.67
+        "compPct": 46.24,
+        "sackPct": 7,
+        "pressPct": 22.25,
+        "rushYpc": 2.12,
+        "rushStuffPct": 31
       }
     },
     {
       "gameId": "2024_04_PHI_TB",
       "actual": {
-        "compPct": 58.06,
+        "compPct": 60,
         "sackPct": 16.22,
         "rushYpc": 5.94
       },
       "simulated": {
-        "compPct": 67.23,
-        "sackPct": 10.75,
-        "pressPct": 35.5,
-        "rushYpc": 1.52,
-        "rushStuffPct": 45.33
+        "compPct": 54.47,
+        "sackPct": 10.5,
+        "pressPct": 27,
+        "rushYpc": 3.15,
+        "rushStuffPct": 12.67
       }
     },
     {
       "gameId": "2024_19_MIN_LA",
       "actual": {
-        "compPct": 60.98,
+        "compPct": 62.5,
         "sackPct": 18,
         "rushYpc": 4.5
       },
       "simulated": {
-        "compPct": 57.58,
-        "sackPct": 2.75,
-        "pressPct": 23,
-        "rushYpc": 4.16,
-        "rushStuffPct": 18.67
+        "compPct": 64.36,
+        "sackPct": 2.5,
+        "pressPct": 16.75,
+        "rushYpc": 2.51,
+        "rushStuffPct": 20.33
       }
     },
     {
       "gameId": "2024_22_KC_PHI",
       "actual": {
-        "compPct": 58.33,
+        "compPct": 65.62,
         "sackPct": 14.29,
         "rushYpc": 3.43
       },
       "simulated": {
-        "compPct": 60.61,
-        "sackPct": 8.6,
-        "pressPct": 29.6,
-        "rushYpc": 3.86,
-        "rushStuffPct": 12.07
+        "compPct": 66.7,
+        "sackPct": 7.95,
+        "pressPct": 25.4,
+        "rushYpc": 3.33,
+        "rushStuffPct": 15.27
       }
     }
   ],
   "playbookAudits": {
-    "apexMeanEpa": 0.023,
-    "hydraMeanEpa": -0.2335,
-    "argonMeanEpa": 0.1105,
-    "apexPlays": [
+    "omegaMeanEpa": 0.1133,
+    "apexMeanEpa": 0.1935,
+    "hydraMeanEpa": 0.1097,
+    "argonMeanEpa": 0.2816,
+    "omegaPlays": [
       {
-        "name": "APEX_ORBIT_GLANCE_FLOOD",
-        "epa": -0.0462,
-        "yds": 8.6,
-        "legal": true,
-        "maxUnengG": 1.418,
-        "minSepP": 0.391
-      },
-      {
-        "name": "APEX_DUO_WING_PIN_PULL",
-        "epa": 0.0556,
-        "yds": 5.56,
+        "name": "OMEGA_DISPLACED_ORBIT_LASER",
+        "epa": -0.0837,
+        "yds": 5.2,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.6
+        "minSepP": 0.607
       },
       {
-        "name": "APEX_SHORT_MESH_PA_BOOT",
-        "epa": 0.0533,
+        "name": "OMEGA_CHIRAL_JET_OPTION",
+        "epa": -0.1148,
+        "yds": 4.22,
+        "legal": true,
+        "maxUnengG": 1.455,
+        "minSepP": 0.615
+      },
+      {
+        "name": "OMEGA_ORBIT_GLANCE_FLOOD",
+        "epa": 0.2547,
         "yds": 9.3,
         "legal": true,
-        "maxUnengG": 1.418,
-        "minSepP": 0.597
+        "maxUnengG": 1.306,
+        "minSepP": 0.361
       },
       {
-        "name": "APEX_SWITCH_MESH_STICKS",
-        "epa": 0.0628,
-        "yds": 8.71,
+        "name": "OMEGA_064S_FLASH_PA_BOOT",
+        "epa": 0.0923,
+        "yds": 7.77,
         "legal": true,
-        "maxUnengG": 1.418,
-        "minSepP": 0.6
+        "maxUnengG": 1.306,
+        "minSepP": 0.612
       },
       {
-        "name": "APEX_TWOMIN_BOUNDARY_OOB",
-        "epa": 0.0214,
-        "yds": 8.92,
+        "name": "OMEGA_3RD9_SWITCH_STICKS",
+        "epa": 0.2327,
+        "yds": 8.72,
         "legal": true,
-        "maxUnengG": 1.418,
+        "maxUnengG": 1.306,
+        "minSepP": 0.601
+      },
+      {
+        "name": "OMEGA_2MIN_BOUNDARY_OOB",
+        "epa": -0.0598,
+        "yds": 7.7,
+        "legal": true,
+        "maxUnengG": 1.306,
         "minSepP": 0.595
       },
       {
-        "name": "APEX_DISPLACED_WING_OPTION",
-        "epa": 0.1579,
-        "yds": 10.46,
+        "name": "OMEGA_11V11_RHINO_PIN_PULL",
+        "epa": 0.5556,
+        "yds": 10.02,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.48
+        "minSepP": 0.6
+      },
+      {
+        "name": "OMEGA_GOALLINE_SPRINT_SMASH",
+        "epa": 0.0295,
+        "yds": 4.71,
+        "legal": true,
+        "maxUnengG": 1.306,
+        "minSepP": 0.615
+      }
+    ],
+    "apexPlays": [
+      {
+        "name": "APEX_ORBIT_GLANCE_FLOOD",
+        "epa": 0.2058,
+        "yds": 8.18,
+        "legal": true,
+        "maxUnengG": 1.306,
+        "minSepP": 0.361
+      },
+      {
+        "name": "APEX_DUO_WING_PIN_PULL",
+        "epa": 0.4129,
+        "yds": 9.13,
+        "legal": true,
+        "maxUnengG": 1.455,
+        "minSepP": 0.597
+      },
+      {
+        "name": "APEX_SHORT_MESH_PA_BOOT",
+        "epa": 0.0987,
+        "yds": 8.71,
+        "legal": true,
+        "maxUnengG": 1.306,
+        "minSepP": 0.61
+      },
+      {
+        "name": "APEX_SWITCH_MESH_STICKS",
+        "epa": 0.2038,
+        "yds": 8.37,
+        "legal": true,
+        "maxUnengG": 1.306,
+        "minSepP": 0.614
+      },
+      {
+        "name": "APEX_TWOMIN_BOUNDARY_OOB",
+        "epa": 0.1486,
+        "yds": 8.82,
+        "legal": true,
+        "maxUnengG": 1.306,
+        "minSepP": 0.589
+      },
+      {
+        "name": "APEX_DISPLACED_WING_OPTION",
+        "epa": 0.0341,
+        "yds": 5.84,
+        "legal": true,
+        "maxUnengG": 1.455,
+        "minSepP": 0.599
       },
       {
         "name": "APEX_EAGLES_RHINO_COUNTER",
-        "epa": 0.0403,
-        "yds": 5.66,
+        "epa": 0.5487,
+        "yds": 10.1,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.588
+        "minSepP": 0.594
       },
       {
         "name": "APEX_GOALLINE_SPRINT_SMASH",
-        "epa": -0.1609,
-        "yds": 7.62,
+        "epa": -0.1047,
+        "yds": 4.81,
         "legal": true,
-        "maxUnengG": 1.418,
-        "minSepP": 0.6
+        "maxUnengG": 1.306,
+        "minSepP": 0.611
       }
     ],
     "hydraPlays": [
       {
         "name": "HYDRA_JET_DOUBLE_OPTION",
-        "epa": -0.1178,
-        "yds": 6.45,
+        "epa": -0.1643,
+        "yds": 3.86,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.452
+        "minSepP": 0.34
       },
       {
         "name": "HYDRA_HOOK_AND_LATERAL",
-        "epa": -0.1458,
-        "yds": 8.11,
+        "epa": 0.5726,
+        "yds": 14.03,
         "legal": true,
         "maxUnengG": 1.455,
         "minSepP": 0.6
       },
       {
         "name": "HYDRA_PONY_SPLIT_BASH",
-        "epa": -0.3993,
-        "yds": 2.8,
+        "epa": 0.1935,
+        "yds": 6.49,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.59
+        "minSepP": 0.592
       },
       {
         "name": "HYDRA_BACKWARD_DOUBLE_PASS",
-        "epa": -0.1301,
-        "yds": 8.18,
+        "epa": 0.0126,
+        "yds": 6.37,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.6
+        "minSepP": 0.61
       },
       {
         "name": "HYDRA_6OL_ELIGIBLE_SEAM",
-        "epa": -0.3038,
-        "yds": 5.33,
+        "epa": 0.4368,
+        "yds": 9.64,
         "legal": true,
-        "maxUnengG": 1.418,
-        "minSepP": 0.594
+        "maxUnengG": 1.306,
+        "minSepP": 0.611
       },
       {
         "name": "HYDRA_2MIN_SIDELINE_CHOICE",
-        "epa": -0.6216,
-        "yds": 2.75,
+        "epa": 0.0919,
+        "yds": 7.19,
         "legal": true,
-        "maxUnengG": 1.418,
-        "minSepP": 0.597
+        "maxUnengG": 1.306,
+        "minSepP": 0.6
       },
       {
         "name": "HYDRA_4MIN_BULLDOZER_SWEEP",
-        "epa": 0.1655,
-        "yds": 6.16,
+        "epa": 0.2833,
+        "yds": 7.51,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.6
+        "minSepP": 0.586
       },
       {
         "name": "HYDRA_GOALLINE_PHILLY_SPECIAL",
-        "epa": -0.3152,
-        "yds": 6.21,
+        "epa": -0.5486,
+        "yds": 1.84,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.6
+        "minSepP": 0.608
       }
     ],
     "argonPlays": [
       {
         "name": "ARGON_CHIRAL_JET_LEFT",
-        "epa": 0.3658,
-        "yds": 12.09,
+        "epa": 0.2813,
+        "yds": 7.03,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.48
+        "minSepP": 0.601
       },
       {
         "name": "ARGON_REACTOR_SWEEP_RIGHT",
-        "epa": 0.3097,
-        "yds": 7.89,
+        "epa": 0.3687,
+        "yds": 8.39,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.597
+        "minSepP": 0.58
       },
       {
         "name": "ARGON_NOBLE_KINETIC_RELAY",
-        "epa": 0.1347,
-        "yds": 9.89,
+        "epa": 0.9815,
+        "yds": 20.16,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.6
+        "minSepP": 0.608
       },
       {
         "name": "ARGON_DISPLACED_NODE_LASER",
-        "epa": 0.2242,
-        "yds": 11.89,
+        "epa": 0.317,
+        "yds": 8.07,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.56
+        "minSepP": 0.601
       },
       {
         "name": "ARGON_WILDCAT_TRIPLE_PITCH",
-        "epa": -0.1382,
-        "yds": 3.57,
+        "epa": 0.3205,
+        "yds": 7.9,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.6
+        "minSepP": 0.596
       },
       {
         "name": "ARGON_2MIN_BOUNDARY_LASER",
-        "epa": -0.0873,
-        "yds": 6.89,
+        "epa": 0.3307,
+        "yds": 7.73,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.566
+        "minSepP": 0.602
       },
       {
         "name": "ARGON_4MIN_LEFT_MONOLITH",
-        "epa": 0.1789,
-        "yds": 6.25,
+        "epa": 0.2225,
+        "yds": 6.89,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.597
+        "minSepP": 0.583
       },
       {
         "name": "ARGON_GOALLINE_CYCLOTRON",
-        "epa": -0.1037,
-        "yds": 6.76,
+        "epa": -0.5697,
+        "yds": 3.15,
         "legal": true,
         "maxUnengG": 1.455,
-        "minSepP": 0.6
+        "minSepP": 0.597
       }
     ]
   },
   "legalityAndBiomechanics": {
     "legalityPassPct": 100,
     "maxUnengagedGForce": 1.455,
-    "minPlayerSepYds": 0.559
+    "minPlayerSepYds": 0.572
   }
 }
