@@ -1,0 +1,204 @@
+{
+  "generatedAt": "2026-11-20T03:04:46.666Z",
+  "seasonsPerArch": 500,
+  "results": [
+    {
+      "id": "CONV11_ELITE_60M",
+      "label": "1. Conv-11 Spread / Elite Pocket ($55M+$5M = $60M)",
+      "qbRoomCapM": 60,
+      "defCapBonusPpg": 0,
+      "exoticAdaptationHaircut": 0,
+      "season": {
+        "pfG": 13.95,
+        "paG": 19.33,
+        "diffG": -5.38,
+        "avgWins": 5.71,
+        "playoffPct": 5.4,
+        "sbPct": 0
+      },
+      "drives": {
+        "ppd": 1.41,
+        "tdPct": 14,
+        "puntPct": 56.3,
+        "threeOutPct": 35.5,
+        "toPct": 1.9,
+        "rzTdPct": 57.5,
+        "sackPlayPct": 3.9,
+        "playsPerGame": 60.1
+      },
+      "health": {
+        "qb1G": 16.68,
+        "qb2G": 17,
+        "bothG": 16.68,
+        "ge1G": 17,
+        "qb1HitsYr": 47,
+        "qb2HitsYr": 0
+      }
+    },
+    {
+      "id": "SHAN12_ELITE_60M",
+      "label": "2. Shanahan-12 PA / Elite Pocket ($55M+$5M = $60M)",
+      "qbRoomCapM": 60,
+      "defCapBonusPpg": 0,
+      "exoticAdaptationHaircut": 0,
+      "season": {
+        "pfG": 38.21,
+        "paG": 17.12,
+        "diffG": 21.09,
+        "avgWins": 16.26,
+        "playoffPct": 100,
+        "sbPct": 84.8
+      },
+      "drives": {
+        "ppd": 4.41,
+        "tdPct": 59.9,
+        "puntPct": 17.3,
+        "threeOutPct": 9.7,
+        "toPct": 7.6,
+        "rzTdPct": 88,
+        "sackPlayPct": 0.83,
+        "playsPerGame": 66.1
+      },
+      "health": {
+        "qb1G": 16.88,
+        "qb2G": 17,
+        "bothG": 16.88,
+        "ge1G": 17,
+        "qb1HitsYr": 15.6,
+        "qb2HitsYr": 0
+      }
+    },
+    {
+      "id": "SHAN12_SUPERMAX_DUAL_60M",
+      "label": "3. Shanahan-12 + Read3 / Supermax Dual ($60M Room)",
+      "qbRoomCapM": 60,
+      "defCapBonusPpg": 0,
+      "exoticAdaptationHaircut": 0.05,
+      "season": {
+        "pfG": 24.56,
+        "paG": 19.35,
+        "diffG": 5.21,
+        "avgWins": 11.18,
+        "playoffPct": 84.4,
+        "sbPct": 13
+      },
+      "drives": {
+        "ppd": 2.5,
+        "tdPct": 29.4,
+        "puntPct": 39.8,
+        "threeOutPct": 22.3,
+        "toPct": 7.2,
+        "rzTdPct": 73.6,
+        "sackPlayPct": 2.62,
+        "playsPerGame": 60.4
+      },
+      "health": {
+        "qb1G": 16.61,
+        "qb2G": 17,
+        "bothG": 16.61,
+        "ge1G": 17,
+        "qb1HitsYr": 75.5,
+        "qb2HitsYr": 0
+      }
+    },
+    {
+      "id": "SINGLE_MID_MOBILE_23M",
+      "label": "4. Single Mid-Mobile + Read3 ($18M+$5M = $23M)",
+      "qbRoomCapM": 23,
+      "defCapBonusPpg": 2.52,
+      "exoticAdaptationHaircut": 0.05,
+      "season": {
+        "pfG": 25.22,
+        "paG": 17.41,
+        "diffG": 7.81,
+        "avgWins": 12.5,
+        "playoffPct": 96.2,
+        "sbPct": 24.6
+      },
+      "drives": {
+        "ppd": 2.56,
+        "tdPct": 29.9,
+        "puntPct": 38.9,
+        "threeOutPct": 21.2,
+        "toPct": 7.2,
+        "rzTdPct": 73,
+        "sackPlayPct": 3.44,
+        "playsPerGame": 60.2
+      },
+      "health": {
+        "qb1G": 16.45,
+        "qb2G": 17,
+        "bothG": 16.45,
+        "ge1G": 17,
+        "qb1HitsYr": 80,
+        "qb2HitsYr": 0
+      }
+    },
+    {
+      "id": "FUNGIBLE_BENCH_2QB_20M",
+      "label": "5. Fungible 2-QB Bench Rotation ($13.5M+$6.5M = $20M)",
+      "qbRoomCapM": 20,
+      "defCapBonusPpg": 2.72,
+      "exoticAdaptationHaircut": 0.05,
+      "season": {
+        "pfG": 25.37,
+        "paG": 17.15,
+        "diffG": 8.22,
+        "avgWins": 12.74,
+        "playoffPct": 97.4,
+        "sbPct": 27.8
+      },
+      "drives": {
+        "ppd": 2.58,
+        "tdPct": 30.5,
+        "puntPct": 38.9,
+        "threeOutPct": 21.2,
+        "toPct": 7.1,
+        "rzTdPct": 73.7,
+        "sackPlayPct": 3.41,
+        "playsPerGame": 60.2
+      },
+      "health": {
+        "qb1G": 16.54,
+        "qb2G": 17,
+        "bothG": 16.54,
+        "ge1G": 17,
+        "qb1HitsYr": 78.9,
+        "qb2HitsYr": 0
+      }
+    },
+    {
+      "id": "ARGON_V2_ONFIELD_2QB_20M",
+      "label": "6. On-Field 2-QB Chiral Split-Gun ($20M, 20% Film Haircut)",
+      "qbRoomCapM": 20,
+      "defCapBonusPpg": 2.72,
+      "exoticAdaptationHaircut": 0.2,
+      "season": {
+        "pfG": 29.64,
+        "paG": 16.4,
+        "diffG": 13.24,
+        "avgWins": 14.43,
+        "playoffPct": 99.6,
+        "sbPct": 52
+      },
+      "drives": {
+        "ppd": 3.19,
+        "tdPct": 40.1,
+        "puntPct": 28.3,
+        "threeOutPct": 15.6,
+        "toPct": 11.5,
+        "rzTdPct": 78.8,
+        "sackPlayPct": 3.3,
+        "playsPerGame": 63
+      },
+      "health": {
+        "qb1G": 15.44,
+        "qb2G": 16.53,
+        "bothG": 14.99,
+        "ge1G": 16.99,
+        "qb1HitsYr": 352.3,
+        "qb2HitsYr": 97.3
+      }
+    }
+  ]
+}

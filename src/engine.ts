@@ -1684,10 +1684,18 @@ export class All22KinematicEngine {
           goalX = def.startX * 0.9;
           goalY = Math.max(0.2, def.startY - 0.8);
         } else if (ballCarrier && ballCarrier.y < -0.8 && timeSec < 0.55) {
-          // Squeeze C/D-gap outside shoulder at LOS while reading RB mesh instead of running past the tackle telepathically
-          defLocomotion = 'FOOTWORK';
-          goalX = def.startX * 0.92;
-          goalY = -0.25;
+          // Read RB mesh at LOS: squeeze inside against downhill runs, but fight across outside shoulder vs perimeter sweeps!
+          const isSweepOutside =
+            (def.startX > 0 && ballCarrier.vx > 2.2) || (def.startX < 0 && ballCarrier.vx < -2.2);
+          if (isSweepOutside && timeSec >= 0.22) {
+            defLocomotion = 'SPRINT';
+            goalX = def.startX + Math.sign(def.startX) * 1.8;
+            goalY = 0.25;
+          } else {
+            defLocomotion = 'FOOTWORK';
+            goalX = def.startX * 0.92;
+            goalY = -0.25;
+          }
         } else if (rushCarrier) {
           const isLeftSide = def.startX < 0;
           if (def.y > rushCarrier.y + 0.8) {
@@ -1780,12 +1788,16 @@ export class All22KinematicEngine {
         );
         // In Man Coverage, defenders stay locked on vertical routes until runner clears LOS (y > 0.65) or 1.15s;
         // HOWEVER, on pure run plays when their assigned man fires into a run block (crack/edge pin), NFL DBs trigger
-        // crack-replace run force after 0.42s visual recognition while holding outside-in alley leverage!
+        // crack-replace run force after 0.42s, AND an LB assigned to man the RB (manTargetId === ballCarrier.id) keys
+        // the handoff immediately after 0.25s visual recognition instead of backpedaling!
         const crackReplaceTrigger =
           Boolean(ballCarrier) && !optionPassThreatActive && isTargetRunBlocking && timeSec >= 0.42;
+        const manIsBallCarrier =
+          Boolean(ballCarrier) && !optionPassThreatActive && da.manTargetId === ballCarrier!.id && timeSec >= 0.25;
         const peelToCarrier =
           Boolean(ballCarrier) &&
           (crackReplaceTrigger ||
+            manIsBallCarrier ||
             (optionPassThreatActive
               ? ballCarrier!.y > 0.45 || da.manTargetId === ballCarrier!.id
               : ballCarrier!.y > 0.65 || timeSec >= 1.15));
@@ -1795,16 +1807,21 @@ export class All22KinematicEngine {
           const leadTime = Math.min(0.32, Math.max(0.06, distToCarrier / 9.2));
           const projX = ballCarrier.x + ballCarrier.vx * leadTime;
           const projY = ballCarrier.y + Math.max(0, ballCarrier.vy * leadTime);
-          // Maintain outside-in alley leverage when outside the runner; never chase behind the LOS past a perimeter sweep
+          // Maintain outside-in alley leverage relative to runner (close in from wide CB alignments instead of freezing at sideline!),
+          // and keep off-ball Man LBs square at fit depth (y>=1.75) before runner crosses LOS so they don't overshoot into the backfield!
           const isLeftForce = def.startX < -4.5 && ballCarrier.x > def.x - 1.5;
           const isRightForce = def.startX > 4.5 && ballCarrier.x < def.x + 1.5;
-          const forceMargin = ballCarrier.y < 1.0 ? 1.25 : 0.45;
+          const forceMargin = ballCarrier.y < 1.0 ? 1.15 : 0.45;
           goalX = isLeftForce
-            ? Math.min(projX - forceMargin, def.x)
+            ? projX - forceMargin
             : isRightForce
-            ? Math.max(projX + forceMargin, def.x)
+            ? projX + forceMargin
             : projX;
-          goalY = Math.max(ballCarrier.y > 0.2 ? ballCarrier.y : (isLeftForce || isRightForce ? 0.90 : 0.30), projY);
+          if (!runnerCrossedLos && def.startY >= 2.8) {
+            goalY = Math.max(1.75, Math.min(def.startY - 0.6, ballCarrier.y + 3.2));
+          } else {
+            goalY = Math.max(ballCarrier.y > 0.2 ? ballCarrier.y + 0.30 : (isLeftForce || isRightForce ? 1.0 : 0.65), projY);
+          }
         } else if (rec) {
           // Check if the assigned man target is staying in to pass-protect (or acting as direct-snap passer) behind LOS
           const isTargetPassPro =
@@ -1871,36 +1888,45 @@ export class All22KinematicEngine {
           def.startY <= 1.2 && ['DE', 'DT', 'NT', 'EDGE', 'LOLB', 'ROLB'].includes(def.pos);
 
         if (ballCarrier && !(optionPassThreatActive && isZoneOrDbCoverage)) {
-          const isBoxDefender = def.startY <= 5.2;
-          const isDeepSafety = def.startY > 5.2;
+          const isBoxDefender = def.startY <= 5.6 && Math.abs(def.startX) <= 7.2;
+          const isDeepSafety = !isBoxDefender && def.startY > 5.2;
 
           if (timeSec < (isDownLinemanRunKey ? 0.05 : 0.25)) {
             defLocomotion = 'FOOTWORK';
-            goalX = da.targetX;
-            goalY = da.targetY;
+            // Box defenders hold their balanced read-step near pre-snap alignment on run keys
+            // instead of bailing backward/outward toward pass-zone landmarks (e.g. Cover-3 Buzz SS)!
+            goalX = isBoxDefender ? def.startX : da.targetX;
+            goalY = isBoxDefender ? def.startY : da.targetY;
           } else if (isBoxDefender) {
             const isOffBallBox = def.startY >= 2.8;
             if (isOffBallBox && !runnerCrossedLos) {
-              // Off-ball LB/box-safety scrape: flow laterally without telepathic lookahead while holding LOS depth
-              // (prevents over-pursuing to y=-2.5 behind sweeps while keeping authentic NFL read-and-scrape lag).
+              // Off-ball LB/box-safety scrape: stay square at fit depth (y=1.8..2.8) instead of diving past the LOS
+              // at -6 yd/s into the backfield (prevents over-pursuing past Duo/Zone cutbacks!).
               const leadSecX = 0.24;
               const projX = ballCarrier.x + ballCarrier.vx * leadSecX;
               const outsideLeft = def.startX <= -4.5 && ballCarrier.vx < -1.5 && def.x <= ballCarrier.x + 1.0;
               const outsideRight = def.startX >= 4.5 && ballCarrier.vx > 1.5 && def.x >= ballCarrier.x - 1.0;
               goalX = outsideLeft ? Math.min(projX - 0.6, def.x) : outsideRight ? Math.max(projX + 0.6, def.x) : projX;
-              goalY = Math.max(0.65, ballCarrier.y + 1.6);
+              goalY = Math.max(1.75, Math.min(def.startY - 0.6, ballCarrier.y + 3.2));
             } else {
               const dist = Math.hypot(ballCarrier.x - def.x, ballCarrier.y - def.y);
               const leadSec = runnerCrossedLos ? Math.min(0.24, dist / 9.5) : 0.20;
               goalX = ballCarrier.x + ballCarrier.vx * leadSec;
               goalY = runnerCrossedLos
-                ? ballCarrier.y + Math.max(-0.15, ballCarrier.vy * leadSec * 0.70)
-                : Math.max(0.25, ballCarrier.y + ballCarrier.vy * leadSec);
+                ? ballCarrier.y + Math.max(0.25, ballCarrier.vy * leadSec * 0.75)
+                : Math.max(0.45, ballCarrier.y + ballCarrier.vy * leadSec);
             }
           } else if (isDeepSafety) {
-            const leadTime = Math.min(0.35, Math.max(0.08, (def.y - ballCarrier.y) / 8.5));
-            goalX = ballCarrier.x + ballCarrier.vx * leadTime;
-            goalY = ballCarrier.y + Math.max(0, ballCarrier.vy * leadTime);
+            if (!runnerCrossedLos) {
+              // Deep alley safety approaches under control (stays square above y=4.5 instead of overshooting at -7 yd/s!)
+              defLocomotion = 'FOOTWORK';
+              goalX = ballCarrier.x + ballCarrier.vx * 0.25;
+              goalY = Math.max(4.5, Math.min(def.startY - 1.2, ballCarrier.y + 6.5));
+            } else {
+              const leadTime = Math.min(0.32, Math.max(0.08, (def.y - ballCarrier.y) / 9.0));
+              goalX = ballCarrier.x + ballCarrier.vx * leadTime;
+              goalY = Math.max(ballCarrier.y + 0.45, ballCarrier.y + Math.max(0, ballCarrier.vy * leadTime));
+            }
           } else {
             goalX = da.targetX;
             goalY = da.targetY;
@@ -1985,15 +2011,22 @@ export class All22KinematicEngine {
                     ? matchedThreat.x + (matchedThreat.x > def.x ? 0.25 : -0.25)
                     : da.targetX * 0.5 + matchedThreat.x * 0.5;
                 const isCover3Corner = da.role === 'DEEP_THIRD' && def.pos === 'CB';
+                const isCover3Post = da.role === 'DEEP_THIRD' && def.pos !== 'CB';
                 const roofFloor =
-                  isCover3Corner && matchedThreat.y < 8.5
-                    ? Math.min(da.targetY - 3.6, 9.6)
+                  isCover3Corner && matchedThreat.y < 9.5
+                    ? Math.min(da.targetY - 5.2, 8.2)
+                    : isCover3Corner
+                    ? Math.min(da.targetY - 3.4, 10.8)
+                    : isCover3Post && matchedThreat.y < 11.0
+                    ? Math.min(da.targetY - 4.0, 11.5)
                     : matchedThreat.y >= 4.0
                     ? Math.min(da.targetY - 1.8, 12.2)
                     : Math.min(da.targetY, def.startY + 3.2);
                 goalY = Math.max(
                   roofFloor,
-                  matchedThreat.y + Math.max(0, matchedThreat.vy) * (isCover3Corner ? 0.22 : 0.28) + (isCover3Corner ? 0.90 : 1.15)
+                  matchedThreat.y +
+                    Math.max(0, matchedThreat.vy) * (isCover3Corner ? 0.18 : 0.28) +
+                    (isCover3Corner ? 0.65 : isCover3Post ? 0.90 : 1.15)
                 );
               } else if (da.role === 'CURL_FLAT') {
                 // Sink-funnel under #1 vertical up to ~10.5y in Cover-2/Cloud unless flat route threatens outside
@@ -3802,8 +3835,8 @@ export class All22KinematicEngine {
             if (role === 'MAN_COV' && d.defAssignment?.manTargetId !== 'QB') continue;
             if (d.y < 3.0) {
               const dist = Math.hypot(d.x - qb.x, d.y - qb.y);
-              // Calibrated QB pressure halo matching ~30% NFL/BDB pressure rate
-              if (dist < 1.65 || ((!d.engagedWithId || d.leverageScore >= 0.30) && dist < 2.35)) {
+              // Calibrated QB pressure halo matching ~30.7-32.3% NFL total & ~38.5-40.6% blitz pressure rates
+              if (dist < 1.55 || ((!d.engagedWithId || d.leverageScore >= 0.34) && dist < 2.12)) {
                 pressuredAtThrow = true;
                 break;
               }
@@ -4325,7 +4358,7 @@ export class All22KinematicEngine {
           const dy = d.y - qb.y;
           const dist = Math.hypot(dx, dy);
           const isHeld = d.engagedWithId && d.leverageScore < 0.34;
-          const effectiveDist = isHeld ? dist + 2.30 : dist;
+          const effectiveDist = isHeld ? dist + 2.45 : dist;
           if (effectiveDist < minRushDist) minRushDist = effectiveDist;
         }
       }

@@ -1284,7 +1284,14 @@ async function main() {
   console.log(`\n[SAVED] ${outPath}`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+const isMainEntry =
+  typeof process !== 'undefined' &&
+  Array.isArray(process.argv) &&
+  Boolean(process.argv[1]?.includes('analyze_read3_scramble_and_dual_qb'));
+
+if (isMainEntry) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

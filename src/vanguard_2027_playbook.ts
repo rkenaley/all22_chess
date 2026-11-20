@@ -1337,23 +1337,25 @@ export function buildModern2027Defense(call: ModernDefFrontId): SimAgent[] {
         def('NT', 'NT', -0.8, 0.5, 'RUSH_GAP', -0.5, -4.0, undefined, { speed: 72, power: 92, finesse: 76 }),
         def('3T', 'DT', 2.1, 0.5, 'RUSH_GAP', 1.8, -4.0, undefined, { speed: 76, power: 90, finesse: 84 }),
         def('LDE', 'EDGE', 4.8, 0.6, 'CONTAIN_EDGE', 4.0, -5.0),
-        def('WILL', 'WILL', -2.2, 4.2, 'HOOK_CURL', -5.5, 4.5),
-        def('MIKE', 'MIKE', 1.2, 4.2, 'HOOK_CURL', 5.5, 4.5),
-        def('NCB', 'NI', -6.8, 4.2, 'CURL_FLAT', -17.5, 5.0, undefined, { speed: 91, power: 70 }),
-        def('CB1', 'CB', -14.2, 6.2, 'DEEP_THIRD', -17.0, 16.0, undefined, { speed: 92, power: 66 }),
-        def('CB2', 'CB', 14.2, 6.2, 'DEEP_THIRD', 17.0, 16.0, undefined, { speed: 92, power: 66 }),
-        def('SS', 'SS', 5.8, 5.4, 'CURL_FLAT', 17.5, 5.0, undefined, { speed: 89, power: 78 }),
-        def('FS', 'FS', 0.0, 12.5, 'DEEP_THIRD', 0.0, 18.0, undefined, { speed: 91, power: 72 }),
+        def('WILL', 'WILL', -2.2, 4.2, 'HOOK_CURL', -5.5, 5.2),
+        def('MIKE', 'MIKE', 1.2, 4.2, 'HOOK_CURL', 5.5, 5.2),
+        def('NCB', 'NI', -6.8, 4.2, 'CURL_FLAT', -12.8, 7.2, undefined, { speed: 91, power: 70 }),
+        def('CB1', 'CB', -14.2, 6.2, 'DEEP_THIRD', -16.2, 15.0, undefined, { speed: 92, power: 66 }),
+        def('CB2', 'CB', 14.2, 6.2, 'DEEP_THIRD', 16.2, 15.0, undefined, { speed: 92, power: 66 }),
+        def('SS', 'SS', 5.8, 5.4, 'CURL_FLAT', 12.8, 7.2, undefined, { speed: 89, power: 78 }),
+        def('FS', 'FS', 0.0, 12.5, 'DEEP_THIRD', 0.0, 16.8, undefined, { speed: 91, power: 72 }),
       ];
   }
 }
 
 // ============================================================================
-// 4. ADAPTIVE NFL GAMEPLAN COUNTER DEFENSES (QB SPY & ELITE WR1 DOUBLE BRACKET)
+// 4. ADAPTIVE NFL GAMEPLAN COUNTER DEFENSES (QB SPY, WR1 BRACKET & ANTI-2QB SYMMETRIC)
 // ============================================================================
 export const ADAPTIVE_COUNTER_DEF_FRONTS = [
   'NICKEL_QB_SPY_CONTAIN_C1',
   'NICKEL_CALVIN_BRACKET_WR1',
+  'NICKEL_SYMMETRIC_WIDE9_C4',
+  'BASE_34_DOUBLE_EDGE_SPY_C3',
 ] as const;
 
 export type AdaptiveCounterDefFrontId = (typeof ADAPTIVE_COUNTER_DEF_FRONTS)[number];
@@ -1418,6 +1420,43 @@ export function buildAdaptiveCounterDefense(call: AdaptiveCounterDefFrontId): Si
       def('CB2', 'CB', 14.2, 4.2, 'MAN_COV', 14.2, 1.0, 'WR2', { speed: 92, accel: 91, power: 66 }),
       def('SS', 'SS', 5.6, 4.2, 'MAN_COV', 5.2, 1.0, 'TE', { speed: 89, accel: 89, power: 80 }),
       def('FS', 'FS', 0.0, 13.5, 'DEEP_ZONE', 0.0, 17.5, undefined, { speed: 91, accel: 90, power: 72 }),
+    ];
+  }
+
+  if (call === 'NICKEL_SYMMETRIC_WIDE9_C4') {
+    // Dedicated Anti-2QB Chiral Counter: 100% Left-Right Mirror Symmetric pre-snap (zero tilt for directional snaps!).
+    // Wide-9 CONTAIN_EDGE on BOTH flanks + symmetric dual FORCE_ALLEY overhangs (NCB/DIME) + central QB_SPY + Quarters.
+    // Rock-paper-scissors vulnerability: lightened interior A/B gaps invite heavy inside Duo/Power & PA seams.
+    return [
+      def('LDE', 'EDGE', -5.4, 0.6, 'CONTAIN_EDGE', -4.8, -4.5, undefined, { speed: 88, accel: 90, power: 85, finesse: 88 }),
+      def('3T_L', 'DT', -1.6, 0.5, 'RUSH_GAP', -1.4, -4.0, undefined, { speed: 76, power: 91, finesse: 84 }),
+      def('3T_R', 'DT', 1.6, 0.5, 'RUSH_GAP', 1.4, -4.0, undefined, { speed: 76, power: 91, finesse: 84 }),
+      def('RDE', 'EDGE', 5.4, 0.6, 'CONTAIN_EDGE', 4.8, -4.5, undefined, { speed: 88, accel: 90, power: 85, finesse: 88 }),
+      def('MIKE', 'MIKE', 0.0, 4.0, 'QB_SPY', 0.0, 4.0, 'QB', { speed: 90, accel: 92, power: 86, awareness: 91 }),
+      def('NCB', 'NI', -6.8, 3.6, 'FORCE_ALLEY', -7.4, 1.4, undefined, { speed: 91, accel: 91, power: 78, awareness: 89 }),
+      def('DIME', 'DB', 6.8, 3.6, 'FORCE_ALLEY', 7.4, 1.4, undefined, { speed: 91, accel: 91, power: 78, awareness: 89 }),
+      def('CB1', 'CB', -14.2, 6.4, 'QUARTERS_MATCH', -18.0, 14.5, undefined, { speed: 92, accel: 91, power: 66 }),
+      def('CB2', 'CB', 14.2, 6.4, 'QUARTERS_MATCH', 18.0, 14.5, undefined, { speed: 92, accel: 91, power: 66 }),
+      def('FS', 'FS', -5.5, 11.0, 'QUARTERS_MATCH', -6.0, 15.5, undefined, { speed: 91, accel: 90, power: 72 }),
+      def('SS', 'SS', 5.5, 11.0, 'QUARTERS_MATCH', 6.0, 15.5, undefined, { speed: 90, accel: 90, power: 76 }),
+    ];
+  }
+
+  if (call === 'BASE_34_DOUBLE_EDGE_SPY_C3') {
+    // Symmetric 5-Man Heavy Front + Wide-9 Double Contain + Central QB_SPY + Tight Cover-3 Shell:
+    // Closes both interior gaps AND both chiral perimeter edges simultaneously, daring the offense to beat single-high seams/crossers!
+    return [
+      def('LOLB', 'EDGE', -5.6, 0.6, 'CONTAIN_EDGE', -5.0, -4.5, undefined, { speed: 87, accel: 89, power: 86, finesse: 88 }),
+      def('4i_L', 'DE', -2.4, 0.5, 'RUSH_GAP', -2.0, -4.0, undefined, { speed: 75, power: 91, finesse: 82 }),
+      def('0T_NT', 'NT', 0.0, 0.5, 'RUSH_GAP', 0.0, -4.0, undefined, { speed: 71, power: 94, finesse: 75 }),
+      def('4i_R', 'DE', 2.4, 0.5, 'RUSH_GAP', 2.0, -4.0, undefined, { speed: 75, power: 91, finesse: 82 }),
+      def('ROLB', 'EDGE', 5.6, 0.6, 'CONTAIN_EDGE', 5.0, -4.5, undefined, { speed: 87, accel: 89, power: 86, finesse: 88 }),
+      def('MIKE', 'ILB', 0.0, 4.0, 'QB_SPY', 0.0, 4.0, 'QB', { speed: 90, accel: 91, power: 87, awareness: 91 }),
+      def('NCB', 'NI', -8.2, 4.4, 'CURL_FLAT', -12.6, 7.0, undefined, { speed: 91, accel: 91, power: 74 }),
+      def('SS', 'SS', 8.2, 4.4, 'CURL_FLAT', 12.6, 7.0, undefined, { speed: 90, accel: 90, power: 80 }),
+      def('CB1', 'CB', -14.2, 6.0, 'DEEP_THIRD', -16.2, 14.8, undefined, { speed: 92, accel: 91, power: 66 }),
+      def('CB2', 'CB', 14.2, 6.0, 'DEEP_THIRD', 16.2, 14.8, undefined, { speed: 92, accel: 91, power: 66 }),
+      def('FS', 'FS', 0.0, 12.5, 'DEEP_THIRD', 0.0, 16.8, undefined, { speed: 91, accel: 90, power: 72 }),
     ];
   }
 

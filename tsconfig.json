@@ -39,7 +39,9 @@
     "src/test_realism_and_defensive_psychology.ts",
     "src/test_voronoi_coverage.ts",
     "src/analyze_qb_archetype_sensitivity.ts",
-    "src/analyze_read3_scramble_and_dual_qb.ts"
+    "src/analyze_read3_scramble_and_dual_qb.ts",
+    "src/run_dual_qb_nash_tournament.ts",
+    "src/simulate_4down_season.ts"
   ],
   "exclude": [
     "src/legacy_v1"
