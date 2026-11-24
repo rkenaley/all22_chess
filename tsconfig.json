@@ -41,7 +41,8 @@
     "src/analyze_qb_archetype_sensitivity.ts",
     "src/analyze_read3_scramble_and_dual_qb.ts",
     "src/run_dual_qb_nash_tournament.ts",
-    "src/simulate_4down_season.ts"
+    "src/simulate_4down_season.ts",
+    "src/analyze_play_sequencing_memory.ts"
   ],
   "exclude": [
     "src/legacy_v1"

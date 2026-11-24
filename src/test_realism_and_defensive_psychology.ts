@@ -559,6 +559,142 @@ async function runTests() {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // 9. Fake Pitch/Exchange Physics & Defensive Memory Priming Audit
+  // ---------------------------------------------------------------------------
+  {
+    const buildFakePitchCounterOff = (): SimAgent[] => {
+      const makeBlk = (id: string, pos: string, x: number, y: number, role: any, gap: any, pri: string | null, wps: { x: number; y: number }[] = []): SimAgent => ({
+        ...makeDummyBlocker(id, pos, x, y),
+        blockRating: pos === 'TE' ? 88 : 87,
+        ratings: pos === 'TE' ? { speed: 85, accel: 87, power: 88, finesse: 86, awareness: 86 } : { speed: 78, accel: 84, power: 87, finesse: 87, awareness: 86 },
+        assignment: { role, primaryTargetId: pri, secondaryTargetId: null, gapOrSet: gap, leverage: 'INSIDE_OUT', climbOrChipDelaySec: 0.4, waypoints: wps },
+      });
+      const ol = [
+        makeBlk('LT', 'LT', -3.2, -0.4, 'MAN_BLOCK', 'B_LEFT', 'LDE'),
+        makeBlk('LG', 'LG', -1.6, -0.3, 'MAN_BLOCK', 'A_LEFT', '3T_L'),
+        makeBlk('C', 'C', 0.0, -0.2, 'COMBO_CLIMB', 'A_LEFT', '3T_R'),
+        makeBlk('RG', 'RG', 1.6, -0.3, 'PULL_LEAD', 'C_LEFT', 'NCB', [
+          { x: -1.4, y: -1.4 },
+          { x: -5.8, y: -0.5 },
+          { x: -7.5, y: 3.8 },
+        ]),
+        makeBlk('RT', 'RT', 3.2, -0.4, 'MAN_BLOCK', 'C_RIGHT', 'RDE'),
+      ];
+      const wr1 = {
+        ...makeDummyBlocker('WR1', 'WR', -14.5, -0.35),
+        ratings: { speed: 92, accel: 92, power: 72, finesse: 88, awareness: 86 },
+        assignment: { role: 'MAN_BLOCK' as const, primaryTargetId: 'CB1', secondaryTargetId: null, gapOrSet: 'D_ALLEY' as const, leverage: 'INSIDE_OUT' as const, climbOrChipDelaySec: 0, waypoints: [] },
+      };
+      const wr2 = {
+        ...makeDummyBlocker('WR2', 'WR', 14.5, -0.35),
+        ratings: { speed: 96, accel: 96, power: 68, finesse: 88, awareness: 86 },
+        assignment: { role: 'ROUTE' as const, primaryTargetId: null, secondaryTargetId: null, gapOrSet: 'VERTICAL_DEEP' as const, leverage: 'NEUTRAL' as const, climbOrChipDelaySec: 0, waypoints: [{ x: 18.0, y: 12.0 }] },
+      };
+      const sl = makeBlk('SL', 'TE', -5.6, -1.15, 'PULL_LEAD', 'D_ALLEY', 'NCB', [{ x: -7.2, y: 0.6 }, { x: -8.6, y: 4.5 }]);
+      const te = makeBlk('TE', 'TE', 5.6, -1.15, 'MAN_BLOCK', 'C_RIGHT', 'RDE');
+      // QB1 aligns left (-1.9, -4.5), takes directional snap, fakes perimeter pitch RIGHT to QB2, then keeps COUNTER LEFT!
+      const qb1: SimAgent = {
+        ...makeDummyBlocker('QB', 'QB', -1.9, -4.5),
+        isSnapRecipient: true,
+        actionFamily: 'PERIMETER_PITCH_TOSS',
+        ratings: { speed: 90, accel: 91, power: 86, finesse: 85, awareness: 85 },
+        assignment: {
+          role: 'BALL_CARRIER',
+          primaryTargetId: null,
+          secondaryTargetId: null,
+          gapOrSet: 'D_ALLEY',
+          leverage: 'OUTSIDE_IN',
+          climbOrChipDelaySec: 0,
+          waypoints: [
+            { x: -1.4, y: -4.8 },
+            { x: -4.5, y: -2.4 },
+            { x: -7.2, y: 1.0 },
+            { x: -8.4, y: 8.5 },
+            { x: -9.0, y: 20.0 },
+          ],
+        },
+        fakeAction: {
+          enabled: true,
+          family: 'PERIMETER_PITCH_TOSS',
+          fakeTargetId: 'RB',
+          fakeStartSec: 0.12,
+          fakeDurationSec: 0.48,
+          fakeDirectionX: 9.0,
+          fakeDirectionY: -3.2,
+          affectsSpy: true,
+        },
+      };
+      const qb2: SimAgent = {
+        ...makeDummyBlocker('RB', 'QB', 1.9, -4.5),
+        ratings: { speed: 89, accel: 90, power: 86, finesse: 84, awareness: 83 },
+        assignment: {
+          role: 'ROUTE',
+          primaryTargetId: null,
+          secondaryTargetId: null,
+          gapOrSet: 'D_ALLEY',
+          leverage: 'OUTSIDE_IN',
+          climbOrChipDelaySec: 0,
+          waypoints: [
+            { x: 8.8, y: -4.6 },
+            { x: 12.2, y: -1.2 },
+            { x: 13.8, y: 5.0 },
+          ],
+        },
+      };
+      return [...ol, wr1, wr2, sl, te, qb1, qb2];
+    };
+
+    const regimes = [
+      { name: 'BURNED', prime: -0.85 },
+      { name: 'NEUTRAL', prime: 0.0 },
+      { name: 'PRIMED', prime: 0.90 },
+    ];
+    const detDimeX: Record<string, number> = {};
+    const meanYds: Record<string, number> = {};
+
+    for (const reg of regimes) {
+      const memCtx = { defensiveMemory: { familyPriming: { PERIMETER_PITCH_TOSS: reg.prime } }, offenseActionFamily: 'PERIMETER_PITCH_TOSS' as const };
+      const detTraj = engine.simulatePlay(
+        [...buildFakePitchCounterOff(), ...buildAdaptiveCounterDefense('NICKEL_SYMMETRIC_WIDE9_C4')],
+        0.0,
+        memCtx
+      );
+      verifyTrajectoryBiomechanics(detTraj, `FAKE_PITCH_${reg.name}`);
+      assert.ok(
+        detTraj.some((s) => s.exoticEvent === 'FAKE_PITCH_EXCHANGE'),
+        `FAKE_PITCH_EXCHANGE event must be emitted under ${reg.name}`
+      );
+      const snap85 = detTraj.find((s) => s.timeSec >= 0.85) ?? detTraj[detTraj.length - 1];
+      const dime = snap85.agents.find((a) => a.id === 'DIME')!;
+      detDimeX[reg.name] = dime.x;
+
+      let ySum = 0;
+      const N = 40;
+      for (let r = 0; r < N; r++) {
+        const stTraj = engine.simulatePlay(
+          [...buildFakePitchCounterOff(), ...buildAdaptiveCounterDefense('NICKEL_SYMMETRIC_WIDE9_C4')],
+          0.65,
+          memCtx
+        );
+        ySum += stTraj[stTraj.length - 1].carrierTackledYards ?? 0;
+      }
+      meanYds[reg.name] = +(ySum / N).toFixed(2);
+    }
+
+    assert.ok(
+      detDimeX['PRIMED'] > detDimeX['BURNED'] + 1.0 && detDimeX['PRIMED'] > detDimeX['NEUTRAL'] + 0.4,
+      `Primed decoy-side FORCE_ALLEY DIME must chase outside further (BURNED=${detDimeX['BURNED'].toFixed(2)}y < NEUTRAL=${detDimeX['NEUTRAL'].toFixed(2)}y < PRIMED=${detDimeX['PRIMED'].toFixed(2)}y)`
+    );
+    assert.ok(
+      meanYds['PRIMED'] > meanYds['BURNED'],
+      `Primed fake counter must outgain burned fake counter (PRIMED=${meanYds['PRIMED']}y vs BURNED=${meanYds['BURNED']}y)`
+    );
+    console.log(
+      `[9] Fake Pitch/Exchange & Defensive Memory check PASSED (DIME_x@0.85s: BURNED=${detDimeX['BURNED'].toFixed(2)}y < NEUTRAL=${detDimeX['NEUTRAL'].toFixed(2)}y < PRIMED=${detDimeX['PRIMED'].toFixed(2)}y | MeanYds: BURNED=${meanYds['BURNED']}y vs PRIMED=${meanYds['PRIMED']}y)`
+    );
+  }
+
   console.log('\n[PASS] ALL ENGINE REALISM, DEFENSIVE PSYCHOLOGY & ANTI-GAMING VALIDATIONS SUCCEEDED.');
 }
 

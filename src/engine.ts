@@ -83,6 +83,29 @@ export interface DesignedScrambleReadConfig {
   voidPlugged?: boolean;             // Runtime flag when void is plugged -> triggers Read #4 fallback pass
 }
 
+export type FakeActionFamily =
+  | 'PERIMETER_PITCH_TOSS'
+  | 'SPLIT_GUN_EXCHANGE'
+  | 'INSIDE_MESH_FAKE'
+  | 'JET_ORBIT_SWEEP';
+
+export interface FakeActionConfig {
+  enabled: boolean;
+  family: FakeActionFamily;
+  fakeTargetId: string;
+  fakeStartSec: number;
+  fakeDurationSec: number;
+  fakeDirectionX?: number;
+  fakeDirectionY?: number;
+  affectsSpy?: boolean; // True only for authentic 2-QB split-gun exchanges where decoy.pos === 'QB'
+  triggered?: boolean;
+}
+
+export interface DefensiveMemoryContext {
+  familyPriming?: Partial<Record<FakeActionFamily, number>>;        // [-1.0 burned .. 0.0 cold .. +1.0 primed]
+  realPlayAnticipation?: Partial<Record<FakeActionFamily, number>>; // [0.0 fresh .. 1.0 spammed real play]
+}
+
 export type DefRoleType =
   | 'RUSH_GAP'
   | 'CONTAIN_EDGE'
@@ -120,6 +143,8 @@ export interface SimFieldContext {
   sidelineObjective?: 'NORMAL' | 'STOP_CLOCK_OOB' | 'STAY_INBOUNDS';
   extendedMaxTicks?: number;      // Optional tick cap override for multi-phase downfield plays
   cappedYacSweep?: boolean;       // Symmetric capped open-field YAC cap for sweeps/runs in NO_FC mode
+  defensiveMemory?: DefensiveMemoryContext;
+  offenseActionFamily?: FakeActionFamily;
 }
 
 export interface BlockerAssignment {
@@ -187,6 +212,8 @@ export interface SimAgent {
   optionPass?: OptionPassConfig;
   lateralConfig?: LateralConfig;
   designedScrambleRead?: DesignedScrambleReadConfig;
+  fakeAction?: FakeActionConfig;
+  actionFamily?: FakeActionFamily;
   isSnapRecipient?: boolean; // Explicit direct/directional shotgun snap recipient (enables 2-QB split-gun)
   designatedMikeId?: string | null;
   // Dynamic runtime telemetry
@@ -264,6 +291,7 @@ export interface PlayTickSnapshot {
     | 'DESIGNED_SCRAMBLE_FALLBACK_PASS'
     | 'DIRECTIONAL_SNAP_LEFT'
     | 'DIRECTIONAL_SNAP_RIGHT'
+    | 'FAKE_PITCH_EXCHANGE'
     | string
     | null;
   appliedDefDisguise?: string | null;
@@ -442,6 +470,8 @@ export class All22KinematicEngine {
               voidPlugged: false,
             }
           : undefined,
+        fakeAction: a.fakeAction ? { ...a.fakeAction, triggered: false } : undefined,
+        actionFamily: a.actionFamily,
         isSnapRecipient: a.isSnapRecipient,
         designatedMikeId: a.designatedMikeId,
         assignment: {
@@ -878,6 +908,14 @@ export class All22KinematicEngine {
       prevEngagedMap.set(a.id, a.engagedWithId);
       preTickVelMap.set(a.id, { vx: a.vx, vy: a.vy });
     }
+    const fakeTriggerCandidate = agents.find(
+      (a) =>
+        a.side === 'OFF' &&
+        a.fakeAction?.enabled &&
+        !a.fakeAction.triggered &&
+        timeSec >= a.fakeAction.fakeStartSec &&
+        (a.assignment.role === 'BALL_CARRIER' || a.assignment.role === 'QB_DROP' || a.isSnapRecipient)
+    );
     const res = this.stepPhysicsCore(
       agents,
       timeSec,
@@ -888,6 +926,12 @@ export class All22KinematicEngine {
       maxFieldY
     );
     this.clampUnengagedBiomechanics(agents, preTickVelMap, prevEngagedMap);
+    if (fakeTriggerCandidate?.fakeAction) {
+      fakeTriggerCandidate.fakeAction.triggered = true;
+      if (!res.exoticEvent) {
+        return { ...res, exoticEvent: 'FAKE_PITCH_EXCHANGE' };
+      }
+    }
     return res;
   }
 
@@ -979,6 +1023,28 @@ export class All22KinematicEngine {
       offAgents.find((a) => a.isSnapRecipient) ??
       offAgents.find((a) => a.pos === 'QB');
     const ballCarrier = offAgents.find((a) => a.assignment.role === 'BALL_CARRIER');
+
+    // Resolve active fake action (fake pitch/exchange/sweep) & defensive memory priming/anticipation state
+    const fakeActor =
+      (ballCarrier?.fakeAction?.enabled ? ballCarrier : undefined) ??
+      (qb?.fakeAction?.enabled ? qb : undefined);
+    const fakeCfg = fakeActor?.fakeAction;
+    const fakeDecoy = fakeCfg ? offAgents.find((o) => o.id === fakeCfg.fakeTargetId) : undefined;
+    const rawPrime = fakeCfg
+      ? fieldContext?.defensiveMemory?.familyPriming?.[fakeCfg.family] ?? 0
+      : 0;
+    const prime = Math.max(-1.0, Math.min(1.0, rawPrime));
+    const primeScale =
+      prime >= 0 ? 0.78 + prime * 0.67 : Math.max(0.15, 0.78 + prime * 0.75);
+    const activeFamily =
+      fieldContext?.offenseActionFamily ??
+      fakeActor?.actionFamily ??
+      ballCarrier?.actionFamily ??
+      qb?.actionFamily;
+    const realAnticipation =
+      !fakeCfg && activeFamily
+        ? Math.max(0, Math.min(1, fieldContext?.defensiveMemory?.realPlayAnticipation?.[activeFamily] ?? 0))
+        : 0;
 
     for (const a of agents) {
       // Clear active engagement flags at start of tick (re-established only if physical contact persists)
@@ -1488,6 +1554,19 @@ export class All22KinematicEngine {
         }
       }
 
+      // Honest offensive fake-sell physical cost (carrier flashes hands/hips toward decoy for 0.22s before accelerating)
+      if (
+        off.fakeAction?.enabled &&
+        fakeDecoy &&
+        timeSec >= off.fakeAction.fakeStartSec &&
+        timeSec < off.fakeAction.fakeStartSec + 0.22
+      ) {
+        locomotionMode = 'FOOTWORK';
+        speedCap = Math.min(speedCap, 4.3);
+        goalX = off.x * 0.75 + fakeDecoy.x * 0.25;
+        goalY = off.y * 0.80 + fakeDecoy.y * 0.20;
+      }
+
       // 4-Minute Drill clock discipline: runner steers inside the numbers/sideline buffer
       if (asg.role === 'BALL_CARRIER' && fieldContext?.sidelineObjective === 'STAY_INBOUNDS') {
         goalX = Math.max(-21.0, Math.min(21.0, goalX));
@@ -1559,6 +1638,22 @@ export class All22KinematicEngine {
       let goalX = def.x;
       let goalY = def.y;
       let defLocomotion: 'SPRINT' | 'FOOTWORK' = 'SPRINT';
+
+      const awrMod = (86 - def.ratings.awareness) * 0.008;
+      const defFakeDur = fakeCfg ? Math.max(0.10, fakeCfg.fakeDurationSec * primeScale + awrMod) : 0;
+      const inFakeWindow = Boolean(
+        fakeCfg && fakeDecoy && timeSec >= fakeCfg.fakeStartSec && timeSec < fakeCfg.fakeStartSec + defFakeDur
+      );
+      const fakeRecoveryDur = 0.22 + Math.max(0, prime) * 0.28;
+      const inFakeRecovery = Boolean(
+        fakeCfg &&
+          fakeDecoy &&
+          !inFakeWindow &&
+          timeSec >= fakeCfg.fakeStartSec + defFakeDur &&
+          timeSec < fakeCfg.fakeStartSec + defFakeDur + fakeRecoveryDur
+      );
+      const fakePtX = fakeCfg?.fakeDirectionX ?? fakeDecoy?.x ?? 0;
+      const fakePtY = fakeCfg?.fakeDirectionY ?? fakeDecoy?.y ?? -2.5;
 
       // When forward pass is in the air, coverage defenders react after realistic key/vision latency
       const elapsedPassFlight =
@@ -1654,9 +1749,18 @@ export class All22KinematicEngine {
         }
       } else if (da.role === 'FORCE_ALLEY') {
         // Overhang / boundary safety playing outside-in force with closing pursuit angle on corner turns
-        if (ballCarrier) {
+        if (
+          inFakeWindow &&
+          (Math.sign(fakePtX || 1) === Math.sign(def.startX || 1) || Math.abs(fakePtX - def.x) <= 9.5)
+        ) {
+          defLocomotion = prime >= 0.15 ? 'SPRINT' : 'FOOTWORK';
+          const sideSign = def.startX < 0 ? -1 : 1;
+          goalX = fakePtX + sideSign * 1.1;
+          goalY = Math.max(0.1, fakePtY + 1.0);
+        } else if (ballCarrier) {
+          if (inFakeRecovery) defLocomotion = 'FOOTWORK';
           const dist = Math.hypot(ballCarrier.x - def.x, ballCarrier.y - def.y);
-          const leadSec = Math.min(0.45, dist / 9.5);
+          const leadSec = Math.min(0.55, dist / 9.5 + 0.12 * realAnticipation);
           const projX = ballCarrier.x + ballCarrier.vx * leadSec;
           const projY = ballCarrier.y + Math.max(0, ballCarrier.vy * leadSec * 0.75);
           const isLeftSide = def.startX < 0;
@@ -1670,6 +1774,7 @@ export class All22KinematicEngine {
             goalY = Math.max(-0.5, projY);
           }
         } else {
+          if (inFakeRecovery) defLocomotion = 'FOOTWORK';
           goalX = da.targetX;
           goalY = da.targetY;
         }
@@ -1683,13 +1788,24 @@ export class All22KinematicEngine {
           defLocomotion = 'FOOTWORK';
           goalX = def.startX * 0.9;
           goalY = Math.max(0.2, def.startY - 0.8);
+        } else if (
+          inFakeWindow &&
+          fakeDecoy &&
+          Math.sign(fakePtX || fakeDecoy.vx || 1) === Math.sign(def.startX || 1)
+        ) {
+          defLocomotion = prime >= 0.15 ? 'SPRINT' : 'FOOTWORK';
+          goalX = def.startX + Math.sign(def.startX || 1) * (1.2 + Math.max(0, prime) * 1.5);
+          goalY = Math.max(-0.4, fakePtY + 0.8);
         } else if (ballCarrier && ballCarrier.y < -0.8 && timeSec < 0.55) {
+          if (inFakeRecovery) defLocomotion = 'FOOTWORK';
           // Read RB mesh at LOS: squeeze inside against downhill runs, but fight across outside shoulder vs perimeter sweeps!
           const isSweepOutside =
             (def.startX > 0 && ballCarrier.vx > 2.2) || (def.startX < 0 && ballCarrier.vx < -2.2);
-          if (isSweepOutside && timeSec >= 0.22) {
-            defLocomotion = 'SPRINT';
-            goalX = def.startX + Math.sign(def.startX) * 1.8;
+          if (isSweepOutside && timeSec >= 0.22 * (1 - 0.70 * realAnticipation)) {
+            defLocomotion = inFakeRecovery ? 'FOOTWORK' : 'SPRINT';
+            goalX =
+              def.startX +
+              Math.sign(def.startX) * (realAnticipation > 0.25 ? 1.8 + 1.2 * realAnticipation : 1.8);
             goalY = 0.25;
           } else {
             defLocomotion = 'FOOTWORK';
@@ -1697,6 +1813,7 @@ export class All22KinematicEngine {
             goalY = -0.25;
           }
         } else if (rushCarrier) {
+          if (inFakeRecovery) defLocomotion = 'FOOTWORK';
           const isLeftSide = def.startX < 0;
           if (def.y > rushCarrier.y + 0.8) {
             goalX = isLeftSide
@@ -1711,14 +1828,20 @@ export class All22KinematicEngine {
       } else if (da.role === 'QB_SPY') {
         // Dedicated QB Spy (LB or Safety): ignores RB play-action fakes, mirrors QB laterally from +3.5y spy depth,
         // and immediately triggers full-speed contain pursuit on designed QB runs or improvised scrambles!
+        // NOTE: Only authentic 2-QB split-gun exchanges (affectsSpy && decoy.pos === 'QB' && prime > 0.10) briefly pull Spy!
         const qbIsRunning = Boolean(ballCarrier && (ballCarrier.id === qb?.id || ballCarrier.pos === 'QB'));
         const runnerExitedBox = Boolean(
           ballCarrier && !optionPassThreatActive && (Math.abs(ballCarrier.x) > 3.5 || ballCarrier.y > 0.25)
         );
-        if ((qbIsRunning || runnerExitedBox) && ballCarrier) {
+        if (inFakeWindow && fakeCfg?.affectsSpy && fakeDecoy?.pos === 'QB' && prime > 0.10) {
+          const qbRef = rushCarrier ?? fakeDecoy;
+          defLocomotion = prime >= 0.45 ? 'SPRINT' : 'FOOTWORK';
+          goalX = Math.max(-9.5, Math.min(9.5, qbRef.x * (1 - 0.70 * prime) + fakeDecoy.x * (0.70 * prime)));
+          goalY = Math.max(2.4, Math.min(4.6, qbRef.y + 6.6));
+        } else if ((qbIsRunning || runnerExitedBox) && ballCarrier) {
           const dist = Math.hypot(ballCarrier.x - def.x, ballCarrier.y - def.y);
-          const leadSec = Math.min(0.35, Math.max(0.06, dist / 9.2));
-          defLocomotion = 'SPRINT';
+          const leadSec = Math.min(0.45, Math.max(0.06, dist / 9.2 + 0.16 * realAnticipation));
+          defLocomotion = inFakeRecovery ? 'FOOTWORK' : 'SPRINT';
           goalX = ballCarrier.x + ballCarrier.vx * leadSec;
           goalY = Math.max(
             ballCarrier.y > 0.2 ? ballCarrier.y : 0.95,
@@ -1728,7 +1851,7 @@ export class All22KinematicEngine {
           const targetSpyX = Math.max(-9.5, Math.min(9.5, qb.x + qb.vx * 0.25));
           const targetSpyY = Math.max(2.6, Math.min(4.6, qb.y + 7.2));
           const spyDist = Math.hypot(targetSpyX - def.x, targetSpyY - def.y);
-          defLocomotion = spyDist > 1.6 ? 'SPRINT' : 'FOOTWORK';
+          defLocomotion = inFakeRecovery ? 'FOOTWORK' : spyDist > 1.6 ? 'SPRINT' : 'FOOTWORK';
           goalX = targetSpyX;
           goalY = targetSpyY;
         } else {
@@ -1890,19 +2013,26 @@ export class All22KinematicEngine {
         if (ballCarrier && !(optionPassThreatActive && isZoneOrDbCoverage)) {
           const isBoxDefender = def.startY <= 5.6 && Math.abs(def.startX) <= 7.2;
           const isDeepSafety = !isBoxDefender && def.startY > 5.2;
+          const runKeySec = (isDownLinemanRunKey ? 0.05 : 0.25) * (1 - 0.55 * realAnticipation);
 
-          if (timeSec < (isDownLinemanRunKey ? 0.05 : 0.25)) {
+          if (timeSec < runKeySec) {
             defLocomotion = 'FOOTWORK';
             // Box defenders hold their balanced read-step near pre-snap alignment on run keys
             // instead of bailing backward/outward toward pass-zone landmarks (e.g. Cover-3 Buzz SS)!
             goalX = isBoxDefender ? def.startX : da.targetX;
             goalY = isBoxDefender ? def.startY : da.targetY;
+          } else if (inFakeWindow && fakeDecoy && (isBoxDefender || isReadingLB)) {
+            // Eye-conflict: reading box/zone defenders pursue the faked pitch/exchange decoy until fake window closes
+            defLocomotion = prime >= 0.15 ? 'SPRINT' : 'FOOTWORK';
+            goalX = fakeDecoy.x + fakeDecoy.vx * 0.22;
+            goalY = Math.max(1.4, Math.min(def.startY - 0.4, fakeDecoy.y + 3.0));
           } else if (isBoxDefender) {
+            if (inFakeRecovery) defLocomotion = 'FOOTWORK';
             const isOffBallBox = def.startY >= 2.8;
             if (isOffBallBox && !runnerCrossedLos) {
               // Off-ball LB/box-safety scrape: stay square at fit depth (y=1.8..2.8) instead of diving past the LOS
               // at -6 yd/s into the backfield (prevents over-pursuing past Duo/Zone cutbacks!).
-              const leadSecX = 0.24;
+              const leadSecX = 0.24 + 0.14 * realAnticipation;
               const projX = ballCarrier.x + ballCarrier.vx * leadSecX;
               const outsideLeft = def.startX <= -4.5 && ballCarrier.vx < -1.5 && def.x <= ballCarrier.x + 1.0;
               const outsideRight = def.startX >= 4.5 && ballCarrier.vx > 1.5 && def.x >= ballCarrier.x - 1.0;
@@ -1910,7 +2040,7 @@ export class All22KinematicEngine {
               goalY = Math.max(1.75, Math.min(def.startY - 0.6, ballCarrier.y + 3.2));
             } else {
               const dist = Math.hypot(ballCarrier.x - def.x, ballCarrier.y - def.y);
-              const leadSec = runnerCrossedLos ? Math.min(0.24, dist / 9.5) : 0.20;
+              const leadSec = runnerCrossedLos ? Math.min(0.24, dist / 9.5) : 0.20 + 0.10 * realAnticipation;
               goalX = ballCarrier.x + ballCarrier.vx * leadSec;
               goalY = runnerCrossedLos
                 ? ballCarrier.y + Math.max(0.25, ballCarrier.vy * leadSec * 0.75)
@@ -1919,9 +2049,15 @@ export class All22KinematicEngine {
           } else if (isDeepSafety) {
             if (!runnerCrossedLos) {
               // Deep alley safety approaches under control (stays square above y=4.5 instead of overshooting at -7 yd/s!)
-              defLocomotion = 'FOOTWORK';
-              goalX = ballCarrier.x + ballCarrier.vx * 0.25;
-              goalY = Math.max(4.5, Math.min(def.startY - 1.2, ballCarrier.y + 6.5));
+              defLocomotion = realAnticipation >= 0.45 ? 'SPRINT' : 'FOOTWORK';
+              goalX = ballCarrier.x + ballCarrier.vx * (0.25 + 0.10 * realAnticipation);
+              goalY = Math.max(
+                3.6,
+                Math.min(
+                  def.startY - 1.2 - 1.4 * realAnticipation,
+                  ballCarrier.y + 6.5 - 1.5 * realAnticipation
+                )
+              );
             } else {
               const leadTime = Math.min(0.32, Math.max(0.08, (def.y - ballCarrier.y) / 9.0));
               goalX = ballCarrier.x + ballCarrier.vx * leadTime;
@@ -1931,14 +2067,32 @@ export class All22KinematicEngine {
             goalX = da.targetX;
             goalY = da.targetY;
           }
-        } else if (inPAMesh && isReadingLB) {
+        } else if (inFakeWindow && (isReadingLB || def.startY <= 5.6)) {
+          // Non-carrier pass fake (e.g. Fake Exchange Boot / Fake Sweep Seam): reading LBs & box defenders bite
+          defLocomotion = prime >= 0.15 ? 'SPRINT' : 'FOOTWORK';
+          const biteLat = prime >= 0 ? 0.35 + prime * 0.25 : Math.max(0.08, 0.35 + prime * 0.30);
+          const biteDepth = prime >= 0 ? 1.2 + prime * 1.8 : Math.max(0.25, 1.2 + prime * 1.1);
+          goalX = def.startX * (1 - biteLat) + fakePtX * biteLat;
+          goalY = Math.max(1.0, def.startY - biteDepth);
+        } else if (inFakeRecovery && (isReadingLB || def.startY <= 5.6)) {
+          defLocomotion = 'FOOTWORK';
+          goalX = da.targetX;
+          goalY = da.targetY;
+        } else if (!fakeCfg && inPAMesh && isReadingLB) {
           // Play-Action Mesh: Reading LBs BITE downhill on the low-hat run fake!
-          // Take 1-2 aggressive false steps (+1.5y forward toward LOS)
+          // Modulated ONLY when fieldContext?.defensiveMemory?.familyPriming is supplied (zero drift on legacy calls).
           defLocomotion = 'SPRINT';
           const fakeX = qb?.playAction?.fakeGap ? GAP_X_COORDS[qb.playAction.fakeGap]?.dx ?? 0 : 0;
+          const memPrimingMap = fieldContext?.defensiveMemory?.familyPriming;
+          const paBiteScale = memPrimingMap
+            ? Math.max(
+                0.45,
+                Math.min(1.45, 0.85 + (memPrimingMap[activeFamily ?? 'SPLIT_GUN_EXCHANGE'] ?? 0) * 0.55)
+              )
+            : 1.0;
           goalX = def.startX * 0.7 + fakeX * 0.3;
-          goalY = Math.max(1.2, def.startY - 1.8);
-        } else if (inPARecovery && isReadingLB) {
+          goalY = Math.max(1.2, def.startY - 1.8 * paBiteScale);
+        } else if (!fakeCfg && inPARecovery && isReadingLB) {
           // Play-Action Recovery: QB pulled the ball, LB frantic hip flip & pedal to zone landmark
           defLocomotion = 'FOOTWORK';
           goalX = da.targetX;
@@ -2699,8 +2853,15 @@ export class All22KinematicEngine {
           }
 
           // Live post-catch YAC + Hook & Lateral continuation when lateralConfig or fieldContext is active
-          const hasLiveContinuation = Boolean(
-            targetRec.lateralConfig?.enabled || fieldContext !== undefined
+    const hasSituationFieldContext = Boolean(
+      fieldContext &&
+        (fieldContext.yardLineToGoal !== undefined ||
+          fieldContext.sidelineObjective !== undefined ||
+          fieldContext.extendedMaxTicks !== undefined ||
+          fieldContext.cappedYacSweep !== undefined)
+    );
+    const hasLiveContinuation = Boolean(
+            targetRec.lateralConfig?.enabled || hasSituationFieldContext
           );
           if (hasLiveContinuation) {
             ballState.state = 'HELD';
@@ -2852,9 +3013,17 @@ export class All22KinematicEngine {
         };
       }
 
+      const hasSituationContextCarrier = Boolean(
+        fieldContext &&
+          (fieldContext.yardLineToGoal !== undefined ||
+            fieldContext.sidelineObjective !== undefined ||
+            fieldContext.extendedMaxTicks !== undefined ||
+            fieldContext.cappedYacSweep !== undefined)
+      );
+
       // B. Sideline Out-of-Bounds Check (Clock Stoppage in 2-Minute Drill)
       if (
-        (fieldContext !== undefined ||
+        (hasSituationContextCarrier ||
           (ballState.lateralCount || 0) > 0 ||
           ballState.completedPass) &&
         Math.abs(ballCarrier.x) >= 25.85
@@ -3214,9 +3383,9 @@ export class All22KinematicEngine {
 
         // Symmetric Capped YAC NO_FC Model for Runs & Sweeps once runner clears box (y >= 5.8) into open field
         if (
-          (fieldContext === undefined ||
-            fieldContext.cappedYacSweep ||
-            fieldContext.sidelineObjective === 'STAY_INBOUNDS') &&
+          (!hasSituationContextCarrier ||
+            fieldContext?.cappedYacSweep ||
+            fieldContext?.sidelineObjective === 'STAY_INBOUNDS') &&
           !fieldContext?.yardLineToGoal &&
           !ballState.completedPass &&
           ballCarrier.y >= 5.8
