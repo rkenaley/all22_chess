@@ -10,16 +10,25 @@ import {
   MacroRPSAnalysis,
 } from './engine';
 import { ThemeManager, SkinId } from './theme';
-import { TacticalRenderer, RenderOptions, MonteCarloRunTrace } from './renderer';
+import { BroadcastRenderPipeline, RenderOptions, MonteCarloRunTrace } from './render_pipeline';
 import {
-  RoutePresetId,
   RECEIVER_EVOLUTION_SEEDS,
   BACKFIELD_EVOLUTION_SEEDS,
   applyRoutePresetToAgent,
 } from './route_presets';
+import { NestedPlayerInspector } from './player_inspector';
+import { initTooltips } from './tooltips';
+import {
+  CHIRAL_2QB_PLAYBOOK,
+  BLANK_FORMATION_STARTERS,
+  auditPlayLegality,
+} from './chiral_playbook_presets';
 import {
   HYDRA_2027_TEAM_ENTRY,
   HYDRA_2027_PLAYBOOK,
+  ADAPTIVE_COUNTER_DEF_FRONTS,
+  AdaptiveCounterDefFrontId,
+  buildAdaptiveCounterDefense,
 } from './vanguard_2027_playbook';
 import {
   ARGON_2027_TEAM_ENTRY,
@@ -47,13 +56,25 @@ interface PlayPreset {
   personnel: string;
   situations: DownDistanceSituation[];
   situationBadge?: string;
+  pack?: string;
+  isCustom?: boolean;
   buildOffense: () => SimAgent[];
+}
+
+interface CustomPlayRecord {
+  id: string;
+  name: string;
+  category: 'PASS' | 'RUN';
+  personnel: string;
+  situations: DownDistanceSituation[];
+  agents: SimAgent[];
 }
 
 class All22WorkstationApp {
   private engine = new All22KinematicEngine();
   private themeManager = new ThemeManager();
-  private renderer!: TacticalRenderer;
+  private renderer!: BroadcastRenderPipeline;
+  private inspector!: NestedPlayerInspector;
 
   private agents: SimAgent[] = [];
   private snapshots: PlayTickSnapshot[] = [];
@@ -61,21 +82,40 @@ class All22WorkstationApp {
   private isPlaying = false;
   private rafId: number | null = null;
   private lastStepTime = 0;
+  private playbackSpeed: 1 | 0.5 = 1;
 
   private mode: InteractionMode = 'SELECT';
   private awaitingCanvasTargetPick = false;
   private isMonteCarloView = false;
   private activeSituationFilter: 'ALL' | DownDistanceSituation = 'ALL';
+  private activeCategoryFilter = 'ALL';
+  private playbookSearchQuery = '';
+  private matrixFilterSide: 'OFF' | 'DEF' | 'ALL' = 'OFF';
   private motionMode: 'OFF' | 'JET_RIGHT' | 'JET_LEFT' | 'ORBIT' = 'OFF';
   private declaredMikeId: string | null = null;
   private autoMatchDefense = true;
   public customFieldContext: SimFieldContext | null = null;
+  private customFirstDownYds: number | null = null;
+  private customYardToGoal: number | null = null;
+  private memConfig = {
+    enabled: true,
+    pitchPrime: 0,
+    exchangePrime: 0,
+    meshPrime: 0,
+    orbitPrime: 0,
+    repeatAntic: 0,
+  };
+
+  private customPlays: PlayPreset[] = [];
+  private undoStack: string[] = [];
+  private redoStack: string[] = [];
 
   private renderOpts: RenderOptions = {
     showForceVectors: true,
     showPocketPoly: true,
     showLeverageCones: true,
     showDefenseAssignments: true,
+    showMotionTrails: true,
     selectedAgentId: 'LT',
     hoveredAgentId: null,
     designatedMikeId: null,
@@ -86,14 +126,58 @@ class All22WorkstationApp {
   private dragSourceAgent: SimAgent | null = null;
   private isDraggingPosition = false;
   private draggingWaypointIndex: number | null = null;
+  private didDragMutate = false;
 
   private presets: PlayPreset[] = [];
   private activePresetId = '';
   private teamsMap: Record<string, any> = {};
 
   constructor() {
+    initTooltips();
     const canvas = document.getElementById('tactical-canvas') as HTMLCanvasElement;
-    this.renderer = new TacticalRenderer(canvas);
+    this.renderer = new BroadcastRenderPipeline(canvas);
+
+    const inspectorRoot = document.getElementById('nested-inspector-root')!;
+    this.inspector = new NestedPlayerInspector(inspectorRoot, {
+      getAllAgents: () => this.agents,
+      getCurrentSnapshot: () => this.snapshots[this.currentTick],
+      isRouteDrawMode: () => this.mode === 'ROUTE',
+      onMutate: (label: string, resetTickZero?: boolean) => {
+        this.pushUndoSnapshot();
+        if (resetTickZero) this.currentTick = 0;
+        this.recomputeSimulation();
+        this.syncInspectorAndMatrix();
+        this.drawCurrentFrame();
+        const hint = document.getElementById('status-hint');
+        if (hint) hint.textContent = `EDITED: ${label}`;
+      },
+      onSetRouteDrawMode: () => {
+        const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
+        if (!sel || sel.side !== 'OFF') return;
+        this.setMode('ROUTE');
+        if (['LT', 'LG', 'C', 'RG', 'RT'].includes(sel.pos)) {
+          if (!['PULL_LEAD', 'PULL_TRAP'].includes(sel.assignment.role)) {
+            sel.assignment.role = 'PULL_LEAD';
+          }
+        } else if (sel.pos === 'RB') {
+          if (sel.assignment.role !== 'BALL_CARRIER' && sel.assignment.role !== 'ROUTE') {
+            sel.assignment.role = 'BALL_CARRIER';
+          }
+        } else {
+          sel.assignment.role = 'ROUTE';
+        }
+        this.syncInspectorAndMatrix();
+        this.drawCurrentFrame();
+      },
+      onPickDefTarget: () => {
+        this.awaitingCanvasTargetPick = true;
+        const hint = document.getElementById('status-hint');
+        if (hint) {
+          hint.textContent =
+            'TARGET PICK ACTIVE: Click any Defender on the field to lock as Target (Hold Shift for 2nd-Level Climb Target)';
+        }
+      },
+    });
 
     this.initTeamSelectors();
     this.initPlayPresets();
@@ -102,11 +186,21 @@ class All22WorkstationApp {
     this.themeManager.applySkin('broadcast-analytics');
     this.loadPlayPreset(this.presets[0].id);
 
+    const syncResBadge = () => {
+      const badge = document.getElementById('res-badge');
+      if (badge) {
+        const res = this.renderer.getBackingResolution();
+        badge.textContent = `${res.width}×${res.height}`;
+      }
+    };
+
     window.addEventListener('resize', () => {
       this.renderer.resize();
+      syncResBadge();
       this.drawCurrentFrame();
     });
     this.renderer.resize();
+    syncResBadge();
     this.drawCurrentFrame();
     (window as any).__all22App = this;
   }
@@ -434,15 +528,6 @@ class All22WorkstationApp {
       situationBadge: kp.situationBadge,
       buildOffense: () => kp.buildBaseOffense(),
     }));
-    const argonItems: PlayPreset[] = ARGON_2027_PLAYBOOK.map((ap) => ({
-      id: ap.id,
-      name: ap.name,
-      category: ap.category,
-      personnel: ap.personnel,
-      situations: ap.situations,
-      situationBadge: ap.situationBadge,
-      buildOffense: () => ap.buildOffense(),
-    }));
     const apexItems: PlayPreset[] = APEX_2027_PLAYBOOK.map((ap) => ({
       id: ap.id,
       name: ap.name,
@@ -452,6 +537,16 @@ class All22WorkstationApp {
       situationBadge: ap.situationBadge,
       buildOffense: () => ap.buildOffense(),
     }));
+    const argonItems: PlayPreset[] = ARGON_2027_PLAYBOOK.map((ap) => ({
+      id: ap.id,
+      name: ap.name,
+      category: ap.category,
+      personnel: ap.personnel,
+      situations: ap.situations,
+      situationBadge: ap.situationBadge,
+      pack: 'ARGON',
+      buildOffense: () => ap.buildOffense(),
+    }));
     const hydraItems: PlayPreset[] = HYDRA_2027_PLAYBOOK.map((hp) => ({
       id: hp.id,
       name: hp.name,
@@ -459,9 +554,22 @@ class All22WorkstationApp {
       personnel: hp.personnel,
       situations: hp.situations,
       situationBadge: hp.situationBadge,
+      pack: 'HYDRA',
       buildOffense: () => hp.buildOffense(),
     }));
-    this.presets.splice(11, 0, ...kbcItems, ...apexItems, ...argonItems, ...hydraItems);
+    const chiralItems: PlayPreset[] = CHIRAL_2QB_PLAYBOOK.map((cp) => ({
+      id: cp.id,
+      name: cp.name,
+      category: cp.category,
+      personnel: cp.personnel,
+      situations: cp.situations,
+      situationBadge: cp.situationBadge,
+      pack: 'CHIRAL',
+      buildOffense: () => cp.buildOffense(),
+    }));
+    this.loadCustomPlaysFromStorage();
+    this.presets.splice(11, 0, ...chiralItems, ...kbcItems, ...apexItems, ...argonItems, ...hydraItems);
+    this.presets.push(...this.customPlays);
 
     this.renderPlaybookList();
   }
@@ -471,9 +579,24 @@ class All22WorkstationApp {
     if (!listEl) return;
     listEl.innerHTML = '';
 
+    const q = this.playbookSearchQuery.trim().toLowerCase();
     const filtered = this.presets.filter((p) => {
-      if (this.activeSituationFilter === 'ALL') return true;
-      return p.situations && p.situations.includes(this.activeSituationFilter);
+      if (this.activeSituationFilter !== 'ALL' && !(p.situations && p.situations.includes(this.activeSituationFilter))) {
+        return false;
+      }
+      if (this.activeCategoryFilter === 'CHIRAL' && p.pack !== 'CHIRAL' && !p.id.includes('CHIRAL')) {
+        return false;
+      }
+      if (this.activeCategoryFilter === 'ARGON' && p.pack !== 'ARGON' && !p.id.includes('ARGON')) {
+        return false;
+      }
+      if (this.activeCategoryFilter === 'CUSTOM' && !p.isCustom) {
+        return false;
+      }
+      if (q && !`${p.name} ${p.id} ${p.personnel} ${p.situationBadge || ''}`.toLowerCase().includes(q)) {
+        return false;
+      }
+      return true;
     });
 
     for (const preset of filtered) {
@@ -483,7 +606,8 @@ class All22WorkstationApp {
         row.classList.add('active');
       }
       row.dataset.id = preset.id;
-      const badgeColor = preset.category === 'PASS' ? 'var(--accent-primary)' : 'var(--accent-positive)';
+      const badgeColor = preset.category === 'PASS' ? 'var(--accent-primary)' : 'var(--accent-Positive)';
+      const customHtml = preset.isCustom ? `<span class="custom-badge">CUSTOM</span>` : '';
       const sitBadgeHtml = preset.situationBadge
         ? `<span class="sit-badge">${preset.situationBadge}</span>`
         : '';
@@ -491,6 +615,7 @@ class All22WorkstationApp {
       row.innerHTML = `
         <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:6px;">${preset.name}</span>
         <span class="play-meta">
+          ${customHtml}
           ${sitBadgeHtml}
           <span style="color:${badgeColor}; font-weight:700;">${preset.category}</span>
         </span>
@@ -886,6 +1011,10 @@ class All22WorkstationApp {
   }
 
   private createDefenseFront(call: string): SimAgent[] {
+    if ((ADAPTIVE_COUNTER_DEF_FRONTS as readonly string[]).includes(call)) {
+      return buildAdaptiveCounterDefense(call as AdaptiveCounterDefFrontId);
+    }
+
     const def = (
       id: string,
       pos: string,
@@ -1295,8 +1424,12 @@ class All22WorkstationApp {
           preset.personnel === '22 WILDCAT'
         ) {
           matched = 'BASE_34_BEAR_C4';
-        } else if (preset.personnel === '21 HYDRA' || preset.personnel === '21 ARGON') {
-          matched = 'NICKEL_OVER_C3';
+        } else if (preset.personnel === '21 HYDRA' || preset.personnel === '21 ARGON' || preset.pack === 'CHIRAL') {
+          matched = preset.id === 'CHIRAL_DIRECT_SNAP_LASER' || preset.id === 'CHIRAL_FAKE_EXCHANGE_BOOT_FLOOD'
+            ? 'NICKEL_QB_SPY_CONTAIN_C1'
+            : preset.id === 'CHIRAL_READ3_MESH_VOID'
+            ? 'NICKEL_SYMMETRIC_WIDE9_C4'
+            : 'NICKEL_OVER_C3';
         } else if (preset.personnel === '11 HYDRA' || preset.personnel === '11 ARGON') {
           matched = 'NICKEL_SIM_C2';
         } else if (preset.personnel === '12 PERS') {
@@ -1321,44 +1454,71 @@ class All22WorkstationApp {
     this.applyTeamPersonnel(this.agents);
     this.autoDesignateDefaultMike();
     this.currentTick = 0;
+    this.undoStack = [JSON.stringify(this.agents)];
+    this.redoStack = [];
+    const nameInput = document.getElementById('custom-play-name') as HTMLInputElement | null;
+    if (nameInput) nameInput.value = preset.name;
     this.recomputeSimulation();
-    this.populateDefenderDropdowns();
     this.syncInspectorAndMatrix();
   }
 
   private getActiveFieldContext(): SimFieldContext | undefined {
+    let base: SimFieldContext = {};
     if (this.customFieldContext) {
-      return this.customFieldContext;
-    }
-    if (
-      this.activePresetId === 'KBC_REDZONE_BISTABLE_HAMMER'
-    ) {
-      return { yardLineToGoal: 6.0, sidelineObjective: 'NORMAL' };
-    }
-    if (
+      base = { ...this.customFieldContext };
+    } else if (this.activePresetId === 'KBC_REDZONE_BISTABLE_HAMMER') {
+      base = { yardLineToGoal: 6.0, sidelineObjective: 'NORMAL' };
+    } else if (
       this.activePresetId === 'HYDRA_GOALLINE_PHILLY_SPECIAL' ||
       this.activePresetId === 'ARGON_GOALLINE_CYCLOTRON' ||
       this.activePresetId === 'APEX_GOALLINE_SPRINT_SMASH'
     ) {
-      return { yardLineToGoal: 4.0, sidelineObjective: 'NORMAL' };
-    }
-    if (
+      base = { yardLineToGoal: 4.0, sidelineObjective: 'NORMAL' };
+    } else if (
       this.activePresetId === 'KBC_TWOMIN_BOUNDARY_CONTINUUM' ||
       this.activePresetId === 'HYDRA_2MIN_SIDELINE_CHOICE' ||
       this.activePresetId === 'ARGON_2MIN_BOUNDARY_LASER' ||
       this.activePresetId === 'APEX_TWOMIN_BOUNDARY_OOB'
     ) {
-      return { sidelineObjective: 'STOP_CLOCK_OOB' };
-    }
-    if (
+      base = { sidelineObjective: 'STOP_CLOCK_OOB' };
+    } else if (
       this.activePresetId === 'KBC_4MIN_CLOCK_BLEEDER' ||
       this.activePresetId === 'HYDRA_4MIN_BULLDOZER_SWEEP' ||
       this.activePresetId === 'ARGON_4MIN_LEFT_MONOLITH' ||
       this.activePresetId === 'APEX_EAGLES_RHINO_COUNTER'
     ) {
-      return { sidelineObjective: 'STAY_INBOUNDS' };
+      base = { sidelineObjective: 'STAY_INBOUNDS' };
     }
-    return undefined;
+
+    if (this.customYardToGoal !== null) {
+      base.yardLineToGoal = this.customYardToGoal;
+    }
+
+    const hasNonZeroMem =
+      this.memConfig.pitchPrime !== 0 ||
+      this.memConfig.exchangePrime !== 0 ||
+      this.memConfig.meshPrime !== 0 ||
+      this.memConfig.orbitPrime !== 0 ||
+      this.memConfig.repeatAntic !== 0;
+
+    if (this.memConfig.enabled && hasNonZeroMem) {
+      base.defensiveMemory = {
+        familyPriming: {
+          PERIMETER_PITCH_TOSS: this.memConfig.pitchPrime,
+          SPLIT_GUN_EXCHANGE: this.memConfig.exchangePrime,
+          INSIDE_MESH_FAKE: this.memConfig.meshPrime,
+          JET_ORBIT_SWEEP: this.memConfig.orbitPrime,
+        },
+        realPlayAnticipation: {
+          PERIMETER_PITCH_TOSS: this.memConfig.repeatAntic,
+          SPLIT_GUN_EXCHANGE: this.memConfig.repeatAntic,
+          INSIDE_MESH_FAKE: this.memConfig.repeatAntic,
+          JET_ORBIT_SWEEP: this.memConfig.repeatAntic,
+        },
+      };
+    }
+
+    return Object.keys(base).length > 0 ? base : undefined;
   }
 
   public recomputeSimulation(): void {
@@ -1367,7 +1527,19 @@ class All22WorkstationApp {
     document.getElementById('mc-sample-label')!.textContent = 'SINGLE RUN';
     const fCtx = this.getActiveFieldContext();
     this.renderOpts.yardLineToGoal = fCtx?.yardLineToGoal;
-    this.renderOpts.firstDownYards = fCtx?.yardLineToGoal ? Math.min(10.0, fCtx.yardLineToGoal) : 10.0;
+    const defaultToGo = this.customFirstDownYds ?? 10.0;
+    this.renderOpts.firstDownYards = fCtx?.yardLineToGoal
+      ? Math.min(defaultToGo, fCtx.yardLineToGoal)
+      : defaultToGo;
+
+    const toGoEl = document.getElementById('ctx-first-down') as HTMLInputElement | null;
+    if (toGoEl && this.customFirstDownYds === null) {
+      toGoEl.value = String(this.renderOpts.firstDownYards);
+    }
+    const goalEl = document.getElementById('ctx-yard-goal') as HTMLInputElement | null;
+    if (goalEl && this.customYardToGoal === null) {
+      goalEl.value = String(fCtx?.yardLineToGoal ?? 50);
+    }
 
     // Reactive Pre-Snap Audible Execution for Kinetic Bistable Continuum (Peyton Manning Effect)
     let kbcAudibleEvent: string | null = null;
@@ -1953,17 +2125,120 @@ class All22WorkstationApp {
   }
 
   private populateDefenderDropdowns(): void {
-    const defs = this.agents.filter((a) => a.side === 'DEF');
-    const sel1 = document.getElementById('insp-target-1') as HTMLSelectElement;
-    const sel2 = document.getElementById('insp-target-2') as HTMLSelectElement;
-    sel1.innerHTML = '<option value="">-- AUTO SECTOR / ZONE --</option>';
-    sel2.innerHTML = '<option value="">-- AUTO 2ND LEVEL --</option>';
+    // Handled dynamically by NestedPlayerInspector.render()
+  }
 
-    for (const d of defs) {
-      const nameTag = d.name ? ` — ${d.name}` : '';
-      sel1.add(new Option(`${d.id} (${d.pos})${nameTag}`, d.id));
-      sel2.add(new Option(`${d.id} (${d.pos})${nameTag}`, d.id));
+  private pushUndoSnapshot(): void {
+    const snapJson = JSON.stringify(this.agents);
+    if (this.undoStack.length > 0 && this.undoStack[this.undoStack.length - 1] === snapJson) {
+      return;
     }
+    this.undoStack.push(snapJson);
+    if (this.undoStack.length > 40) this.undoStack.shift();
+    this.redoStack = [];
+    this.updateUndoRedoButtons();
+  }
+
+  private undo(): void {
+    if (this.undoStack.length <= 1) return;
+    const current = this.undoStack.pop()!;
+    this.redoStack.push(current);
+    const prev = this.undoStack[this.undoStack.length - 1];
+    this.agents = JSON.parse(prev);
+    this.currentTick = 0;
+    this.recomputeSimulation();
+    this.syncInspectorAndMatrix();
+    this.drawCurrentFrame();
+  }
+
+  private redo(): void {
+    if (this.redoStack.length === 0) return;
+    const next = this.redoStack.pop()!;
+    this.undoStack.push(next);
+    this.agents = JSON.parse(next);
+    this.currentTick = 0;
+    this.recomputeSimulation();
+    this.syncInspectorAndMatrix();
+    this.drawCurrentFrame();
+  }
+
+  private updateUndoRedoButtons(): void {
+    const u = document.getElementById('btn-undo') as HTMLButtonElement | null;
+    const r = document.getElementById('btn-redo') as HTMLButtonElement | null;
+    if (u) u.disabled = this.undoStack.length <= 1;
+    if (r) r.disabled = this.redoStack.length === 0;
+  }
+
+  private loadCustomPlaysFromStorage(): void {
+    try {
+      const raw = localStorage.getItem('all22_custom_plays_v1');
+      if (!raw) return;
+      const arr = JSON.parse(raw) as CustomPlayRecord[];
+      if (!Array.isArray(arr)) return;
+      this.customPlays = arr.map((rec) => ({
+        id: rec.id,
+        name: rec.name,
+        category: rec.category,
+        personnel: rec.personnel || 'CUSTOM',
+        situations: rec.situations || ['1ST_10'],
+        situationBadge: 'CUSTOM',
+        isCustom: true,
+        pack: 'CUSTOM',
+        buildOffense: () => JSON.parse(JSON.stringify(rec.agents)),
+      }));
+    } catch {
+      this.customPlays = [];
+    }
+  }
+
+  private persistCustomPlaysToStorage(): void {
+    try {
+      const records: CustomPlayRecord[] = this.customPlays.map((cp) => ({
+        id: cp.id,
+        name: cp.name,
+        category: cp.category,
+        personnel: cp.personnel,
+        situations: cp.situations,
+        agents: cp.buildOffense(),
+      }));
+      localStorage.setItem('all22_custom_plays_v1', JSON.stringify(records));
+    } catch {
+      // Ignore storage quota errors
+    }
+  }
+
+  private registerAndLoadCustomPreset(
+    id: string,
+    name: string,
+    offAgents: SimAgent[],
+    category?: 'PASS' | 'RUN',
+    personnel?: string
+  ): void {
+    const inferredCat: 'PASS' | 'RUN' =
+      category ?? (offAgents.some((a) => a.assignment.role === 'BALL_CARRIER') ? 'RUN' : 'PASS');
+    const recAgents = JSON.parse(JSON.stringify(offAgents)) as SimAgent[];
+    const preset: PlayPreset = {
+      id,
+      name,
+      category: inferredCat,
+      personnel: personnel || 'CUSTOM',
+      situations: ['1ST_10', '3RD_SHORT', '3RD_LONG', 'RED_ZONE'],
+      situationBadge: 'CUSTOM',
+      isCustom: true,
+      pack: 'CUSTOM',
+      buildOffense: () => JSON.parse(JSON.stringify(recAgents)),
+    };
+    const existingIdx = this.customPlays.findIndex((p) => p.id === id);
+    if (existingIdx >= 0) this.customPlays[existingIdx] = preset;
+    else this.customPlays.push(preset);
+
+    const pIdx = this.presets.findIndex((p) => p.id === id);
+    if (pIdx >= 0) this.presets[pIdx] = preset;
+    else this.presets.unshift(preset);
+
+    this.persistCustomPlaysToStorage();
+    this.renderPlaybookList();
+    this.loadPlayPreset(id);
   }
 
   private syncInspectorAndMatrix(): void {
@@ -1973,146 +2248,93 @@ class All22WorkstationApp {
       activeAgents.find((a) => a.id === this.renderOpts.selectedAgentId) ||
       activeAgents.find((a) => a.side === 'OFF')!;
 
-    const jerseyStr = selected.jersey !== undefined ? ` #${selected.jersey}` : '';
-    document.getElementById('selected-entity-badge')!.textContent = `${selected.id}${jerseyStr} (${selected.side})`;
+    this.inspector.render(selected.id);
+    this.updateUndoRedoButtons();
 
-    // Update Scouting & Live Telemetry Banner
-    const nameEl = document.getElementById('insp-player-name');
-    const ratingsEl = document.getElementById('insp-player-ratings');
-    const liveEl = document.getElementById('insp-player-live');
-    if (nameEl && ratingsEl && liveEl) {
-      const fullName = selected.name || selected.id;
-      nameEl.textContent = `${selected.pos}${jerseyStr} — ${fullName} [${selected.side}]`;
-      const r = selected.ratings;
-      ratingsEl.textContent = `SPD ${r.speed} | ACC ${r.accel} | PWR ${r.power} | FIN ${r.finesse} | AWR ${r.awareness}`;
-
-      const spdYps = Math.hypot(selected.vx, selected.vy).toFixed(1);
-      if (selected.engagedWithId) {
-        const winLoss = selected.leverageScore >= 0.08 ? 'WINNING' : selected.leverageScore <= -0.08 ? 'LOSING' : 'STALEMATE';
-        liveEl.style.color =
-          selected.leverageScore >= 0.08
-            ? 'var(--accent-Positive)'
-            : selected.leverageScore <= -0.08
-            ? 'var(--accent-danger)'
-            : 'var(--accent-secondary)';
-        liveEl.textContent = `ENGAGED vs ${selected.engagedWithId} (${winLoss} | LEV ${selected.leverageScore >= 0 ? '+' : ''}${selected.leverageScore.toFixed(2)})`;
-      } else if (selected.side === 'DEF' && selected.defAssignment) {
-        liveEl.style.color = 'var(--accent-primary)';
-        liveEl.textContent = `DEF ROLE: ${selected.defAssignment.role} | V=${spdYps} y/s`;
+    // Live NFL Formation Legality Audit Pill
+    const legEl = document.getElementById('legality-pill');
+    if (legEl) {
+      const offBase = this.agents.filter((a) => a.side === 'OFF');
+      const audit = auditPlayLegality(offBase);
+      legEl.classList.toggle('illegal', !audit.isLegal);
+      if (audit.isLegal) {
+        legEl.textContent = `LEGAL: ${audit.onLosCount} LOS · ENDS ELIG`;
       } else {
-        liveEl.style.color = 'var(--fg-1)';
-        liveEl.textContent = `ROLE: ${selected.assignment.role} | V=${spdYps} y/s | XY=(${selected.x.toFixed(1)}, ${selected.y.toFixed(1)})`;
+        legEl.textContent = `ILLEGAL: ${audit.illegalReason || `${audit.onLosCount} LOS`}`;
       }
     }
 
-    const roleSel = document.getElementById('insp-role-type') as HTMLSelectElement;
-    const tgt1Sel = document.getElementById('insp-target-1') as HTMLSelectElement;
-    const tgt2Sel = document.getElementById('insp-target-2') as HTMLSelectElement;
-    const gapSel = document.getElementById('insp-gap-set') as HTMLSelectElement;
-    const levSel = document.getElementById('insp-leverage') as HTMLSelectElement;
-    const delayInp = document.getElementById('insp-delay-sec') as HTMLInputElement;
-
-    const isOff = selected.side === 'OFF';
-    [roleSel, tgt1Sel, tgt2Sel, gapSel, levSel, delayInp].forEach((el) => {
-      el.disabled = !isOff;
-    });
-
-    if (isOff) {
-      roleSel.value = selected.assignment.role;
-      tgt1Sel.value = selected.assignment.primaryTargetId || '';
-      tgt2Sel.value = selected.assignment.secondaryTargetId || '';
-      gapSel.value = selected.assignment.gapOrSet;
-      levSel.value = selected.assignment.leverage;
-      delayInp.value = String(selected.assignment.climbOrChipDelaySec);
-    }
-
-    // Update Landmark & Route Stem Inspector Controls
-    const rowRoute = document.getElementById('row-route-preset');
-    const rowPull = document.getElementById('row-pull-preset');
-    const landmarksText = document.getElementById('insp-landmarks-text');
-    const landmarksHint = document.getElementById('insp-landmarks-hint');
-    const btnDrawRoute = document.getElementById('btn-draw-route') as HTMLButtonElement | null;
-    const btnAddLm = document.getElementById('btn-add-landmark') as HTMLButtonElement | null;
-    const btnPopLm = document.getElementById('btn-pop-landmark') as HTMLButtonElement | null;
-    const btnClearWp = document.getElementById('btn-clear-waypoints') as HTMLButtonElement | null;
-
-    if (isOff) {
-      const isOL = ['LT', 'LG', 'C', 'RG', 'RT'].includes(selected.pos);
-      if (rowPull) rowPull.style.display = isOL ? 'grid' : 'none';
-      if (rowRoute) rowRoute.style.display = 'grid';
-
-      if (btnDrawRoute) {
-        btnDrawRoute.disabled = false;
-        btnDrawRoute.innerHTML = isOL
-          ? `DRAW PULL <span class="kbd-hint">R</span>`
-          : `DRAW ROUTE <span class="kbd-hint">R</span>`;
-        btnDrawRoute.classList.toggle('active', this.mode === 'ROUTE');
-      }
-      if (btnAddLm) btnAddLm.disabled = false;
-      if (btnPopLm) btnPopLm.disabled = selected.assignment.waypoints.length === 0;
-      if (btnClearWp) btnClearWp.disabled = false;
-
-      const wps = selected.assignment.waypoints;
-      if (landmarksText && landmarksHint) {
-        if (wps.length === 0) {
-          landmarksText.textContent = `LANDMARKS: None (0 nodes)`;
-          landmarksHint.textContent = `Click [+ ADD LANDMARK] or [DRAW ROUTE]`;
-        } else {
-          const wpListStr = wps
-            .map((w, idx) => `L${idx + 1}: ${w.x >= 0 ? '+' : ''}${w.x.toFixed(1)}, ${w.y >= 0 ? '+' : ''}${w.y.toFixed(1)}y`)
-            .join(' → ');
-          landmarksText.textContent = `LANDMARKS: ${wps.length} node${wps.length > 1 ? 's' : ''} (${wpListStr})`;
-          landmarksHint.textContent = `Drag nodes on field`;
-        }
-      }
-    } else {
-      if (rowPull) rowPull.style.display = 'none';
-      if (rowRoute) rowRoute.style.display = 'none';
-      if (btnDrawRoute) btnDrawRoute.disabled = true;
-      if (btnAddLm) btnAddLm.disabled = true;
-      if (btnPopLm) btnPopLm.disabled = true;
-      if (btnClearWp) btnClearWp.disabled = true;
-      if (landmarksText) landmarksText.textContent = `DEFENDER (No Offensive Route Stem)`;
-      if (landmarksHint) landmarksHint.textContent = '';
-    }
-
-    // Populate 11-player offensive assignment matrix with live matchup grades
+    // Populate switchable OFF / DEF / ALL assignment matrix
     const tbody = document.getElementById('assignment-matrix-body')!;
     tbody.innerHTML = '';
 
-    for (const off of activeAgents.filter((a) => a.side === 'OFF')) {
-      const tr = document.createElement('tr');
-      if (off.id === selected.id) tr.classList.add('selected');
-      const asg = off.assignment;
-      const wpSummary =
-        asg.waypoints.length > 0 ? `${asg.waypoints.length} pts` : asg.secondaryTargetId || '-';
+    const filteredAgents = activeAgents.filter((a) =>
+      this.matrixFilterSide === 'ALL' ? true : a.side === this.matrixFilterSide
+    );
 
-      let levCell = asg.leverage.slice(0, 3);
-      let levColor = 'var(--fg-1)';
-      if (off.engagedWithId) {
-        const grade = off.leverageScore >= 0.08 ? 'WIN' : off.leverageScore <= -0.08 ? 'LOSS' : 'EVEN';
-        levCell = `${grade} (${off.engagedWithId})`;
-        levColor =
-          grade === 'WIN'
-            ? 'var(--accent-Positive)'
-            : grade === 'LOSS'
-            ? 'var(--accent-danger)'
-            : 'var(--accent-secondary)';
-      } else if (snap && snap.targetedReceiverId === off.id) {
-        levCell = 'TARGET';
-        levColor = 'var(--accent-secondary)';
+    for (const ag of filteredAgents) {
+      const tr = document.createElement('tr');
+      if (ag.id === selected.id) tr.classList.add('selected-row');
+      const shortName = ag.name ? ag.name.split(' ').slice(-1)[0] : ag.pos;
+
+      if (ag.side === 'OFF') {
+        const asg = ag.assignment;
+        const wpSummary =
+          asg.waypoints.length > 0 ? `${asg.waypoints.length} pts` : asg.secondaryTargetId || '-';
+        let levCell = asg.leverage.slice(0, 3);
+        let levColor = 'var(--fg-1)';
+        if (ag.engagedWithId) {
+          const grade = ag.leverageScore >= 0.08 ? 'WIN' : ag.leverageScore <= -0.08 ? 'LOSS' : 'EVEN';
+          levCell = `${grade} (${ag.engagedWithId})`;
+          levColor =
+            grade === 'WIN'
+              ? 'var(--accent-Positive)'
+              : grade === 'LOSS'
+              ? 'var(--accent-danger)'
+              : 'var(--accent-secondary)';
+        } else if (snap && snap.targetedReceiverId === ag.id) {
+          levCell = 'TARGET';
+          levColor = 'var(--accent-secondary)';
+        } else if (ag.isSnapRecipient) {
+          levCell = 'SNAP';
+          levColor = 'var(--accent-secondary)';
+        } else if (ag.designedScrambleRead?.enabled) {
+          levCell = 'R3-VOID';
+          levColor = 'var(--accent-Positive)';
+        } else if (ag.fakeAction?.enabled) {
+          levCell = 'FAKE';
+          levColor = 'var(--accent-fake)';
+        }
+
+        tr.innerHTML = `
+          <td style="font-weight:700" title="${ag.name || ag.pos}">${ag.id} <span style="color:var(--fg-2);font-weight:400;">${shortName}</span></td>
+          <td>${asg.role}</td>
+          <td>${asg.primaryTargetId || asg.gapOrSet} (${wpSummary})</td>
+          <td style="color:${levColor}; font-weight:700;">${levCell}</td>
+        `;
+      } else {
+        const da = ag.defAssignment;
+        const defRole = da?.role ?? 'READ_RUN_PASS';
+        const tgtStr = da?.manTargetId ? `TGT:${da.manTargetId}` : `(${(da?.targetX ?? ag.startX).toFixed(1)}, ${(da?.targetY ?? ag.startY).toFixed(1)})`;
+        let stateCell = 'DEF';
+        let stateColor = 'var(--accent-primary)';
+        if (ag.engagedWithId) {
+          stateCell = `VS ${ag.engagedWithId}`;
+          stateColor = 'var(--accent-danger)';
+        } else if (defRole === 'QB_SPY' || defRole === 'BRACKET_TOP') {
+          stateCell = defRole === 'QB_SPY' ? 'SPY' : 'BRACKET';
+          stateColor = 'var(--accent-secondary)';
+        }
+        tr.innerHTML = `
+          <td style="font-weight:700; color:var(--accent-danger);" title="${ag.name || ag.pos}">${ag.id} <span style="color:var(--fg-2);font-weight:400;">${shortName}</span></td>
+          <td>${defRole}</td>
+          <td>${tgtStr}</td>
+          <td style="color:${stateColor}; font-weight:700;">${stateCell}</td>
+        `;
       }
 
-      const shortName = off.name ? off.name.split(' ').slice(-1)[0] : off.pos;
-      tr.innerHTML = `
-        <td style="font-weight:700" title="${off.name || off.pos}">${off.pos} <span style="color:var(--fg-2);font-weight:400;">${shortName}</span></td>
-        <td>${asg.role}</td>
-        <td>${asg.primaryTargetId || asg.gapOrSet}</td>
-        <td>${wpSummary}</td>
-        <td style="color:${levColor}; font-weight:700;">${levCell}</td>
-      `;
       tr.addEventListener('click', () => {
-        this.renderOpts.selectedAgentId = off.id;
+        this.renderOpts.selectedAgentId = ag.id;
         this.syncInspectorAndMatrix();
         this.drawCurrentFrame();
       });
@@ -2125,7 +2347,7 @@ class All22WorkstationApp {
     document.getElementById('mode-select')?.classList.toggle('active', m === 'SELECT');
     document.getElementById('mode-block')?.classList.toggle('active', m === 'BLOCK');
     document.getElementById('mode-route')?.classList.toggle('active', m === 'ROUTE');
-    document.getElementById('btn-draw-route')?.classList.toggle('active', m === 'ROUTE');
+    document.getElementById('nd-draw-route')?.classList.toggle('active', m === 'ROUTE');
     document.getElementById('status-mode')!.textContent = `MODE: ${m}`;
 
     if (m === 'ROUTE') {
@@ -2171,13 +2393,18 @@ class All22WorkstationApp {
       (e.currentTarget as HTMLElement).classList.toggle('active', !!this.renderOpts.showDefenseAssignments);
       this.drawCurrentFrame();
     });
+    document.getElementById('toggle-trails')?.addEventListener('click', (e) => {
+      this.renderOpts.showMotionTrails = !this.renderOpts.showMotionTrails;
+      (e.currentTarget as HTMLElement).classList.toggle('active', !!this.renderOpts.showMotionTrails);
+      this.drawCurrentFrame();
+    });
 
     // Skin selector
     const skinSel = document.getElementById('skin-select') as HTMLSelectElement;
     skinSel.addEventListener('change', () => {
       const id = skinSel.value as SkinId;
       this.themeManager.applySkin(id);
-      document.getElementById('skin-indicator')!.textContent = `SKIN: ${id.toUpperCase()}`;
+      document.getElementById('skin-indicator')!.textContent = this.themeManager.getTheme().label;
       this.drawCurrentFrame();
     });
 
@@ -2244,7 +2471,20 @@ class All22WorkstationApp {
     document.getElementById('btn-jet-motion')?.addEventListener('click', () => this.togglePreSnapMotion());
     document.getElementById('btn-cycle-mike')?.addEventListener('click', () => this.cycleDeclaredMike());
 
-    // Transport Controls
+    // Transport Controls & Undo/Redo & Zoom
+    document.getElementById('btn-step-back')?.addEventListener('click', () => {
+      this.pause();
+      this.currentTick = Math.max(0, this.currentTick - 1);
+      this.drawCurrentFrame();
+      this.syncInspectorAndMatrix();
+    });
+    document.getElementById('btn-speed')?.addEventListener('click', (e) => {
+      this.playbackSpeed = this.playbackSpeed === 1 ? 0.5 : 1;
+      (e.currentTarget as HTMLElement).textContent = this.playbackSpeed === 1 ? '1.0x' : '0.5x';
+    });
+    document.getElementById('btn-undo')?.addEventListener('click', () => this.undo());
+    document.getElementById('btn-redo')?.addEventListener('click', () => this.redo());
+
     document.getElementById('btn-reset')!.addEventListener('click', () => {
       this.pause();
       this.currentTick = 0;
@@ -2263,6 +2503,270 @@ class All22WorkstationApp {
     });
     document.getElementById('btn-monte-carlo')!.addEventListener('click', () => {
       this.runMonteCarloBatch(100);
+    });
+
+    // Zoom & Pan Camera Controls
+    const syncZoomHud = () => {
+      const btn = document.getElementById('btn-zoom-reset');
+      if (btn) btn.textContent = `${Math.round(this.renderer.getZoom() * 100)}%`;
+      this.drawCurrentFrame();
+    };
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
+      this.renderer.setZoom(this.renderer.getZoom() * 1.15);
+      syncZoomHud();
+    });
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
+      this.renderer.setZoom(this.renderer.getZoom() / 1.15);
+      syncZoomHud();
+    });
+    document.getElementById('btn-zoom-reset')?.addEventListener('click', () => {
+      this.renderer.resetView();
+      syncZoomHud();
+    });
+    canvas.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.ctrlKey || Math.abs(e.deltaY) > 0) {
+          e.preventDefault();
+          const factor = e.deltaY < 0 ? 1.1 : 0.91;
+          this.renderer.setZoom(this.renderer.getZoom() * factor);
+          syncZoomHud();
+        }
+      },
+      { passive: false }
+    );
+
+    // Dock Collapse Toggles
+    const shell = document.getElementById('workspace-shell');
+    const resizeAfterDock = () => {
+      window.setTimeout(() => {
+        this.renderer.resize();
+        const badge = document.getElementById('res-badge');
+        if (badge) {
+          const r = this.renderer.getBackingResolution();
+          badge.textContent = `${r.width}×${r.height}`;
+        }
+        this.drawCurrentFrame();
+      }, 175);
+    };
+    document.getElementById('btn-toggle-left-dock')?.addEventListener('click', () => {
+      shell?.classList.toggle('left-collapsed');
+      resizeAfterDock();
+    });
+    document.getElementById('btn-toggle-right-dock')?.addEventListener('click', () => {
+      shell?.classList.toggle('right-collapsed');
+      resizeAfterDock();
+    });
+
+    // Left Dock Tabs
+    const tabPb = document.getElementById('btn-left-tab-playbook');
+    const tabMem = document.getElementById('btn-left-tab-memory');
+    const panePb = document.getElementById('pane-left-playbook');
+    const paneMem = document.getElementById('pane-left-memory');
+    tabPb?.addEventListener('click', () => {
+      tabPb.classList.add('active');
+      tabMem?.classList.remove('active');
+      panePb?.classList.add('active');
+      paneMem?.classList.remove('active');
+    });
+    tabMem?.addEventListener('click', () => {
+      tabMem.classList.add('active');
+      tabPb?.classList.remove('active');
+      paneMem?.classList.add('active');
+      panePb?.classList.remove('active');
+    });
+
+    // Right Dock Tabs
+    const tabDes = document.getElementById('btn-right-tab-designer');
+    const tabMat = document.getElementById('btn-right-tab-matrix');
+    const paneDes = document.getElementById('pane-right-designer');
+    const paneMat = document.getElementById('pane-right-matrix');
+    tabDes?.addEventListener('click', () => {
+      tabDes.classList.add('active');
+      tabMat?.classList.remove('active');
+      paneDes?.classList.add('active');
+      paneMat?.classList.remove('active');
+    });
+    tabMat?.addEventListener('click', () => {
+      tabMat.classList.add('active');
+      tabDes?.classList.remove('active');
+      paneMat?.classList.add('active');
+      paneDes?.classList.remove('active');
+    });
+
+    // Matrix OFF / DEF / ALL Filter
+    document.querySelectorAll('[data-side]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const side = ((btn as HTMLElement).dataset.side || 'OFF') as 'OFF' | 'DEF' | 'ALL';
+        this.matrixFilterSide = side;
+        document.querySelectorAll('[data-side]').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.syncInspectorAndMatrix();
+      });
+    });
+
+    // Playbook Search & Category Filter
+    document.getElementById('playbook-search')?.addEventListener('input', (e) => {
+      this.playbookSearchQuery = (e.target as HTMLInputElement).value;
+      this.renderPlaybookList();
+    });
+    document.querySelectorAll('.cat-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        this.activeCategoryFilter = (tab as HTMLElement).dataset.cat || 'ALL';
+        document.querySelectorAll('.cat-tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        this.renderPlaybookList();
+      });
+    });
+
+    // Custom Play Builder Actions
+    document.getElementById('btn-new-play')?.addEventListener('click', () => {
+      const formId = (document.getElementById('starter-formation-select') as HTMLSelectElement)?.value;
+      const starter = BLANK_FORMATION_STARTERS.find((s) => s.id === formId) || BLANK_FORMATION_STARTERS[0];
+      const customId = `CUSTOM_${Date.now()}`;
+      const nameEl = document.getElementById('custom-play-name') as HTMLInputElement | null;
+      const title = `Custom ${starter.label.replace(' Blank', '')}`;
+      if (nameEl) nameEl.value = title;
+      this.registerAndLoadCustomPreset(customId, title, starter.buildOffense(), 'PASS', starter.personnel);
+    });
+    document.getElementById('btn-save-play')?.addEventListener('click', () => {
+      const nameInput = document.getElementById('custom-play-name') as HTMLInputElement | null;
+      const rawName = (nameInput?.value || '').trim() || `Custom Play ${this.customPlays.length + 1}`;
+      const curPreset = this.presets.find((p) => p.id === this.activePresetId);
+      const id = curPreset?.isCustom ? curPreset.id : `CUSTOM_${Date.now()}`;
+      const offOnly = this.agents.filter((a) => a.side === 'OFF');
+      this.registerAndLoadCustomPreset(id, rawName, offOnly, undefined, curPreset?.personnel);
+      document.getElementById('status-hint')!.textContent = `SAVED CUSTOM PLAY: "${rawName}"`;
+    });
+    document.getElementById('btn-dup-play')?.addEventListener('click', () => {
+      const curPreset = this.presets.find((p) => p.id === this.activePresetId);
+      const baseName = curPreset?.name || 'Concept';
+      const cloneName = `${baseName} (Custom)`;
+      const offOnly = this.agents.filter((a) => a.side === 'OFF');
+      this.registerAndLoadCustomPreset(`CUSTOM_${Date.now()}`, cloneName, offOnly, curPreset?.category, curPreset?.personnel);
+    });
+    document.getElementById('btn-del-play')?.addEventListener('click', () => {
+      const idx = this.customPlays.findIndex((p) => p.id === this.activePresetId);
+      if (idx < 0) {
+        document.getElementById('status-hint')!.textContent = 'Built-in catalog plays are read-only; only CUSTOM plays can be deleted.';
+        return;
+      }
+      this.customPlays.splice(idx, 1);
+      this.presets = this.presets.filter((p) => p.id !== this.activePresetId);
+      this.persistCustomPlaysToStorage();
+      this.renderPlaybookList();
+      if (this.presets.length > 0) this.loadPlayPreset(this.presets[0].id);
+    });
+    document.getElementById('btn-export-play')?.addEventListener('click', () => {
+      const curPreset = this.presets.find((p) => p.id === this.activePresetId);
+      const offOnly = this.agents.filter((a) => a.side === 'OFF');
+      const payload: CustomPlayRecord = {
+        id: curPreset?.id || `CUSTOM_${Date.now()}`,
+        name: (document.getElementById('custom-play-name') as HTMLInputElement | null)?.value || curPreset?.name || 'Custom Play',
+        category: offOnly.some((a) => a.assignment.role === 'BALL_CARRIER') ? 'RUN' : 'PASS',
+        personnel: curPreset?.personnel || 'CUSTOM',
+        situations: curPreset?.situations || ['1ST_10'],
+        agents: offOnly,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${payload.name.replace(/[^a-zA-Z0-9_-]+/g, '_').toLowerCase()}.all22.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+    const importInput = document.getElementById('import-play-file') as HTMLInputElement | null;
+    document.getElementById('btn-import-play')?.addEventListener('click', () => importInput?.click());
+    importInput?.addEventListener('change', async () => {
+      const f = importInput.files?.[0];
+      if (!f) return;
+      try {
+        const parsed = JSON.parse(await f.text()) as CustomPlayRecord;
+        if (parsed && Array.isArray(parsed.agents) && parsed.agents.length === 11) {
+          this.registerAndLoadCustomPreset(
+            `CUSTOM_${Date.now()}`,
+            parsed.name || f.name.replace(/\.json$/i, ''),
+            parsed.agents,
+            parsed.category,
+            parsed.personnel
+          );
+          document.getElementById('status-hint')!.textContent = `IMPORTED CUSTOM PLAY: ${parsed.name || f.name}`;
+        }
+      } catch {
+        document.getElementById('status-hint')!.textContent = 'Invalid .all22.json play file.';
+      }
+      importInput.value = '';
+    });
+
+    // Defensive Memory Lab & Context Listeners
+    const syncMemSliders = () => {
+      const setSlider = (id: string, valId: string, val: number) => {
+        const s = document.getElementById(id) as HTMLInputElement | null;
+        const v = document.getElementById(valId);
+        if (s) s.value = val.toFixed(2);
+        if (v) v.textContent = `${val > 0 ? '+' : ''}${val.toFixed(2)}`;
+      };
+      setSlider('mem-pitch', 'mem-pitch-val', this.memConfig.pitchPrime);
+      setSlider('mem-exchange', 'mem-exchange-val', this.memConfig.exchangePrime);
+      setSlider('mem-mesh', 'mem-mesh-val', this.memConfig.meshPrime);
+      setSlider('mem-orbit', 'mem-orbit-val', this.memConfig.orbitPrime);
+      const aEl = document.getElementById('mem-antic') as HTMLInputElement | null;
+      const aVal = document.getElementById('mem-antic-val');
+      if (aEl) aEl.value = this.memConfig.repeatAntic.toFixed(2);
+      if (aVal) aVal.textContent = this.memConfig.repeatAntic.toFixed(2);
+      const enEl = document.getElementById('mem-enabled') as HTMLInputElement | null;
+      if (enEl) enEl.checked = this.memConfig.enabled;
+    };
+
+    const onMemChange = () => {
+      this.memConfig.enabled = Boolean((document.getElementById('mem-enabled') as HTMLInputElement | null)?.checked);
+      this.memConfig.pitchPrime = parseFloat((document.getElementById('mem-pitch') as HTMLInputElement | null)?.value || '0') || 0;
+      this.memConfig.exchangePrime = parseFloat((document.getElementById('mem-exchange') as HTMLInputElement | null)?.value || '0') || 0;
+      this.memConfig.meshPrime = parseFloat((document.getElementById('mem-mesh') as HTMLInputElement | null)?.value || '0') || 0;
+      this.memConfig.orbitPrime = parseFloat((document.getElementById('mem-orbit') as HTMLInputElement | null)?.value || '0') || 0;
+      this.memConfig.repeatAntic = parseFloat((document.getElementById('mem-antic') as HTMLInputElement | null)?.value || '0') || 0;
+      syncMemSliders();
+      this.recomputeSimulation();
+      this.syncInspectorAndMatrix();
+      this.drawCurrentFrame();
+    };
+    ['mem-enabled', 'mem-pitch', 'mem-exchange', 'mem-mesh', 'mem-orbit', 'mem-antic'].forEach((id) => {
+      document.getElementById(id)?.addEventListener('input', onMemChange);
+      document.getElementById(id)?.addEventListener('change', onMemChange);
+    });
+    document.getElementById('mem-preset-primed')?.addEventListener('click', () => {
+      this.memConfig = { enabled: true, pitchPrime: 0.85, exchangePrime: 0.85, meshPrime: 0.85, orbitPrime: 0.85, repeatAntic: 0 };
+      syncMemSliders();
+      onMemChange();
+    });
+    document.getElementById('mem-preset-neutral')?.addEventListener('click', () => {
+      this.memConfig = { enabled: true, pitchPrime: 0, exchangePrime: 0, meshPrime: 0, orbitPrime: 0, repeatAntic: 0 };
+      syncMemSliders();
+      onMemChange();
+    });
+    document.getElementById('mem-preset-burned')?.addEventListener('click', () => {
+      this.memConfig = { enabled: true, pitchPrime: -0.8, exchangePrime: -0.8, meshPrime: -0.8, orbitPrime: -0.8, repeatAntic: 0 };
+      syncMemSliders();
+      onMemChange();
+    });
+    document.getElementById('mem-preset-antispam')?.addEventListener('click', () => {
+      this.memConfig = { enabled: true, pitchPrime: 0, exchangePrime: 0, meshPrime: 0, orbitPrime: 0, repeatAntic: 0.75 };
+      syncMemSliders();
+      onMemChange();
+    });
+
+    document.getElementById('ctx-first-down')?.addEventListener('change', (e) => {
+      const val = parseFloat((e.target as HTMLInputElement).value);
+      this.customFirstDownYds = Number.isFinite(val) && val > 0 ? val : null;
+      this.recomputeSimulation();
+      this.drawCurrentFrame();
+    });
+    document.getElementById('ctx-yard-goal')?.addEventListener('change', (e) => {
+      const val = parseFloat((e.target as HTMLInputElement).value);
+      this.customYardToGoal = Number.isFinite(val) && val >= 2 ? val : null;
+      this.recomputeSimulation();
+      this.drawCurrentFrame();
     });
 
     const slider = document.getElementById('timeline-slider') as HTMLInputElement;
@@ -2319,196 +2823,30 @@ class All22WorkstationApp {
       this.mutateCurrentPlayAndProtection();
     });
 
-    // Inspector Field Listeners
-    const updateSelectedAssignment = () => {
-      const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
-      if (!sel || sel.side !== 'OFF') return;
-      sel.assignment.role = (document.getElementById('insp-role-type') as HTMLSelectElement).value as BlockRoleType;
-      sel.assignment.primaryTargetId = (document.getElementById('insp-target-1') as HTMLSelectElement).value || null;
-      sel.assignment.secondaryTargetId = (document.getElementById('insp-target-2') as HTMLSelectElement).value || null;
-      sel.assignment.gapOrSet = (document.getElementById('insp-gap-set') as HTMLSelectElement).value as GapOrSetCode;
-      sel.assignment.leverage = (document.getElementById('insp-leverage') as HTMLSelectElement).value as LeverageBias;
-      sel.assignment.climbOrChipDelaySec = parseFloat(
-        (document.getElementById('insp-delay-sec') as HTMLInputElement).value
-      ) || 0.65;
-
-      this.recomputeSimulation();
-      this.syncInspectorAndMatrix();
-    };
-
-    ['insp-role-type', 'insp-target-1', 'insp-target-2', 'insp-gap-set', 'insp-leverage', 'insp-delay-sec'].forEach(
-      (id) => document.getElementById(id)!.addEventListener('change', updateSelectedAssignment)
-    );
-
-    // DRAW ROUTE / PATH BUTTON
-    document.getElementById('btn-draw-route')?.addEventListener('click', () => {
-      const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
-      if (!sel || sel.side !== 'OFF') return;
-
-      this.setMode('ROUTE');
-      if (['LT', 'LG', 'C', 'RG', 'RT'].includes(sel.pos)) {
-        if (!['PULL_LEAD', 'PULL_TRAP'].includes(sel.assignment.role)) {
-          sel.assignment.role = 'PULL_LEAD';
-        }
-      } else if (sel.pos === 'RB') {
-        if (sel.assignment.role !== 'BALL_CARRIER' && sel.assignment.role !== 'ROUTE') {
-          sel.assignment.role = 'BALL_CARRIER';
-        }
-      } else {
-        sel.assignment.role = 'ROUTE';
-      }
-
-      this.syncInspectorAndMatrix();
-      this.drawCurrentFrame();
-    });
-
-    // + ADD LANDMARK BUTTON
-    document.getElementById('btn-add-landmark')?.addEventListener('click', () => {
-      const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
-      if (!sel || sel.side !== 'OFF') return;
-
-      const isOL = ['LT', 'LG', 'C', 'RG', 'RT'].includes(sel.pos);
-      const wps = sel.assignment.waypoints;
-
-      if (wps.length === 0) {
-        if (isOL) {
-          sel.assignment.role = 'PULL_LEAD';
-          const dir = sel.startX < 0 ? 1 : -1;
-          wps.push({ x: +(sel.startX + dir * 2.2).toFixed(2), y: +(sel.startY - 1.4).toFixed(2) });
-        } else if (sel.pos === 'RB') {
-          sel.assignment.role = 'BALL_CARRIER';
-          const dir = sel.startX < 0 ? -1 : 1;
-          wps.push({ x: +(sel.startX + dir * 3.5).toFixed(2), y: +(sel.startY + 2.5).toFixed(2) });
-        } else {
-          sel.assignment.role = 'ROUTE';
-          wps.push({ x: +sel.startX.toFixed(2), y: +(Math.max(5.0, sel.startY + 6.0)).toFixed(2) });
-        }
-      } else {
-        const last = wps[wps.length - 1];
-        if (wps.length === 1) {
-          const insideDir = sel.startX < 0 ? 1 : -1;
-          if (isOL) {
-            wps.push({ x: +(last.x + insideDir * 3.0).toFixed(2), y: +(last.y + 2.0).toFixed(2) });
-          } else {
-            wps.push({ x: +(last.x + insideDir * 4.5).toFixed(2), y: +(last.y + 3.5).toFixed(2) });
-          }
-        } else {
-          const prev = wps[wps.length - 2];
-          const dx = last.x - prev.x;
-          const dy = last.y - prev.y;
-          const len = Math.hypot(dx, dy) || 1;
-          const extDist = 4.0;
-          wps.push({
-            x: +(last.x + (dx / len) * extDist).toFixed(2),
-            y: +(last.y + (dy / len) * extDist).toFixed(2),
-          });
-        }
-      }
-
-      this.recomputeSimulation();
-      this.syncInspectorAndMatrix();
-      this.drawCurrentFrame();
-    });
-
-    // - POP LANDMARK BUTTON
-    document.getElementById('btn-pop-landmark')?.addEventListener('click', () => {
-      const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
-      if (!sel || sel.side !== 'OFF') return;
-      if (sel.assignment.waypoints.length > 0) {
-        sel.assignment.waypoints.pop();
-        this.recomputeSimulation();
-        this.syncInspectorAndMatrix();
-        this.drawCurrentFrame();
-      }
-    });
-
-    // ROUTE TREE PRESETS DROPDOWN
-    const routePresetSel = document.getElementById('insp-route-preset') as HTMLSelectElement | null;
-    routePresetSel?.addEventListener('change', () => {
-      const val = routePresetSel.value as RoutePresetId | '';
-      if (!val) return;
-      const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
-      if (!sel || sel.side !== 'OFF') return;
-
-      applyRoutePresetToAgent(sel, val);
-
-      routePresetSel.value = '';
-      this.recomputeSimulation();
-      this.syncInspectorAndMatrix();
-      this.drawCurrentFrame();
-    });
-
-    // PULL / TRAP SCHEME PRESETS DROPDOWN
-    const pullPresetSel = document.getElementById('insp-pull-preset') as HTMLSelectElement | null;
-    pullPresetSel?.addEventListener('change', () => {
-      const val = pullPresetSel.value;
-      if (!val) return;
-      const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
-      if (!sel || sel.side !== 'OFF') return;
-
-      const x0 = sel.startX;
-      const toRight = x0 < 0;
-      const dir = toRight ? 1 : -1;
-
-      if (val === 'PULL_KICK') {
-        sel.assignment.role = 'PULL_TRAP';
-        sel.assignment.waypoints = [
-          { x: +(x0 + dir * 1.5).toFixed(2), y: -1.6 },
-          { x: +(dir * 5.2).toFixed(2), y: 0.5 },
-        ];
-      } else if (val === 'PULL_WRAP') {
-        sel.assignment.role = 'PULL_LEAD';
-        sel.assignment.waypoints = [
-          { x: +(x0 + dir * 2.0).toFixed(2), y: -1.8 },
-          { x: +(dir * 4.2).toFixed(2), y: 1.8 },
-          { x: +(dir * 4.5).toFixed(2), y: 4.5 },
-        ];
-      } else if (val === 'BACKSIDE_TRAP') {
-        sel.assignment.role = 'PULL_TRAP';
-        sel.assignment.waypoints = [
-          { x: +(x0 + dir * 1.2).toFixed(2), y: -1.2 },
-          { x: +(dir * 1.8).toFixed(2), y: 0.2 },
-        ];
-      } else if (val === 'PIN_PULL_SWEEP') {
-        sel.assignment.role = 'PULL_LEAD';
-        sel.assignment.waypoints = [
-          { x: +(x0 + 2.5).toFixed(2), y: -1.6 },
-          { x: 7.2, y: -0.5 },
-          { x: 8.5, y: 3.5 },
-        ];
-      }
-
-      pullPresetSel.value = '';
-      this.recomputeSimulation();
-      this.syncInspectorAndMatrix();
-      this.drawCurrentFrame();
-    });
-
-    document.getElementById('btn-clear-waypoints')!.addEventListener('click', () => {
-      const sel = this.agents.find((a) => a.id === this.renderOpts.selectedAgentId);
-      if (sel && sel.side === 'OFF') {
-        sel.assignment.waypoints = [];
-        this.recomputeSimulation();
-        this.syncInspectorAndMatrix();
-        this.drawCurrentFrame();
-      }
-    });
-
-    document.getElementById('btn-pick-target-canvas')!.addEventListener('click', () => {
-      this.awaitingCanvasTargetPick = true;
-      document.getElementById('status-hint')!.textContent =
-        'TARGET PICK ACTIVE: Click any Defender on the field to lock as Target (Hold Shift for 2nd-Level Climb Target)';
-    });
-
-    // Canvas Mouse Interaction
+    // Canvas Mouse Interaction + Leave cleanup
     canvas.addEventListener('mousedown', (e) => this.onCanvasMouseDown(e, canvas));
     canvas.addEventListener('mousemove', (e) => this.onCanvasMouseMove(e, canvas));
+    canvas.addEventListener('mouseleave', () => {
+      this.renderOpts.hoveredAgentId = null;
+      document.getElementById('hover-card')?.classList.add('hidden');
+      this.drawCurrentFrame();
+    });
     window.addEventListener('mouseup', (e) => this.onCanvasMouseUp(e, canvas));
 
     // Power-user keyboard shortcuts
     window.addEventListener('keydown', (e) => {
-      if (['INPUT', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
       const k = e.key.toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && k === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) this.redo();
+        else this.undo();
+        return;
+      } else if ((e.ctrlKey || e.metaKey) && k === 'y') {
+        e.preventDefault();
+        this.redo();
+        return;
+      }
       if (e.code === 'Space') {
         e.preventDefault();
         if (this.isPlaying) this.pause();
@@ -2516,6 +2854,11 @@ class All22WorkstationApp {
       } else if (k === 's') {
         this.pause();
         this.currentTick = Math.min(this.snapshots.length - 1, this.currentTick + 1);
+        this.drawCurrentFrame();
+        this.syncInspectorAndMatrix();
+      } else if (k === 'a') {
+        this.pause();
+        this.currentTick = Math.max(0, this.currentTick - 1);
         this.drawCurrentFrame();
         this.syncInspectorAndMatrix();
       } else if (k === 'v') {
@@ -2534,14 +2877,26 @@ class All22WorkstationApp {
         document.getElementById('toggle-pocket')?.click();
       } else if (k === 'l') {
         document.getElementById('toggle-leverage')?.click();
+      } else if (k === 't') {
+        document.getElementById('toggle-trails')?.click();
       } else if (k === 'x') {
         this.flipPlayLeftRight();
       } else if (k === 'j') {
         this.togglePreSnapMotion();
       } else if (k === 'i') {
         this.cycleDeclaredMike();
+      } else if (k === '[') {
+        document.getElementById('btn-toggle-left-dock')?.click();
+      } else if (k === ']') {
+        document.getElementById('btn-toggle-right-dock')?.click();
+      } else if (k === '=' || k === '+') {
+        document.getElementById('btn-zoom-in')?.click();
+      } else if (k === '-') {
+        document.getElementById('btn-zoom-out')?.click();
+      } else if (k === '0') {
+        document.getElementById('btn-zoom-reset')?.click();
       } else if (k === '?') {
-        window.open('explainer.html', '_blank');
+        window.open('how_it_works.html', '_blank');
       }
     });
   }
@@ -2569,6 +2924,7 @@ class All22WorkstationApp {
 
     if (this.awaitingCanvasTargetPick && clicked && clicked.side === 'DEF') {
       if (sel && sel.side === 'OFF') {
+        this.pushUndoSnapshot();
         if (e.shiftKey) {
           sel.assignment.role = 'COMBO_CLIMB';
           sel.assignment.secondaryTargetId = clicked.id;
@@ -2592,6 +2948,7 @@ class All22WorkstationApp {
 
       const baseAgent = this.agents.find((a) => a.id === clicked.id)!;
       this.dragSourceAgent = baseAgent;
+      this.didDragMutate = false;
 
       if (this.mode === 'SELECT') {
         this.isDraggingPosition = true;
@@ -2611,6 +2968,7 @@ class All22WorkstationApp {
     // 3. Clicked open field in BLOCK or ROUTE mode -> append landmark to selected offensive player
     if (sel && sel.side === 'OFF') {
       if (this.mode === 'BLOCK') {
+        this.pushUndoSnapshot();
         if (!['PULL_LEAD', 'PULL_TRAP', 'CHIP_RELEASE'].includes(sel.assignment.role)) {
           sel.assignment.role = 'PULL_LEAD';
         }
@@ -2619,6 +2977,7 @@ class All22WorkstationApp {
         this.syncInspectorAndMatrix();
         this.drawCurrentFrame();
       } else if (this.mode === 'ROUTE') {
+        this.pushUndoSnapshot();
         if (['LT', 'LG', 'C', 'RG', 'RT'].includes(sel.pos)) {
           if (!['PULL_LEAD', 'PULL_TRAP'].includes(sel.assignment.role)) {
             sel.assignment.role = 'PULL_LEAD';
@@ -2647,11 +3006,53 @@ class All22WorkstationApp {
     const hovered = snapAgents.find((a) => Math.hypot(a.x - wx, a.y - wy) < 1.35);
     this.renderOpts.hoveredAgentId = hovered ? hovered.id : null;
 
+    const hoverCard = document.getElementById('hover-card');
+    if (hoverCard) {
+      if (hovered && !this.isDraggingPosition && this.draggingWaypointIndex === null && !this.renderOpts.activeDragLine) {
+        const jerseyStr = hovered.jersey !== undefined ? ` #${hovered.jersey}` : '';
+        const roleStr = hovered.side === 'OFF' ? hovered.assignment.role : hovered.defAssignment?.role ?? 'READ';
+        const spdYps = Math.hypot(hovered.vx, hovered.vy).toFixed(1);
+        const r = hovered.ratings;
+        const badges: string[] = [];
+        if (hovered.isSnapRecipient) badges.push('SNAP');
+        if (hovered.preSnapMotion?.enabled) badges.push('MOT');
+        if (hovered.playAction?.enabled) badges.push('PA');
+        if (hovered.fakeAction?.enabled) badges.push('FAKE');
+        if (hovered.designedScrambleRead?.enabled) badges.push('R3-VOID');
+        if (hovered.optionPass?.enabled) badges.push('RPO');
+        const engStr = hovered.engagedWithId
+          ? `ENG vs ${hovered.engagedWithId} (${hovered.leverageScore >= 0 ? '+' : ''}${hovered.leverageScore.toFixed(2)})`
+          : `V=${spdYps} y/s · XY (${hovered.x.toFixed(1)}, ${hovered.y.toFixed(1)})`;
+
+        hoverCard.innerHTML = `
+          <div style="font-weight:800; color:#f8fafc; display:flex; justify-content:space-between; gap:8px;">
+            <span>${hovered.id}${jerseyStr} · ${hovered.name || hovered.pos}</span>
+            <span style="color:${hovered.side === 'OFF' ? 'var(--accent-primary)' : 'var(--accent-danger)'};">${hovered.side}</span>
+          </div>
+          <div style="font-family:var(--font-mono); font-size:9.5px; color:var(--accent-secondary); margin:2px 0;">${roleStr}${badges.length ? ` · ${badges.join(' ')}` : ''}</div>
+          <div style="font-family:var(--font-mono); font-size:9.5px; color:var(--fg-1);">SPD ${r.speed} · ACC ${r.accel} · PWR ${r.power} · FIN ${r.finesse} · AWR ${r.awareness}${hovered.blockRating !== undefined ? ` · BLK ${hovered.blockRating}` : ''}</div>
+          <div style="font-family:var(--font-mono); font-size:9.5px; color:var(--fg-muted); margin-top:2px;">${engStr}</div>
+        `;
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+        const cardW = 240;
+        const cardH = 88;
+        const left = Math.min(rect.width - cardW - 10, Math.max(10, cx + 16));
+        const top = Math.min(rect.height - cardH - 10, Math.max(10, cy - cardH - 12));
+        hoverCard.style.left = `${Math.round(left)}px`;
+        hoverCard.style.top = `${Math.round(top)}px`;
+        hoverCard.classList.remove('hidden');
+      } else {
+        hoverCard.classList.add('hidden');
+      }
+    }
+
     if (this.draggingWaypointIndex !== null && this.dragSourceAgent) {
       this.dragSourceAgent.assignment.waypoints[this.draggingWaypointIndex] = {
         x: +wx.toFixed(2),
         y: +wy.toFixed(2),
       };
+      this.didDragMutate = true;
       this.recomputeSimulation();
       this.syncInspectorAndMatrix();
       this.drawCurrentFrame();
@@ -2663,6 +3064,7 @@ class All22WorkstationApp {
       this.dragSourceAgent.startY = +(
         this.dragSourceAgent.side === 'OFF' ? Math.min(-0.2, wy) : Math.max(0.3, wy)
       ).toFixed(2);
+      this.didDragMutate = true;
       this.recomputeSimulation();
       return;
     }
@@ -2679,6 +3081,8 @@ class All22WorkstationApp {
   private onCanvasMouseUp(e: MouseEvent, canvas: HTMLCanvasElement): void {
     if (this.draggingWaypointIndex !== null) {
       this.draggingWaypointIndex = null;
+      if (this.didDragMutate) this.pushUndoSnapshot();
+      this.didDragMutate = false;
       this.recomputeSimulation();
       this.syncInspectorAndMatrix();
       this.drawCurrentFrame();
@@ -2692,6 +3096,7 @@ class All22WorkstationApp {
         (a) => a.side === 'DEF' && Math.hypot(a.startX - wx, a.startY - wy) < 1.6
       );
 
+      this.pushUndoSnapshot();
       if (targetDef) {
         if (e.shiftKey && this.dragSourceAgent.assignment.primaryTargetId) {
           this.dragSourceAgent.assignment.role = 'COMBO_CLIMB';
@@ -2708,9 +3113,12 @@ class All22WorkstationApp {
       this.renderOpts.activeDragLine = null;
       this.recomputeSimulation();
       this.syncInspectorAndMatrix();
+    } else if (this.isDraggingPosition && this.didDragMutate) {
+      this.pushUndoSnapshot();
     }
 
     this.isDraggingPosition = false;
+    this.didDragMutate = false;
     this.dragSourceAgent = null;
   }
 
@@ -2916,14 +3324,15 @@ class All22WorkstationApp {
   private play(): void {
     if (this.isPlaying) return;
     this.isPlaying = true;
-    document.getElementById('btn-play')!.textContent = 'PAUSE';
+    document.getElementById('btn-play')!.textContent = '❚❚ PAUSE';
     if (this.currentTick >= this.snapshots.length - 1) {
       this.currentTick = 0;
     }
     this.lastStepTime = performance.now();
     const loop = (now: number) => {
       if (!this.isPlaying) return;
-      if (now - this.lastStepTime >= 50) {
+      const tickMs = this.playbackSpeed === 0.5 ? 100 : 50;
+      if (now - this.lastStepTime >= tickMs) {
         this.lastStepTime = now;
         this.currentTick++;
         if (this.currentTick >= this.snapshots.length) {
@@ -2942,13 +3351,17 @@ class All22WorkstationApp {
 
   private pause(): void {
     this.isPlaying = false;
-    document.getElementById('btn-play')!.textContent = 'RUN 20Hz';
+    document.getElementById('btn-play')!.textContent = '▶ PLAY';
     if (this.rafId !== null) cancelAnimationFrame(this.rafId);
   }
 
   private drawCurrentFrame(): void {
     const snap = this.snapshots[this.currentTick];
     if (!snap) return;
+
+    this.renderOpts.trailSnapshots = this.renderOpts.showMotionTrails
+      ? this.snapshots.slice(Math.max(0, this.currentTick - 10), this.currentTick + 1)
+      : undefined;
 
     this.renderer.render(snap, this.themeManager.getTheme().canvas, this.renderOpts);
 

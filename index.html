@@ -1,977 +1,394 @@
 <!DOCTYPE html>
-<html lang="en" data-skin="all22-pro">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ALL-22 CHESS // TACTICAL KINEMATIC SIMULATOR</title>
-  <style>
-    :root {
-      /* Default: all22-pro (set dynamically by ThemeManager) */
-      --bg-0: #080a0d;
-      --bg-1: #0e1217;
-      --bg-2: #151b22;
-      --bg-3: #1c242e;
-      --fg-0: #e6edf3;
-      --fg-1: #9da7b3;
-      --fg-2: #636e7b;
-      --border-hairline: #212832;
-      --border-focus: #388bfd;
-      --accent-primary: #2f81f7;
-      --accent-secondary: #d29922;
-      --accent-Positive: #3fb950;
-      --accent-danger: #f85149;
-      --accent-block: #f0883e;
-      --accent-combo: #a371f7;
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
-      --radius-sm: 2px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
-
-    html, body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background: var(--bg-0);
-      color: var(--fg-0);
-      font-family: var(--font-sans);
-      font-size: 12px;
-      line-height: 1.35;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Master Workstation Grid */
-    .workstation {
-      display: grid;
-      grid-template-rows: 38px 1fr 26px;
-      grid-template-columns: 290px 1fr 360px;
-      grid-template-areas:
-        "topbar topbar topbar"
-        "leftdock viewport rightdock"
-        "statusbar statusbar statusbar";
-      width: 100vw;
-      height: 100vh;
-    }
-
-    /* Top Command & Transport Strip */
-    .topbar {
-      grid-area: topbar;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px;
-      background: var(--bg-1);
-      border-bottom: 1px solid var(--border-hairline);
-      gap: 12px;
-    }
-
-    .brand-cluster {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      font-size: 11px;
-      color: var(--fg-0);
-      white-space: nowrap;
-    }
-
-    .brand-tag {
-      padding: 2px 5px;
-      background: var(--accent-primary);
-      color: #fff;
-      font-size: 10px;
-      border-radius: var(--radius-sm);
-    }
-
-    .toolbar-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .toolbar-divider {
-      width: 1px;
-      height: 20px;
-      background: var(--border-hairline);
-      margin: 0 4px;
-    }
-
-    /* Crisp Buttons & Selects */
-    .btn, .select-input, .num-input {
-      height: 24px;
-      padding: 0 8px;
-      background: var(--bg-2);
-      color: var(--fg-0);
-      border: 1px solid var(--border-hairline);
-      border-radius: var(--radius-sm);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: background 80ms linear, border-color 80ms linear;
-    }
-
-    .btn:hover, .select-input:hover {
-      background: var(--bg-3);
-      border-color: var(--fg-2);
-    }
-
-    .btn.active {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: #ffffff;
-    }
-
-    .btn.block-mode.active {
-      background: var(--accent-block);
-      border-color: var(--accent-block);
-      color: #080a0d;
-      font-weight: 700;
-    }
-
-    .btn-xs {
-      height: 20px;
-      padding: 0 5px;
-      font-size: 10px;
-    }
-
-    .kbd-hint {
-      font-size: 9px;
-      color: var(--fg-2);
-      padding: 0 3px;
-      border: 1px solid var(--border-hairline);
-      background: var(--bg-0);
-    }
-
-    .btn.active .kbd-hint {
-      color: inherit;
-      border-color: rgba(255,255,255,0.35);
-      background: rgba(0,0,0,0.2);
-    }
-
-    /* Docks */
-    .dock-left {
-      grid-area: leftdock;
-      background: var(--bg-1);
-      border-right: 1px solid var(--border-hairline);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .dock-right {
-      grid-area: rightdock;
-      background: var(--bg-1);
-      border-left: 1px solid var(--border-hairline);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .pane-header {
-      height: 28px;
-      padding: 0 10px;
-      background: var(--bg-2);
-      border-bottom: 1px solid var(--border-hairline);
-      border-top: 1px solid var(--border-hairline);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--fg-1);
-      flex-shrink: 0;
-    }
-
-    .pane-header:first-child {
-      border-top: none;
-    }
-
-    .pane-body {
-      padding: 8px;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    .pane-body.compact {
-      padding: 0;
-    }
-
-    /* Center Viewport */
-    .viewport-area {
-      grid-area: viewport;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-0);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .protection-macro-bar {
-      height: 30px;
-      background: var(--bg-1);
-      border-bottom: 1px solid var(--border-hairline);
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      gap: 6px;
-      overflow-x: auto;
-    }
-
-    .macro-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--fg-2);
-      text-transform: uppercase;
-      margin-right: 4px;
-      white-space: nowrap;
-    }
-
-    /* QB Pre-Snap Intelligence Strip */
-    .qb-intel-strip {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-left: auto;
-      font-family: var(--font-mono);
-      font-size: 9px;
-      padding-left: 8px;
-    }
-    .intel-tag {
-      background: var(--bg-0);
-      border: 1px solid var(--border-hairline);
-      padding: 2px 6px;
-      border-radius: 2px;
-      color: var(--fg-1);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .intel-tag.tell-man {
-      border-color: #f59e0b;
-      color: #f59e0b;
-      background: rgba(245, 158, 11, 0.12);
-    }
-    .intel-tag.tell-zone {
-      border-color: #38bdf8;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.12);
-    }
-    .intel-tag.tell-blitz {
-      border-color: #ef4444;
-      color: #ef4444;
-      background: rgba(239, 68, 68, 0.16);
-    }
-    .intel-tag.tell-box {
-      border-color: #10b981;
-      color: #10b981;
-      background: rgba(16, 185, 129, 0.12);
-    }
-    .btn-mike-id {
-      border-color: #f59e0b !important;
-      color: #f59e0b !important;
-      font-weight: 700 !important;
-    }
-
-    /* Macro Formation & Personnel Rock-Paper-Scissors Card */
-    .macro-rps-card {
-      background: var(--bg-1);
-      border: 1px solid var(--border-hairline);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-      margin-top: 8px;
-      font-size: 11px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .macro-rps-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .macro-rps-label {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      color: var(--fg-muted);
-      letter-spacing: 0.05em;
-      font-weight: 700;
-    }
-    .macro-rps-badge {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      padding: 1px 6px;
-      border-radius: 2px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-    .macro-rps-badge.badge-danger {
-      background: rgba(239, 68, 68, 0.18);
-      color: #ef4444;
-      border: 1px solid #ef4444;
-    }
-    .macro-rps-badge.badge-success {
-      background: rgba(16, 185, 129, 0.18);
-      color: #10b981;
-      border: 1px solid #10b981;
-    }
-    .macro-rps-badge.badge-neutral {
-      background: rgba(56, 189, 248, 0.14);
-      color: #38bdf8;
-      border: 1px solid #38bdf8;
-    }
-    .macro-rps-badge.badge-warning {
-      background: rgba(245, 158, 11, 0.18);
-      color: #f59e0b;
-      border: 1px solid #f59e0b;
-    }
-    .macro-rps-headline {
-      font-weight: 700;
-      color: var(--fg-0);
-      font-size: 11px;
-      line-height: 1.25;
-    }
-    .macro-rps-detail {
-      color: var(--fg-muted);
-      font-size: 10px;
-      line-height: 1.35;
-    }
-    .macro-rps-audible {
-      font-size: 10px;
-      color: var(--accent-primary);
-      margin-top: 2px;
-      border-top: 1px dashed var(--border-hairline);
-      padding-top: 4px;
-    }
-
-    .canvas-wrap {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #tactical-canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      cursor: crosshair;
-    }
-
-    /* Timeline & Telemetry Strip */
-    .scrubber-bar {
-      height: 34px;
-      background: var(--bg-1);
-      border-top: 1px solid var(--border-hairline);
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      gap: 10px;
-      font-family: var(--font-mono);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .scrubber-slider {
-      flex: 1;
-      accent-color: var(--accent-primary);
-      cursor: pointer;
-    }
-
-    /* Data Tables (Blocker Matrix & Play Catalog) */
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .data-table th {
-      text-align: left;
-      padding: 5px 6px;
-      background: var(--bg-0);
-      color: var(--fg-2);
-      font-size: 10px;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border-hairline);
-      position: sticky;
-      top: 0;
-      z-index: 2;
-    }
-
-    .data-table td {
-      padding: 4px 6px;
-      border-bottom: 1px solid var(--border-hairline);
-      color: var(--fg-0);
-      vertical-align: middle;
-    }
-
-    .data-table tr:hover td {
-      background: var(--bg-2);
-    }
-
-    .data-table tr.selected td {
-      background: var(--bg-3);
-      border-left: 2px solid var(--accent-block);
-    }
-
-    /* Telemetry Readout Grid */
-    .telemetry-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border-hairline);
-      border-bottom: 1px solid var(--border-hairline);
-      flex-shrink: 0;
-    }
-
-    .telemetry-cell {
-      background: var(--bg-1);
-      padding: 6px 8px;
-    }
-
-    .telemetry-label {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      color: var(--fg-2);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .telemetry-val {
-      font-family: var(--font-mono);
-      font-size: 14px;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      margin-top: 2px;
-    }
-
-    /* Inspector Form Controls */
-    .inspector-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 8px;
-      border-bottom: 1px solid var(--border-hairline);
-    }
-
-    .field-row {
-      display: grid;
-      grid-template-columns: 105px 1fr;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-    }
-
-    .field-label {
-      color: var(--fg-1);
-      font-size: 10px;
-      text-transform: uppercase;
-    }
-
-    /* List Items for Playbook */
-    .play-item {
-      padding: 6px 8px;
-      border-bottom: 1px solid var(--border-hairline);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      font-size: 11px;
-    }
-
-    .play-item:hover {
-      background: var(--bg-2);
-    }
-
-    .play-item.active {
-      background: var(--bg-3);
-      border-left: 2px solid var(--accent-primary);
-    }
-
-    .play-meta {
-      font-size: 10px;
-      color: var(--fg-2);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* Situational Call Sheet Navigation Tabs */
-    .call-sheet-nav {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 1px;
-      background: var(--border-hairline);
-      border-bottom: 1px solid var(--border-hairline);
-    }
-    .call-tab {
-      background: var(--bg-1);
-      border: none;
-      color: var(--fg-2);
-      font-family: var(--font-mono);
-      font-size: 8px;
-      font-weight: 700;
-      padding: 6px 2px;
-      text-align: center;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-      transition: background 0.1s ease, color 0.1s ease;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .call-tab:hover {
-      background: var(--bg-2);
-      color: var(--fg-0);
-    }
-    .call-tab.active {
-      background: var(--accent-primary);
-      color: #0b0f17;
-      font-weight: 800;
-    }
-    .sit-badge {
-      font-size: 8px;
-      padding: 1px 4px;
-      border-radius: 2px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      background: var(--bg-2);
-      border: 1px solid var(--border-hairline);
-      color: var(--fg-1);
-    }
-
-    /* Statusbar */
-    .statusbar {
-      grid-area: statusbar;
-      background: var(--bg-1);
-      border-top: 1px solid var(--border-hairline);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--fg-1);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .status-segment {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      background: var(--accent-Positive);
-      display: inline-block;
-    }
-  </style>
-</head>
-<body>
-  <div class="workstation">
-    <!-- TOP COMMAND BAR -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GRIDIRON GENIUS // All-22 Kinematic Chess &amp; Play Designer (1080p)</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <!-- TOP BROADCAST COMMAND BAR -->
     <header class="topbar">
-      <div class="brand-cluster">
-        <span class="brand-tag">ALL-22</span>
-        <span>CHESS // KINEMATIC SIMULATOR v2.4</span>
+      <div class="topbar-left">
+        <button id="btn-toggle-left-dock" class="btn btn-xs" data-tip-title="Toggle Left Dock ([)">☰</button>
+        <div class="brand-lockup">
+          <span class="brand-dot"></span>
+          <span class="brand-title">ALL-22 STUDIO</span>
+          <span id="skin-indicator" class="brand-sub">BROADCAST</span>
+        </div>
+
+        <!-- Drawing & Editing Mode -->
+        <div class="toolbar-group">
+          <button id="mode-select" class="btn btn-xs active" data-tip-key="mode-select">SEL [V]</button>
+          <button id="mode-block" class="btn btn-xs" data-tip-key="mode-block">BLK [B]</button>
+          <button id="mode-route" class="btn btn-xs" data-tip-key="mode-route">RTE [R]</button>
+        </div>
+
+        <!-- Undo / Redo -->
+        <div class="toolbar-group" data-tip-key="undo-redo">
+          <button id="btn-undo" class="btn btn-xs" disabled>↶ UNDO</button>
+          <button id="btn-redo" class="btn btn-xs" disabled>↷ REDO</button>
+        </div>
       </div>
 
-      <!-- Tool Mode Switcher -->
-      <div class="toolbar-group">
-        <button id="mode-select" class="btn active" title="Inspect & Move Players (V)">
-          SELECT / MOVE <span class="kbd-hint">V</span>
-        </button>
-        <button id="mode-block" class="btn block-mode" title="Assign Blocker Targets, Combos & Pull Paths (B)">
-          BLOCK ASSIGN <span class="kbd-hint">B</span>
-        </button>
-        <button id="mode-route" class="btn" title="Draw Receiver Route Waypoints (R)">
-          ROUTE STEM <span class="kbd-hint">R</span>
-        </button>
-        <div class="toolbar-divider"></div>
-        <button id="toggle-vectors" class="btn active" title="Toggle Velocity & Trench Force Vectors (F)">
-          FORCE VECTORS <span class="kbd-hint">F</span>
-        </button>
-        <button id="toggle-pocket" class="btn active" title="Toggle Pocket Integrity Polygon (P)">
-          POCKET POLY <span class="kbd-hint">P</span>
-        </button>
-        <button id="toggle-leverage" class="btn active" title="Toggle Hat-on-Hat Leverage Cones (L)">
-          LEVERAGE <span class="kbd-hint">L</span>
-        </button>
-        <button id="toggle-def-shell" class="btn active" title="Toggle Defensive Coverage Zones, Man Lines &amp; Blitz Vectors (D)">
-          DEF SHELL <span class="kbd-hint">D</span>
-        </button>
+      <div class="topbar-center">
+        <!-- Tactical Visual Layers -->
+        <div class="toolbar-group">
+          <button id="toggle-def-shell" class="btn btn-xs active" data-tip-key="toggle-def-shell">DEF [D]</button>
+          <button id="toggle-vectors" class="btn btn-xs active" data-tip-key="toggle-vectors">VEL [F]</button>
+          <button id="toggle-pocket" class="btn btn-xs active" data-tip-key="toggle-pocket">PKT [P]</button>
+          <button id="toggle-leverage" class="btn btn-xs active" data-tip-key="toggle-leverage">LEV [L]</button>
+          <button id="toggle-trails" class="btn btn-xs active" data-tip-key="toggle-trails">TRL [T]</button>
+        </div>
+
+        <!-- Simulation Transport -->
+        <div class="toolbar-group">
+          <button id="btn-step-back" class="btn btn-xs" data-tip-title="Step Back (-50ms)" data-tip-body="Rewinds playback by one 20 Hz simulation tick (-0.05s).">-50ms</button>
+          <button id="btn-play" class="btn btn-xs btn-primary">▶ PLAY</button>
+          <button id="btn-step" class="btn btn-xs" data-tip-title="Step Forward (+50ms)" data-tip-body="Advances playback by one 20 Hz simulation tick (+0.05s).">+50ms</button>
+          <button id="btn-speed" class="btn btn-xs" data-tip-title="Toggle Slow-Mo Film Study" data-tip-body="Switches playback speed between 1.0x real-time and 0.5x coaching film slow motion.">1.0x</button>
+          <button id="btn-reset" class="btn btn-xs" data-tip-title="Reset to Pre-Snap T=0.00s">↺</button>
+        </div>
+
+        <button id="btn-monte-carlo" class="btn btn-xs btn-gold" data-tip-key="mc-batch">⚡ MC <span id="mc-sample-label">(N=100)</span></button>
       </div>
 
-      <!-- Simulation Transport & Skin Switcher -->
-      <div class="toolbar-group">
-        <button id="btn-reset" class="btn" title="Reset to Pre-Snap (0.00s)">|&lt; RESET</button>
-        <button id="btn-step" class="btn" title="Advance Single 50ms Tick (S)">+50ms <span class="kbd-hint">S</span></button>
-        <button id="btn-play" class="btn active" title="Run / Pause 20 Hz Simulation (Space)">RUN 20Hz <span class="kbd-hint">SPC</span></button>
-        <button id="btn-monte-carlo" class="btn" title="Execute 100-Iteration Monte Carlo Batch (M)">MC x100 <span class="kbd-hint">M</span></button>
-        <div class="toolbar-divider"></div>
-        <select id="skin-select" class="select-input" title="Hot-Swap UI & Canvas Graphics Skin">
-          <option value="broadcast-analytics" selected>SKIN: NEXT-GEN BROADCAST</option>
-          <option value="all22-pro">SKIN: ALL-22 TELEMETRY PRO</option>
-          <option value="coach-chalkboard">SKIN: BELICHICK CHALKBOARD</option>
-          <option value="retro-16bit">SKIN: 16-BIT CRT ARCADE</option>
-          <option value="paper-playbook">SKIN: WEST COAST VELLUM</option>
+      <div class="topbar-right">
+        <select id="skin-select" class="select-input skin-select-compact">
+          <option value="broadcast-analytics" selected>SKIN: BROADCAST</option>
+          <option value="all22-pro">SKIN: ALL-22 PRO</option>
+          <option value="coach-chalkboard">SKIN: CHALKBOARD</option>
+          <option value="retro-16bit">SKIN: 16-BIT CRT</option>
+          <option value="paper-playbook">SKIN: VELLUM</option>
         </select>
-        <div class="toolbar-divider"></div>
-        <a href="explainer.html" target="_blank" class="btn" style="text-decoration:none; display:flex; align-items:center; gap:4px; color:var(--accent-primary);" title="Open New User Explainer Guide with Pictorial Examples">GUIDE <span class="kbd-hint">?</span></a>
+        <a href="./presentation.html" class="btn btn-xs btn-emerald" data-tip-title="Research Findings Presentation" data-tip-body="Open the interactive 9-slide research deck summarizing BDB-2027 validation, Read-3 void scrambles, 2-QB Nash equilibrium, season Monte Carlo, and MDP sequencing.">DECK ↗</a>
+        <a href="./how_it_works.html" class="btn btn-xs" target="_blank">GUIDE</a>
+        <button id="btn-toggle-right-dock" class="btn btn-xs" data-tip-title="Toggle Right Designer Dock (])">☷</button>
       </div>
     </header>
 
-    <!-- LEFT DOCK: PLAYBOOK, DEFENSE & ROSTERS -->
-    <aside class="dock-left">
-      <div class="pane-header">
-        <span>MATCHUP & PERSONNEL</span>
-        <span id="personnel-badge">11 PERS</span>
-      </div>
-      <div class="inspector-group">
-        <div class="field-row">
-          <span class="field-label">OFFENSE TEAM</span>
-          <select id="off-team-select" class="select-input"></select>
+    <!-- MAIN WORKSTATION BODY -->
+    <div id="workspace-shell" class="workspace-shell">
+      <!-- LEFT DOCK: PLAYBOOK & BUILDER / MATCHUP & MEMORY -->
+      <aside class="dock-panel left-dock">
+        <div class="dock-tabbar">
+          <button id="btn-left-tab-playbook" class="dock-tab active">PLAYBOOK &amp; BUILDER</button>
+          <button id="btn-left-tab-memory" class="dock-tab" data-tip-key="mem-lab">MATCHUP &amp; MEMORY</button>
         </div>
-        <div class="field-row">
-          <span class="field-label">DEFENSE TEAM</span>
-          <select id="def-team-select" class="select-input"></select>
-        </div>
-        <div class="field-row">
-          <span class="field-label">DEF SHELL / FRONT</span>
-          <select id="def-call-select" class="select-input">
-            <optgroup label="4-2-5 NICKEL (MODERN NFL BASE)">
-              <option value="NICKEL_OVER_C3" selected>4-2-5 OVER // COVER 3 SKY (8-MAN BOX)</option>
-              <option value="NICKEL_UNDER_C1">4-2-5 UNDER // COVER 1 ROBBER</option>
-              <option value="NICKEL_SIM_C2">4-2-5 CREEPER // TAMPA 2 SIM PRESSURE</option>
-              <option value="NICKEL_WIDE9_C3">4-2-5 WIDE-9 // COVER 3 PENETRATE</option>
-              <option value="NICKEL_SPLIT_C6">4-2-5 EVEN // COVER 6 (QQH MATCH)</option>
-              <option value="NICKEL_FIRE_ZONE">4-2-5 FIRE ZONE // 3-UNDER 3-DEEP BLITZ</option>
-            </optgroup>
-            <optgroup label="VIKINGS &amp; FLORES RUN BLITZ META">
-              <option value="VIKINGS_MUG_CROSSDOG_C0">3-2-6 MUG // CROSS-DOG RUN BLITZ (C0)</option>
-              <option value="VIKINGS_A_GAP_SIM_C3">3-2-6 DOUBLE A-GAP // 4-MAN SIMULATED (C3)</option>
-              <option value="VIKINGS_SAFETY_BLITZ_C1">4-2-5 UNDER // SAFETY EDGE CRASH (C1)</option>
-            </optgroup>
-            <optgroup label="BASE 3-4 &amp; 4-3 (ANTI-HEAVY MULTI-TE)">
-              <option value="BASE_34_BEAR_C4">3-4 BEAR TITE // QUARTERS MATCH (5-0)</option>
-              <option value="BASE_34_OKIE_C2">3-4 OKIE 2-GAP // COVER 2</option>
-              <option value="BASE_43_OVER_C1">BASE 4-3 OVER HEAVY // COVER 1 (8-MAN BOX)</option>
-            </optgroup>
-            <optgroup label="DIME &amp; SUB-PACKAGES (EMPTY / PASS DOWNS)">
-              <option value="DIME_MUG_C0">3-2-6 DOUBLE A-GAP // COVER 0 HOUSE BLITZ</option>
-              <option value="DIME_QUARTERS_MATCH">4-1-6 DIME PALMS // 2-READ MATCH</option>
-              <option value="DIME_CORNER_CAT_C2">3-2-6 CORNER CAT // INVERT COVER 2</option>
-            </optgroup>
-            <optgroup label="GOAL LINE &amp; SHORT YARDAGE">
-              <option value="GOAL_LINE_62_PINCH">6-2 HEAVY JUMBO // GOAL LINE PINCH &amp; JAM</option>
-            </optgroup>
-          </select>
-        </div>
-        <div class="field-row">
-          <span class="field-label">MATCHUP MODE</span>
-          <button id="btn-toggle-auto-match" class="btn btn-xs active" title="Temporally Prior Formation Matching: Auto-matches defense personnel and front to offense formation">AUTO MATCH: ON</button>
-        </div>
-        <div class="field-row">
-          <span class="field-label">DOWN &amp; DISTANCE</span>
-          <select id="situation-select" class="select-input">
-            <option value="10">1ST &amp; 10 // OPEN FIELD (+10Y)</option>
-            <option value="6">2ND &amp; 6 // STANDARD (+6Y)</option>
-            <option value="3">3RD &amp; 3 // SHORT YARDAGE (+3Y)</option>
-            <option value="8">3RD &amp; 8 // PASSING DOWN (+8Y)</option>
-            <option value="5">RED ZONE // HIGH (+5Y)</option>
-          </select>
-        </div>
-        <!-- Macro Formation & Personnel Rock-Paper-Scissors Card -->
-        <div class="macro-rps-card" id="macro-rps-card">
-          <div class="macro-rps-header">
-            <span class="macro-rps-label">TEMPORALLY PRIOR RPS</span>
-            <span class="macro-rps-badge badge-neutral" id="macro-rps-badge">BALANCED</span>
+
+        <!-- TAB 1: PLAYBOOK & BUILDER -->
+        <div id="pane-left-playbook" class="dock-pane active">
+          <div class="pane-section">
+            <div class="grid-2">
+              <label class="field-lbl">
+                <span>OFFENSE ROSTER</span>
+                <select id="off-team-select" class="select-input"></select>
+              </label>
+              <label class="field-lbl">
+                <span>DEFENSE ROSTER</span>
+                <select id="def-team-select" class="select-input"></select>
+              </label>
+            </div>
+            <label class="field-lbl">
+              <span>SITUATION &amp; FIELD CONTEXT</span>
+              <select id="situation-select" class="select-input">
+                <option value="10" selected>1ST &amp; 10 // OPEN FIELD (+10Y)</option>
+                <option value="6">2ND &amp; 6 // STANDARD (+6Y)</option>
+                <option value="3">3RD &amp; 3 // SHORT YARDAGE (+3Y)</option>
+                <option value="8">3RD &amp; 8 // PASSING DOWN (+8Y)</option>
+                <option value="5">RED ZONE // HIGH (+5Y)</option>
+              </select>
+            </label>
+            <div class="field-lbl">
+              <div class="pane-heading-row">
+                <span>DEFENSIVE CALL</span>
+                <button id="btn-toggle-auto-match" class="btn btn-xs active" data-tip-title="Auto-Match Defense Shell" data-tip-body="Automatically pairs situational plays with realistic NFL counter fronts, or lock manually to test against one specific defense.">AUTO-MATCH: ON</button>
+              </div>
+              <select id="def-call-select" class="select-input">
+                <optgroup label="NFL STANDARD FRONTS &amp; COVERAGES">
+                  <option value="NICKEL_OVER_C3">4-2-5 OVER // COVER 3 SKY (8-MAN BOX)</option>
+                  <option value="NICKEL_UNDER_C1">4-2-5 UNDER // COVER 1 ROBBER</option>
+                  <option value="NICKEL_SIM_C2">4-2-5 CREEPER // TAMPA 2 SIM PRESSURE</option>
+                  <option value="NICKEL_WIDE9_C3">4-2-5 WIDE-9 // COVER 3 PENETRATE</option>
+                  <option value="NICKEL_SPLIT_C6">4-2-5 EVEN // COVER 6 (QQH MATCH)</option>
+                  <option value="NICKEL_FIRE_ZONE">4-2-5 FIRE ZONE // 3-UNDER 3-DEEP BLITZ</option>
+                  <option value="VIKINGS_MUG_CROSSDOG_C0">3-2-6 MUG // CROSS-DOG RUN BLITZ (C0)</option>
+                  <option value="VIKINGS_A_GAP_SIM_C3">3-2-6 DOUBLE A-GAP // 4-MAN SIMULATED (C3)</option>
+                  <option value="VIKINGS_SAFETY_BLITZ_C1">4-2-5 UNDER // SAFETY EDGE CRASH (C1)</option>
+                  <option value="BASE_34_BEAR_C4">3-4 BEAR TITE // QUARTERS MATCH (5-0)</option>
+                  <option value="BASE_34_OKIE_C2">3-4 OKIE 2-GAP // COVER 2</option>
+                  <option value="BASE_43_OVER_C1">BASE 4-3 OVER HEAVY // COVER 1 (8-MAN BOX)</option>
+                  <option value="DIME_MUG_C0">3-2-6 DOUBLE A-GAP // COVER 0 HOUSE BLITZ</option>
+                  <option value="DIME_QUARTERS_MATCH">4-1-6 DIME PALMS // 2-READ MATCH</option>
+                  <option value="DIME_CORNER_CAT_C2">3-2-6 CORNER CAT // INVERT COVER 2</option>
+                  <option value="GOAL_LINE_62_PINCH">6-2 HEAVY JUMBO // GOAL LINE PINCH &amp; JAM</option>
+                </optgroup>
+                <optgroup label="ADAPTIVE ANTI-2QB / READ-3 COUNTERS">
+                  <option value="NICKEL_QB_SPY_CONTAIN_C1">COUNTER // NICKEL QB SPY CONTAIN (C1)</option>
+                  <option value="NICKEL_CALVIN_BRACKET_WR1">COUNTER // CALVIN WR1 BRACKET CONE</option>
+                  <option value="NICKEL_SYMMETRIC_WIDE9_C4">COUNTER // SYMMETRIC WIDE-9 CONTAIN (C4)</option>
+                  <option value="BASE_34_DOUBLE_EDGE_SPY_C3">COUNTER // 3-4 DOUBLE EDGE SPY (C3)</option>
+                </optgroup>
+              </select>
+            </div>
           </div>
-          <div class="macro-rps-headline" id="macro-rps-headline">11 PERS vs 4-2-5 NICKEL</div>
-          <div class="macro-rps-detail" id="macro-rps-detail">Standard 6-man box vs 6 blockers. Balanced formation matchup.</div>
-          <div class="macro-rps-audible" id="macro-rps-audible"><strong>OC TIP:</strong> Execute base concept as called.</div>
-        </div>
-      </div>
 
-      <div class="pane-header">
-        <span>SITUATIONAL CALL SHEET</span>
-        <button id="btn-mutate-play" class="btn btn-xs" title="Evolve / Mutate Play + Blocking Geometry">MUTATE</button>
-      </div>
-      <div class="call-sheet-nav" id="call-sheet-nav">
-        <button class="call-tab active" data-situation="ALL" title="Full offensive playbook catalog">ALL</button>
-        <button class="call-tab" data-situation="1ST_10" title="1st &amp; 10 Base down &amp; distance concepts">1ST &amp; 10</button>
-        <button class="call-tab" data-situation="3RD_SHORT" title="3rd &amp; Short (2-4y) high percentage conversion concepts">3RD &amp; SH</button>
-        <button class="call-tab" data-situation="3RD_LONG" title="3rd &amp; Long (7+y) sticks-beating seams &amp; deep shots">3RD &amp; LG</button>
-        <button class="call-tab" data-situation="RED_ZONE" title="Red Zone inside-20 compressed space &amp; goal line">RED ZONE</button>
-      </div>
-      <div id="playbook-list" class="pane-body compact"></div>
-    </aside>
+          <div class="filter-bar">
+            <input id="playbook-search" type="search" class="text-input" placeholder="Search concepts (chiral, fake, argon, read3, mesh...)" />
+            <div class="tab-strip">
+              <button class="call-tab active" data-situation="ALL">ALL</button>
+              <button class="call-tab" data-situation="1ST_10">1ST&amp;10</button>
+              <button class="call-tab" data-situation="3RD_SHORT">3RD&amp;SH</button>
+              <button class="call-tab" data-situation="3RD_LONG">3RD&amp;LG</button>
+              <button class="call-tab" data-situation="RED_ZONE">RZ</button>
+            </div>
+            <div class="tab-strip">
+              <button class="cat-tab active" data-cat="ALL">ALL PACKAGES</button>
+              <button class="cat-tab" data-cat="CHIRAL">CHIRAL 2QB</button>
+              <button class="cat-tab" data-cat="ARGON">ARGON</button>
+              <button class="cat-tab" data-cat="CUSTOM">CUSTOM</button>
+            </div>
+          </div>
 
-    <!-- CENTER VIEWPORT: PROTECTION BAR + ALL-22 CANVAS + TIMELINE -->
-    <main class="viewport-area">
-      <div class="protection-macro-bar">
-        <span class="macro-label">OC AUDIBLES:</span>
-        <button id="btn-flip-play" class="btn btn-xs" title="Mirror Formation, Routes &amp; Run Gaps Left/Right (X)">FLIP PLAY <span class="kbd-hint">X</span></button>
-        <button id="btn-jet-motion" class="btn btn-xs" title="Toggle Pre-Snap Slot/WR Jet Motion Shift (J)">MOTION SHIFT <span class="kbd-hint">J</span></button>
-        <button id="btn-cycle-mike" class="btn btn-xs btn-mike-id" title="Pre-Snap 'Mike' ID: Cycles declared Mike LB to lock slide side &amp; RB dual-read (I)">ID MIKE: <span id="mike-id-label">#54 MIKE</span> <span class="kbd-hint">I</span></button>
-        <div class="toolbar-divider"></div>
-        <span class="macro-label">LINE CALLS:</span>
-        <button class="btn btn-xs" data-prot-macro="HALF_SLIDE_L">50 SLIDE L</button>
-        <button class="btn btn-xs" data-prot-macro="HALF_SLIDE_R">51 SLIDE R</button>
-        <button class="btn btn-xs" data-prot-macro="MAX_PROTECT">MAX PROT</button>
-        <button class="btn btn-xs" data-prot-macro="INSIDE_ZONE_R">IZ COMBO</button>
-        <button class="btn btn-xs" data-prot-macro="OUTSIDE_ZONE_L">OZ REACH</button>
-        <button class="btn btn-xs" data-prot-macro="POWER_PULL_G">POWER O</button>
-        <button class="btn btn-xs" data-prot-macro="PIN_AND_PULL">PIN &amp; PULL</button>
-        <div class="toolbar-divider"></div>
-        <div class="qb-intel-strip" id="qb-intel-strip" title="Quarterback Pre-Snap Read: Defensive reaction to formation &amp; motion">
-          <span class="intel-tag tell-zone" id="intel-coverage-tell">READ: MOFC (1-HIGH)</span>
-          <span class="intel-tag" id="intel-motion-reaction">MOTION: STATIC</span>
-          <span class="intel-tag tell-box" id="intel-box-count">BOX: 6-MAN</span>
-          <span class="intel-tag" id="intel-rps-tell">RPS: BALANCED</span>
-        </div>
-      </div>
+          <div id="playbook-list" class="playbook-scroll"></div>
 
-      <div class="canvas-wrap">
-        <canvas id="tactical-canvas"></canvas>
-      </div>
-
-      <div class="scrubber-bar">
-        <span id="clock-readout">T = 0.00s (TICK 00 / 80)</span>
-        <input id="timeline-slider" type="range" min="0" max="80" value="0" step="1" class="scrubber-slider" />
-        <span id="phase-readout">PHASE: PRE-SNAP</span>
-      </div>
-    </main>
-
-    <!-- RIGHT DOCK: TELEMETRY +SELECTED AGENT + BLOCKER ASSIGNMENT MATRIX -->
-    <aside class="dock-right">
-      <div class="pane-header">
-        <span>SIMULATION TELEMETRY (20 HZ)</span>
-        <span id="mc-sample-label">SINGLE RUN</span>
-      </div>
-      <div class="telemetry-grid">
-        <div class="telemetry-cell">
-          <div class="telemetry-label">EXPECTED EPA</div>
-          <div id="val-epa" class="telemetry-val">+0.42</div>
-        </div>
-        <div class="telemetry-cell">
-          <div class="telemetry-label">POCKET INTEGRITY</div>
-          <div id="val-pocket" class="telemetry-val">94.2%</div>
-        </div>
-        <div class="telemetry-cell">
-          <div class="telemetry-label">TRENCH NET LEV</div>
-          <div id="val-leverage" class="telemetry-val">+1.8 yds</div>
-        </div>
-        <div class="telemetry-cell">
-          <div class="telemetry-label">TIME TO THROW/GAP</div>
-          <div id="val-ttt" class="telemetry-val">2.45s</div>
-        </div>
-        <div class="telemetry-cell">
-          <div class="telemetry-label">SUCCESS RATE</div>
-          <div id="val-sr" class="telemetry-val">58.0%</div>
-        </div>
-        <div class="telemetry-cell">
-          <div class="telemetry-label">PRESSURE / STUFF</div>
-          <div id="val-pressure" class="telemetry-val">18.0%</div>
-        </div>
-      </div>
-
-      <!-- Selected Player / Blocker Assignment Inspector -->
-      <div class="pane-header">
-        <span>ACTIVE ENTITY &amp; BLOCK INSPECTOR</span>
-        <span id="selected-entity-badge">LT #68</span>
-      </div>
-      <div id="entity-inspector" class="inspector-group">
-        <div id="insp-player-meta" style="padding:5px 7px; background:var(--bg-0); border:1px solid var(--border-hairline); font-family:var(--font-mono); font-size:10px; line-height:1.45; color:var(--fg-1);">
-          <div id="insp-player-name" style="color:var(--fg-0); font-weight:700;">LT #68 — Jordan Mailata (OFF)</div>
-          <div id="insp-player-ratings">SPD 78 | ACC 82 | PWR 92 | FIN 88 | AWR 89</div>
-          <div id="insp-player-live" style="color:var(--accent-Positive);">STATUS: PRE-SNAP ANCHOR (LEV +0.00)</div>
-        </div>
-        <div class="field-row">
-          <span class="field-label">ROLE / MODE</span>
-          <select id="insp-role-type" class="select-input">
-            <option value="PASS_SET">PASS_SET (Pocket Anchor)</option>
-            <option value="MAN_BLOCK">MAN_BLOCK (Lock Defender)</option>
-            <option value="GAP_ZONE">GAP_ZONE (Reach / Zone Step)</option>
-            <option value="COMBO_CLIMB">COMBO_CLIMB (Double -> LB)</option>
-            <option value="PULL_LEAD">PULL_LEAD (Pull &amp; Turn Up)</option>
-            <option value="PULL_TRAP">PULL_TRAP (Kick-Out EMOL)</option>
-            <option value="CHIP_RELEASE">CHIP_RELEASE (Chip -> Route)</option>
-            <option value="MAX_PROTECT_SCAN">MAX_PROTECT_SCAN (Blitz Scan)</option>
-            <option value="ROUTE">ROUTE (Pass Pattern)</option>
-            <option value="BALL_CARRIER">BALL_CARRIER (Run Track)</option>
-            <option value="QB_DROP">QB_DROP (Pocket Drop)</option>
-          </select>
+          <!-- CUSTOM PLAY BUILDER FOOTER -->
+          <div class="builder-footer">
+            <div class="pane-heading-row">
+              <span class="pane-heading">CUSTOM PLAY BUILDER</span>
+              <span class="help-badge" data-tip-title="Custom Play Studio" data-tip-body="Start from a legal blank NFL formation (Split-Gun 2-QB, 11 Trips, 12 Ace, 21 I-Form, or 3x2 Empty), craft custom routes/blocks/fakes/Read-3 voids, and save to browser localStorage or JSON.">?</span>
+            </div>
+            <div class="grid-2">
+              <select id="starter-formation-select" class="select-input">
+                <option value="BLANK_SPLIT_GUN_2QB">Split-Shotgun 2-QB Blank</option>
+                <option value="BLANK_11_GUN_TRIPS">11 Gun Trips Right Blank</option>
+                <option value="BLANK_12_SINGLEBACK_ACE">12 Singleback Ace Blank</option>
+                <option value="BLANK_21_IFORM_PRO">21 I-Form Pro Blank</option>
+                <option value="BLANK_EMPTY_3X2">10 Empty 3x2 Spread Blank</option>
+              </select>
+              <button id="btn-new-play" class="btn btn-xs btn-primary">+ NEW BLANK PLAY</button>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <input id="custom-play-name" type="text" class="text-input" placeholder="My Custom Concept Name" />
+              <button id="btn-save-play" class="btn btn-xs btn-emerald">SAVE</button>
+            </div>
+            <div class="builder-btn-row">
+              <button id="btn-dup-play" class="btn btn-xs">CLONE</button>
+              <button id="btn-del-play" class="btn btn-xs btn-danger">DELETE</button>
+              <button id="btn-export-play" class="btn btn-xs">EXPORT JSON</button>
+              <button id="btn-import-play" class="btn btn-xs">IMPORT JSON</button>
+              <input id="import-play-file" type="file" accept="application/json,.json" style="display:none;" />
+            </div>
+          </div>
         </div>
 
-        <div class="field-row" id="row-primary-target">
-          <span class="field-label">1ST TARGET DEF</span>
-          <select id="insp-target-1" class="select-input"></select>
+        <!-- TAB 2: DEFENSIVE MEMORY LAB & FIELD CONTEXT -->
+        <div id="pane-left-memory" class="dock-pane">
+          <div class="pane-section" data-tip-key="mem-lab">
+            <div class="pane-heading-row">
+              <span class="pane-heading">DEFENSIVE MEMORY &amp; PRIMING LAB <span class="help-badge" data-tip-key="mem-lab">?</span></span>
+            </div>
+            <label class="insp-switch-row">
+              <input id="mem-enabled" type="checkbox" checked />
+              <span>Enable Live Multi-Snap Memory &amp; Eye-Conflict</span>
+            </label>
+            <div class="builder-btn-row">
+              <button id="mem-preset-primed" class="btn btn-xs btn-emerald">PRIMED +0.85</button>
+              <button id="mem-preset-neutral" class="btn btn-xs">NEUTRAL 0.0</button>
+              <button id="mem-preset-burned" class="btn btn-xs btn-danger">BURNED -0.80</button>
+              <button id="mem-preset-antispam" class="btn btn-xs btn-gold">SPAM ALERT</button>
+            </div>
+          </div>
+
+          <div class="pane-section">
+            <div class="mem-slider-row" data-tip-key="mem-pitch">
+              <div class="mem-slider-head">
+                <span>PERIMETER PITCH PRIMING <span class="help-badge" data-tip-key="mem-pitch">?</span></span>
+                <span id="mem-pitch-val" class="mem-slider-val">+0.00</span>
+              </div>
+              <input id="mem-pitch" type="range" min="-1" max="1" step="0.05" value="0" class="mem-slider" />
+            </div>
+
+            <div class="mem-slider-row" data-tip-key="mem-exchange">
+              <div class="mem-slider-head">
+                <span>SPLIT-GUN EXCHANGE PRIMING <span class="help-badge" data-tip-key="mem-exchange">?</span></span>
+                <span id="mem-exchange-val" class="mem-slider-val">+0.00</span>
+              </div>
+              <input id="mem-exchange" type="range" min="-1" max="1" step="0.05" value="0" class="mem-slider" />
+            </div>
+
+            <div class="mem-slider-row">
+              <div class="mem-slider-head">
+                <span>INSIDE MESH FAKE PRIMING</span>
+                <span id="mem-mesh-val" class="mem-slider-val">+0.00</span>
+              </div>
+              <input id="mem-mesh" type="range" min="-1" max="1" step="0.05" value="0" class="mem-slider" />
+            </div>
+
+            <div class="mem-slider-row">
+              <div class="mem-slider-head">
+                <span>JET / ORBIT SWEEP PRIMING</span>
+                <span id="mem-orbit-val" class="mem-slider-val">+0.00</span>
+              </div>
+              <input id="mem-orbit" type="range" min="-1" max="1" step="0.05" value="0" class="mem-slider" />
+            </div>
+
+            <div class="mem-slider-row" data-tip-key="mem-antic">
+              <div class="mem-slider-head">
+                <span>REAL PLAY SPAM ANTICIPATION <span class="help-badge" data-tip-key="mem-antic">?</span></span>
+                <span id="mem-antic-val" class="mem-slider-val">0.00</span>
+              </div>
+              <input id="mem-antic" type="range" min="0" max="1" step="0.05" value="0" class="mem-slider" />
+            </div>
+          </div>
+
+          <div class="pane-section">
+            <span class="pane-heading">FIELD BOUNDARIES &amp; DOWN STICKS</span>
+            <div class="grid-2">
+              <label class="field-lbl">
+                <span>FIRST DOWN LINE (YDS)</span>
+                <input id="ctx-first-down" type="number" min="1" max="25" step="1" value="10" class="num-input" />
+              </label>
+              <label class="field-lbl">
+                <span>YDS TO GOAL LINE</span>
+                <input id="ctx-yard-goal" type="number" min="2" max="99" step="1" value="50" class="num-input" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER STAGE: AUDIBLES + 1080P FIELD CANVAS + SCRUBBER -->
+      <main class="center-stage">
+        <div class="audible-bar">
+          <div class="audible-group">
+            <button id="btn-flip-play" class="btn btn-xs" data-tip-key="flip-play">⇄ FLIP L/R [X]</button>
+            <button id="btn-jet-motion" class="btn btn-xs" data-tip-key="jet-motion">» MOTION [J]</button>
+            <button id="btn-cycle-mike" class="btn btn-xs" data-tip-key="cycle-mike">MIKE: <span id="mike-id-label">AUTO</span></button>
+            <button id="btn-mutate-play" class="btn btn-xs btn-gold" data-tip-title="Randomize Defensive Look / Protection Counter" data-tip-body="Cycles realistic counter defensive fronts and optimizes offensive protection macro alignments.">🎲 EVOLVE COUNTER</button>
+          </div>
+          <div class="audible-group">
+            <button class="btn btn-xs" data-prot-macro="HALF_SLIDE_L">50 SLIDE L</button>
+            <button class="btn btn-xs" data-prot-macro="HALF_SLIDE_R">51 SLIDE R</button>
+            <button class="btn btn-xs" data-prot-macro="MAX_PROTECT">MAX PROT</button>
+            <button class="btn btn-xs" data-prot-macro="INSIDE_ZONE_R">IZ COMBO</button>
+            <button class="btn btn-xs" data-prot-macro="OUTSIDE_ZONE_L">OZ REACH</button>
+            <button class="btn btn-xs" data-prot-macro="POWER_PULL_G">POWER O</button>
+            <button class="btn btn-xs" data-prot-macro="PIN_AND_PULL">PIN &amp; PULL</button>
+          </div>
+          <div class="audible-group">
+            <span id="personnel-badge" class="personnel-pill">11 PERS</span>
+            <span id="legality-pill" class="legality-pill" data-tip-key="legality-pill">LEGAL: 7 LOS</span>
+          </div>
         </div>
 
-        <div class="field-row" id="row-secondary-target">
-          <span class="field-label">2ND CLIMB LB/DB</span>
-          <select id="insp-target-2" class="select-input"></select>
+        <div class="intel-strip">
+          <div class="intel-chips">
+            <span class="intel-chip"><strong id="intel-box-count">BOX: 6</strong></span>
+            <span class="intel-chip"><strong id="intel-coverage-tell">SHELL: 2-HIGH</strong></span>
+            <span class="intel-chip"><strong id="intel-motion-reaction">MOT: ZONE</strong></span>
+            <span class="intel-chip"><strong id="intel-rps-tell">LEV: BALANCED</strong></span>
+          </div>
+          <div id="macro-rps-audible" class="macro-rps-box">
+            <span id="macro-rps-badge" class="macro-rps-badge">EVEN</span>
+            <div class="macro-rps-copy">
+              <span id="macro-rps-headline">Pre-Snap Read Ready</span>
+              <span id="macro-rps-detail">Inspect leverage &amp; shell</span>
+            </div>
+          </div>
         </div>
 
-        <div class="field-row" id="row-gap-responsibility">
-          <span class="field-label">GAP / SET DEPTH</span>
-          <select id="insp-gap-set" class="select-input">
-            <option value="VERTICAL_DEEP">VERTICAL PASS SET (-2.2y)</option>
-            <option value="ANGLE_45">45-DEG HALF SLIDE (-1.4y)</option>
-            <option value="JUMP_SET">AGGRESSIVE JUMP SET (+0.3y)</option>
-            <option value="A_LEFT">A-GAP LEFT</option>
-            <option value="A_RIGHT">A-GAP RIGHT</option>
-            <option value="B_LEFT">B-GAP LEFT</option>
-            <option value="B_RIGHT">B-GAP RIGHT</option>
-            <option value="C_LEFT">C-GAP LEFT</option>
-            <option value="C_RIGHT">C-GAP RIGHT</option>
-            <option value="D_ALLEY">D-GAP / ALLEY SEAL</option>
-          </select>
+        <div class="canvas-viewport">
+          <canvas id="tactical-canvas"></canvas>
+          <div id="hover-card" class="hover-card hidden"></div>
+          <div class="canvas-zoom-hud">
+            <button id="btn-zoom-out" class="btn btn-xs" title="Zoom Out (-)">－</button>
+            <button id="btn-zoom-reset" class="btn btn-xs" title="Reset Camera (0)">100%</button>
+            <button id="btn-zoom-in" class="btn btn-xs" title="Zoom In (+)">＋</button>
+            <span id="res-badge" class="res-badge">1920×1080+</span>
+          </div>
         </div>
 
-        <div class="field-row" id="row-leverage-bias">
-          <span class="field-label">HAT LEVERAGE</span>
-          <select id="insp-leverage" class="select-input">
-            <option value="INSIDE_OUT">INSIDE-OUT (Protect Inside Gap)</option>
-            <option value="NEUTRAL">SQUARE / HEAD-UP</option>
-            <option value="OUTSIDE_IN">OUTSIDE-IN (Reach / Seal Edge)</option>
-          </select>
+        <footer class="scrubber-bar">
+          <span id="clock-readout" class="clock-pill">T = 0.00s</span>
+          <span id="phase-readout" class="phase-pill">PRE-SNAP</span>
+          <input id="timeline-slider" type="range" min="0" max="80" value="0" step="1" />
+          <span id="cursor-coords" class="status-meta">X: 0.0y | Y: 0.0y</span>
+          <span id="status-mode" class="status-meta">MODE: SELECT</span>
+          <span id="status-hint" class="status-meta">Drag any player pre-snap or waypoint knob downfield</span>
+        </footer>
+      </main>
+
+      <!-- RIGHT DOCK: BROADCAST KPI STRIP + NESTED 5-LEVEL DESIGNER & 22-PLAYER MATRIX -->
+      <aside class="dock-panel right-dock">
+        <div class="telemetry-strip">
+          <div class="kpi-card" data-tip-key="tel-epa">
+            <div class="kpi-lbl"><span>EXP EPA</span><span class="help-badge" data-tip-key="tel-epa">?</span></div>
+            <div id="val-epa" class="kpi-val">+0.00</div>
+          </div>
+          <div class="kpi-card" data-tip-key="tel-pocket">
+            <div class="kpi-lbl"><span>POCKET %</span><span class="help-badge" data-tip-key="tel-pocket">?</span></div>
+            <div id="val-pocket" class="kpi-val">100%</div>
+          </div>
+          <div class="kpi-card" data-tip-key="tel-leverage">
+            <div class="kpi-lbl"><span>NET YDS</span><span class="help-badge" data-tip-key="tel-leverage">?</span></div>
+            <div id="val-leverage" class="kpi-val">0.0y</div>
+          </div>
+          <div class="kpi-card" data-tip-key="tel-ttt">
+            <div class="kpi-lbl"><span>TTT / LOS</span><span class="help-badge" data-tip-key="tel-ttt">?</span></div>
+            <div id="val-ttt" class="kpi-val">0.00s</div>
+          </div>
+          <div class="kpi-card" data-tip-key="tel-sr">
+            <div class="kpi-lbl"><span>OUTCOME</span><span class="help-badge" data-tip-key="tel-sr">?</span></div>
+            <div id="val-sr" class="kpi-val">READY</div>
+          </div>
+          <div class="kpi-card" data-tip-key="tel-pressure">
+            <div class="kpi-lbl"><span>POCKET STATUS</span><span class="help-badge" data-tip-key="tel-pressure">?</span></div>
+            <div id="val-pressure" class="kpi-val">CLEAN</div>
+          </div>
         </div>
 
-        <div class="field-row" id="row-climb-delay">
-          <span class="field-label">CLIMB / CHIP SEC</span>
-          <input id="insp-delay-sec" type="number" min="0.10" max="2.50" step="0.05" value="0.65" class="num-input" />
+        <div class="dock-tabbar">
+          <button id="btn-right-tab-designer" class="dock-tab active">NESTED PLAYER DESIGNER</button>
+          <button id="btn-right-tab-matrix" class="dock-tab">22-PLAYER MATRIX</button>
         </div>
 
-        <!-- ROUTE STEMS & PULL SCHEMES (FOR RECEIVERS, TIGHT ENDS & LINEMEN) -->
-        <div class="field-row" id="row-route-preset">
-          <span class="field-label">ROUTE TREE</span>
-          <select id="insp-route-preset" class="select-input">
-            <option value="">-- Apply Route Tree Stem (16 Seeds) --</option>
-            <optgroup label="Quick / Underneath">
-              <option value="SLANT">Slant (3.5y stem -> 45° inside)</option>
-              <option value="SHALLOW">Shallow (curved drag across middle)</option>
-              <option value="HITCH">Hitch (5.5y stop -> hook back in)</option>
-              <option value="OUT">Out (5.0y stem -> 90° out)</option>
-              <option value="WHIP">Whip (outside jab -> whip inside)</option>
-            </optgroup>
-            <optgroup label="Intermediate / Vertical">
-              <option value="POST">Post (13.0y stem -> 45° to MOF)</option>
-              <option value="CORNER">Corner (10.0y stem -> 45° out)</option>
-              <option value="WHEEL">Wheel (flat outside -> up sideline)</option>
-              <option value="GO">Go (9-route vertical seam -> +25.5y)</option>
-              <option value="DIG">Dig (12.0y stem -> 90° hard inside)</option>
-            </optgroup>
-            <optgroup label="Double-Moves / Breaks Back / RPO">
-              <option value="COMEBACK">Comeback (14.0y -> 45° back outside)</option>
-              <option value="CURL">Curl (10.5y -> hook back inside)</option>
-              <option value="ZIG">Zig (inside jab -> whip outside)</option>
-              <option value="FADE">Fade (outside arc release -> vertical)</option>
-              <option value="GLANCE">Glance (6.0y RPO skinny post inside)</option>
-            </optgroup>
-            <optgroup label="Backfield Checkdown">
-              <option value="SWING">Swing (RB wide boundary arc)</option>
-            </optgroup>
-          </select>
+        <div class="selected-header">
+          <span class="pane-heading">ACTIVE UNIT</span>
+          <span id="selected-entity-badge">LT (OFF)</span>
         </div>
 
-        <div class="field-row" id="row-pull-preset" style="display:none;">
-          <span class="field-label">PULL / TRAP</span>
-          <select id="insp-pull-preset" class="select-input">
-            <option value="">-- Apply Pull / Trap Preset --</option>
-            <option value="PULL_KICK">Pull & Kick Out (EMOL Kick-Out)</option>
-            <option value="PULL_WRAP">Pull & Wrap Upfield (Lead Alley / C-Gap)</option>
-            <option value="BACKSIDE_TRAP">Backside Guard Short Trap</option>
-            <option value="PIN_PULL_SWEEP">Frontside Pin & Pull Sweep</option>
-          </select>
+        <!-- TAB 1: NESTED 5-LEVEL PLAYER INSPECTOR -->
+        <div id="pane-right-designer" class="dock-pane active">
+          <div id="nested-inspector-root"></div>
         </div>
 
-        <!-- LANDMARK & ROUTE COMMAND BUTTONS -->
-        <div style="display:flex; gap:4px; margin-top:2px;">
-          <button id="btn-draw-route" class="btn btn-xs" style="flex:1;" title="Activate Route Drawing Mode: Click on Canvas to add Landmarks (R)">
-            DRAW ROUTE <span class="kbd-hint">R</span>
-          </button>
-          <button id="btn-add-landmark" class="btn btn-xs" style="flex:1;" title="Add a landmark node ahead of current stem">
-            + ADD LANDMARK
-          </button>
-          <button id="btn-pop-landmark" class="btn btn-xs" style="flex:0.65;" title="Remove last route/pull landmark">
-            - POP
-          </button>
+        <!-- TAB 2: 22-PLAYER ASSIGNMENT MATRIX -->
+        <div id="pane-right-matrix" class="dock-pane">
+          <div class="pane-section" style="padding:6px 8px;">
+            <div class="tab-strip">
+              <button id="matrix-filter-off" class="cat-tab active" data-side="OFF">OFFENSE (11)</button>
+              <button id="matrix-filter-def" class="cat-tab" data-side="DEF">DEFENSE (11)</button>
+              <button id="matrix-filter-all" class="cat-tab" data-side="ALL">ALL 22</button>
+            </div>
+          </div>
+          <div style="flex:1; overflow-y:auto;">
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>ROLE / COV</th>
+                  <th>TGT / GAP</th>
+                  <th>LEV / EXTRAS</th>
+                </tr>
+              </thead>
+              <tbody id="assignment-matrix-body"></tbody>
+            </table>
+          </div>
         </div>
+      </aside>
+    </div>
 
-        <div style="display:flex; gap:4px; margin-top:2px;">
-          <button id="btn-clear-waypoints" class="btn btn-xs" style="flex:1;">CLEAR ROUTE / PULL</button>
-          <button id="btn-pick-target-canvas" class="btn btn-xs" style="flex:1;">CLICK DEF ON CANVAS</button>
-        </div>
-
-        <!-- LANDMARK NODES SUMMARY -->
-        <div id="insp-landmarks-display" style="padding:4px 6px; background:var(--bg-0); border:1px solid var(--border-hairline); font-family:var(--font-mono); font-size:10px; color:var(--fg-1); line-height:1.3; min-height:22px; display:flex; align-items:center; justify-content:space-between;">
-          <span id="insp-landmarks-text">LANDMARKS: 0 nodes</span>
-          <span id="insp-landmarks-hint" style="color:var(--accent-secondary); font-size:9px;"></span>
-        </div>
-      </div>
-
-      <!-- Full 11-Player Blocker & Assignment Matrix -->
-      <div class="pane-header">
-        <span>OFFENSIVE UNIT ASSIGNMENT TABLE</span>
-        <span>CLICK ROW TO EDIT</span>
-      </div>
-      <div class="pane-body compact">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>POS</th>
-              <th>ASSIGNMENT</th>
-              <th>1ST TGT / GAP</th>
-              <th>2ND / PATH</th>
-              <th>LEV</th>
-            </tr>
-          </thead>
-          <tbody id="assignment-matrix-body"></tbody>
-        </table>
-      </div>
-    </aside>
-
-    <!-- STATUS FOOTER -->
-    <footer class="statusbar">
-      <div class="status-segment">
-        <span><i class="status-dot"></i> ENGINE: 20Hz TIME-EXPLICIT KINEMATICS</span>
-        <span id="status-mode">MODE: SELECT / INSPECT</span>
-        <span id="status-hint">TIP: Press [B] then drag from any OL/TE/RB to a Defender (Man/Combo) or open field (Pull Path)</span>
-      </div>
-      <div class="status-segment">
-        <span id="cursor-coords">FIELD XY: (0.0y, +0.0y)</span>
-        <span id="skin-indicator">SKIN: BROADCAST-ANALYTICS</span>
-      </div>
-    </footer>
-  </div>
-
-  <script type="module" src="/src/main.ts"></script>
-</body>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
 </html>

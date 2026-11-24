@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ALL-22 CHESS // Research Findings &amp; Symmetry-Driven Optionality Deck</title>
+    <link rel="stylesheet" href="./src/presentation.css" />
+  </head>
+  <body>
+    <header class="deck-topbar">
+      <div class="deck-brand">
+        <span class="brand-dot"></span>
+        <span class="deck-brand-title">ALL-22 KINEMATIC CHESS // RESEARCH BRIEFING</span>
+        <span id="slide-counter" class="deck-counter">01 / 09</span>
+      </div>
+
+      <div class="deck-progress-rail">
+        <div id="deck-progress-fill" class="deck-progress-fill"></div>
+      </div>
+
+      <nav class="deck-nav">
+        <button id="btn-prev" class="deck-btn" title="Previous Slide (ArrowLeft)">← PREV</button>
+        <button id="btn-next" class="deck-btn deck-btn-primary" title="Next Slide (ArrowRight / Space)">NEXT →</button>
+        <button id="btn-overview" class="deck-btn" title="All Slides Grid (O)">GRID [O]</button>
+        <button id="btn-print" class="deck-btn" title="Print / Save PDF">PRINT / PDF</button>
+        <a href="./index.html" class="deck-btn deck-btn-emerald">OPEN 1080P SIMULATOR ↗</a>
+      </nav>
+    </header>
+
+    <main class="deck-stage">
+      <section id="slide-viewport" class="slide-frame" aria-live="polite"></section>
+    </main>
+
+    <footer class="deck-footer">
+      <div id="slide-pills" class="slide-pills"></div>
+      <div class="deck-hints">KEYS: [←/→] OR [SPACE] NAVIGATE · [O] OVERVIEW · [HOME/END] JUMP</div>
+    </footer>
+
+    <!-- Overview Modal -->
+    <div id="overview-modal" class="overview-modal hidden">
+      <div class="overview-header">
+        <h2>PRESENTATION OVERVIEW — 9 SLIDES</h2>
+        <button id="btn-close-overview" class="deck-btn">✕ CLOSE [ESC]</button>
+      </div>
+      <div id="overview-grid" class="overview-grid"></div>
+    </div>
+
+    <script type="module" src="./src/presentation.ts"></script>
+  </body>
+</html>
