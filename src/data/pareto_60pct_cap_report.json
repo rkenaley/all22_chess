@@ -1,0 +1,493 @@
+{
+  "generatedAt": "2026-11-25T01:01:19.476Z",
+  "totalNflCapM": 275,
+  "fixedOffCapM": 165,
+  "fixedOffCapPct": 60,
+  "repsPerCell": 18,
+  "seasonsPerPortfolio": 500,
+  "frontsEvaluated": [
+    "NICKEL_OVER_C3",
+    "NICKEL_UNDER_C1",
+    "NICKEL_SIM_C2",
+    "BASE_34_BEAR_C4",
+    "BASE_43_OVER_C1",
+    "DIME_MUG_C0",
+    "DIME_QUARTERS_MATCH",
+    "VIKINGS_MUG_CROSSDOG_C0",
+    "VIKINGS_SAFETY_BLITZ_C1",
+    "NICKEL_QB_SPY_CONTAIN_C1",
+    "NICKEL_CALVIN_BRACKET_WR1",
+    "NICKEL_SYMMETRIC_WIDE9_C4",
+    "BASE_34_DOUBLE_EDGE_SPY_C3"
+  ],
+  "methodologyNote": "Strict 60.0% ($165.0M) offensive salary cap held identical across all 8 portfolios with equal 40% defense ($110.0M, zero assumed defCapBonusPpg) and equal 0% baseline adaptation haircut, plus 10%/20% adaptation sensitivity on exotic 2-QB schemes.",
+  "paretoFrontierSteadyStateIds": [
+    "P4_SHAN12_SUPERMAX_DUAL_SQUEEZED",
+    "P5_SHAN12_TRENCH_BULLY_MID_MOB"
+  ],
+  "portfolios": [
+    {
+      "id": "P1_CONV11_SUPERMAX_POCKET",
+      "shortLabel": "Conv-11 Star QB",
+      "label": "1. Conv-11 Spread · $60M Elite Pocket / $44M OL",
+      "schemeFamily": "CONV_11",
+      "repeatableSteadyState": true,
+      "isDualQbOnField": false,
+      "budget": {
+        "qbM": 60,
+        "olM": 44,
+        "wrM": 39,
+        "teM": 14,
+        "rbM": 8
+      },
+      "ratingsSummary": {
+        "qb1FinAwr": 95,
+        "qb1Spd": 74,
+        "olBlock": 83,
+        "wr1Fin": 90,
+        "teBlock": 80
+      },
+      "nash13Epa": -0.0633,
+      "mean13RawEpa": -0.0405,
+      "nash13OffMix": {
+        "DAGGER": 0,
+        "MESH": 22,
+        "FOUR_VERTS": 19.2,
+        "PA_FLOOD": 0,
+        "QUICK_SLANT": 58.1,
+        "INSIDE_ZONE": 0,
+        "OUTSIDE_ZONE": 0,
+        "DUO": 0.6
+      },
+      "seasonEqual0": {
+        "avgWins": 4.84,
+        "playoffPct": 0.8,
+        "sbPct": 0,
+        "pfG": 15.96,
+        "paG": 23.59,
+        "diffG": -7.63,
+        "qb1HealthyG": 16.71,
+        "qb1HitsYr": 49.6,
+        "qb2HitsYr": 0
+      },
+      "seasonHaircut10": null,
+      "seasonHaircut20": null
+    },
+    {
+      "id": "P2_CONV11_STAR_WR_CHEAP_OL",
+      "shortLabel": "Air-Raid Star WR",
+      "label": "2. Conv-11 Stars · $58M QB / $58M WR / $32M OL",
+      "schemeFamily": "CONV_11",
+      "repeatableSteadyState": true,
+      "isDualQbOnField": false,
+      "budget": {
+        "qbM": 58,
+        "olM": 32,
+        "wrM": 58,
+        "teM": 10,
+        "rbM": 7
+      },
+      "ratingsSummary": {
+        "qb1FinAwr": 94,
+        "qb1Spd": 76,
+        "olBlock": 78,
+        "wr1Fin": 95,
+        "teBlock": 76
+      },
+      "nash13Epa": -0.0669,
+      "mean13RawEpa": -0.1888,
+      "nash13OffMix": {
+        "DAGGER": 0.3,
+        "MESH": 55.7,
+        "FOUR_VERTS": 0,
+        "PA_FLOOD": 0,
+        "QUICK_SLANT": 38.2,
+        "INSIDE_ZONE": 0,
+        "OUTSIDE_ZONE": 0,
+        "DUO": 5.8
+      },
+      "seasonEqual0": {
+        "avgWins": 3.4,
+        "playoffPct": 0,
+        "sbPct": 0,
+        "pfG": 13.33,
+        "paG": 24.2,
+        "diffG": -10.86,
+        "qb1HealthyG": 16.57,
+        "qb1HitsYr": 89.9,
+        "qb2HitsYr": 0
+      },
+      "seasonHaircut10": null,
+      "seasonHaircut20": null
+    },
+    {
+      "id": "P3_SHAN12_SUPERMAX_SQUEEZED",
+      "shortLabel": "Shan12 $60M QB",
+      "label": "3. Shanahan-12 · $60M Elite Pocket / $44M Squeezed OL",
+      "schemeFamily": "SHANAHAN_12",
+      "repeatableSteadyState": true,
+      "isDualQbOnField": false,
+      "budget": {
+        "qbM": 60,
+        "olM": 44,
+        "wrM": 39,
+        "teM": 14,
+        "rbM": 8
+      },
+      "ratingsSummary": {
+        "qb1FinAwr": 95,
+        "qb1Spd": 74,
+        "olBlock": 83,
+        "wr1Fin": 90,
+        "teBlock": 80
+      },
+      "nash13Epa": 0.1052,
+      "mean13RawEpa": -0.0058,
+      "nash13OffMix": {
+        "PA_UC_BOOT": 23.7,
+        "PA_FLOOD": 0,
+        "QUICK_SLANT": 22,
+        "DAGGER": 0,
+        "MESH": 39.4,
+        "OUTSIDE_ZONE": 0,
+        "DUO": 0,
+        "PIN_PULL": 14.8
+      },
+      "seasonEqual0": {
+        "avgWins": 8.67,
+        "playoffPct": 33.8,
+        "sbPct": 1.4,
+        "pfG": 21.85,
+        "paG": 21.85,
+        "diffG": 0,
+        "qb1HealthyG": 16.83,
+        "qb1HitsYr": 33.8,
+        "qb2HitsYr": 0
+      },
+      "seasonHaircut10": null,
+      "seasonHaircut20": null
+    },
+    {
+      "id": "P4_SHAN12_SUPERMAX_DUAL_SQUEEZED",
+      "shortLabel": "Shan12 $60M Dual",
+      "label": "4. Shanahan-12 + R3 · $60M Supermax Dual / $44M OL",
+      "schemeFamily": "SHANAHAN_12",
+      "repeatableSteadyState": true,
+      "isDualQbOnField": false,
+      "budget": {
+        "qbM": 60,
+        "olM": 44,
+        "wrM": 39,
+        "teM": 14,
+        "rbM": 8
+      },
+      "ratingsSummary": {
+        "qb1FinAwr": 93,
+        "qb1Spd": 90,
+        "olBlock": 83,
+        "wr1Fin": 90,
+        "teBlock": 80
+      },
+      "nash13Epa": 0.1569,
+      "mean13RawEpa": 0.0056,
+      "nash13OffMix": {
+        "PA_UC_BOOT": 20,
+        "PA_FLOOD": 0,
+        "QUICK_SLANT": 28.1,
+        "DAGGER": 0,
+        "READ3_MESH_VOID": 24.9,
+        "OUTSIDE_ZONE": 0,
+        "DUO": 0,
+        "PIN_PULL": 27
+      },
+      "seasonEqual0": {
+        "avgWins": 11.93,
+        "playoffPct": 91,
+        "sbPct": 22.4,
+        "pfG": 27.28,
+        "paG": 20.71,
+        "diffG": 6.57,
+        "qb1HealthyG": 16.72,
+        "qb1HitsYr": 64.5,
+        "qb2HitsYr": 0
+      },
+      "seasonHaircut10": null,
+      "seasonHaircut20": null
+    },
+    {
+      "id": "P5_SHAN12_TRENCH_BULLY_MID_MOB",
+      "shortLabel": "Trench Bully R3",
+      "label": "5. Shanahan-12 + R3 · $22M Mid-Mob / $74M OL / $26M TE",
+      "schemeFamily": "SHANAHAN_12",
+      "repeatableSteadyState": true,
+      "isDualQbOnField": false,
+      "budget": {
+        "qbM": 22,
+        "olM": 74,
+        "wrM": 33,
+        "teM": 26,
+        "rbM": 10
+      },
+      "ratingsSummary": {
+        "qb1FinAwr": 84,
+        "qb1Spd": 89,
+        "olBlock": 93,
+        "wr1Fin": 88,
+        "teBlock": 89
+      },
+      "nash13Epa": 0.075,
+      "mean13RawEpa": 0.0054,
+      "nash13OffMix": {
+        "PA_UC_BOOT": 0,
+        "PA_FLOOD": 0,
+        "QUICK_SLANT": 0,
+        "DAGGER": 0,
+        "READ3_MESH_VOID": 54.6,
+        "OUTSIDE_ZONE": 0,
+        "DUO": 29.9,
+        "PIN_PULL": 15.4
+      },
+      "seasonEqual0": {
+        "avgWins": 12.27,
+        "playoffPct": 95.4,
+        "sbPct": 22.2,
+        "pfG": 28.66,
+        "paG": 21.3,
+        "diffG": 7.37,
+        "qb1HealthyG": 16.87,
+        "qb1HitsYr": 32.3,
+        "qb2HitsYr": 0
+      },
+      "seasonHaircut10": null,
+      "seasonHaircut20": null
+    },
+    {
+      "id": "P6_CHIRAL_2QB_ELITE_OL_STATIC",
+      "shortLabel": "Chiral 2QB Static",
+      "label": "6. Chiral 2-QB Static · $22M 2-QB / $66M OL / $44M WR",
+      "schemeFamily": "CHIRAL_2QB_STATIC",
+      "repeatableSteadyState": true,
+      "isDualQbOnField": true,
+      "budget": {
+        "qbM": 22,
+        "olM": 66,
+        "wrM": 44,
+        "teM": 21,
+        "rbM": 12
+      },
+      "ratingsSummary": {
+        "qb1FinAwr": 85,
+        "qb1Spd": 89,
+        "olBlock": 90,
+        "wr1Fin": 91,
+        "teBlock": 85
+      },
+      "nash13Epa": -0.0819,
+      "mean13RawEpa": 0.0377,
+      "nash13OffMix": {
+        "CHIRAL_DIRECT_SNAP_LASER": 19,
+        "CHIRAL_FAKE_PITCH_COUNTER_KEEP": 6.1,
+        "CHIRAL_FAKE_EXCHANGE_BOOT_FLOOD": 30,
+        "CHIRAL_PA_SEAM_FLOOD": 26,
+        "CHIRAL_FAKE_SWEEP_READ3_SEAM": 3.1,
+        "CHIRAL_READ3_MESH_VOID": 9.7,
+        "CHIRAL_REACTOR_SWEEP": 0,
+        "CHIRAL_SPLIT_GUN_INSIDE_EXCHANGE": 6
+      },
+      "seasonEqual0": {
+        "avgWins": 8.61,
+        "playoffPct": 34.4,
+        "sbPct": 2.8,
+        "pfG": 23.5,
+        "paG": 23.68,
+        "diffG": -0.18,
+        "qb1HealthyG": 17,
+        "qb1HitsYr": 0,
+        "qb2HitsYr": 500.7
+      },
+      "seasonHaircut10": {
+        "avgWins": 6.49,
+        "playoffPct": 8.8,
+        "sbPct": 0.2,
+        "pfG": 19.43,
+        "paG": 23.62,
+        "diffG": -4.19,
+        "qb1HealthyG": 17,
+        "qb1HitsYr": 0,
+        "qb2HitsYr": 497.5
+      },
+      "seasonHaircut20": {
+        "avgWins": 4.4,
+        "playoffPct": 0.4,
+        "sbPct": 0,
+        "pfG": 15.41,
+        "paG": 24.06,
+        "diffG": -8.65,
+        "qb1HealthyG": 17,
+        "qb1HitsYr": 0,
+        "qb2HitsYr": 488.1
+      }
+    },
+    {
+      "id": "P7_CHIRAL_2QB_ELITE_OL_MDP",
+      "shortLabel": "Chiral 2QB + MDP",
+      "label": "7. Chiral 2-QB + MDP Seq · $22M 2-QB / $66M OL / $44M WR",
+      "schemeFamily": "CHIRAL_2QB_MDP",
+      "repeatableSteadyState": true,
+      "isDualQbOnField": true,
+      "budget": {
+        "qbM": 22,
+        "olM": 66,
+        "wrM": 44,
+        "teM": 21,
+        "rbM": 12
+      },
+      "ratingsSummary": {
+        "qb1FinAwr": 85,
+        "qb1Spd": 89,
+        "olBlock": 90,
+        "wr1Fin": 91,
+        "teBlock": 85
+      },
+      "nash13Epa": 0.0228,
+      "mean13RawEpa": 0.0646,
+      "nash13OffMix": {
+        "CHIRAL_DIRECT_SNAP_LASER": 59.4,
+        "CHIRAL_FAKE_PITCH_COUNTER_KEEP": 0,
+        "CHIRAL_FAKE_EXCHANGE_BOOT_FLOOD": 22.6,
+        "CHIRAL_PA_SEAM_FLOOD": 18,
+        "CHIRAL_FAKE_SWEEP_READ3_SEAM": 0,
+        "CHIRAL_READ3_MESH_VOID": 0,
+        "CHIRAL_REACTOR_SWEEP": 0,
+        "CHIRAL_SPLIT_GUN_INSIDE_EXCHANGE": 0
+      },
+      "seasonEqual0": {
+        "avgWins": 10.47,
+        "playoffPct": 67.2,
+        "sbPct": 10.6,
+        "pfG": 26.39,
+        "paG": 22.81,
+        "diffG": 3.58,
+        "qb1HealthyG": 17,
+        "qb1HitsYr": 0,
+        "qb2HitsYr": 490.3
+      },
+      "seasonHaircut10": {
+        "avgWins": 8.14,
+        "playoffPct": 24.8,
+        "sbPct": 1,
+        "pfG": 22.13,
+        "paG": 23.05,
+        "diffG": -0.92,
+        "qb1HealthyG": 17,
+        "qb1HitsYr": 0,
+        "qb2HitsYr": 485.9
+      },
+      "seasonHaircut20": {
+        "avgWins": 5.99,
+        "playoffPct": 4.2,
+        "sbPct": 0.2,
+        "pfG": 17.93,
+        "paG": 22.99,
+        "diffG": -5.05,
+        "qb1HealthyG": 17,
+        "qb1HitsYr": 0,
+        "qb2HitsYr": 480.7
+      }
+    },
+    {
+      "id": "P8_ROOKIE_WINDOW_SHAN12",
+      "shortLabel": "Rookie QB Window*",
+      "label": "8. Rookie-Hit Control* · $14M Draft QB / $68M OL / $48M WR",
+      "schemeFamily": "SHANAHAN_12",
+      "repeatableSteadyState": false,
+      "isDualQbOnField": false,
+      "budget": {
+        "qbM": 14,
+        "olM": 68,
+        "wrM": 48,
+        "teM": 22,
+        "rbM": 13
+      },
+      "ratingsSummary": {
+        "qb1FinAwr": 91,
+        "qb1Spd": 86,
+        "olBlock": 91,
+        "wr1Fin": 92,
+        "teBlock": 86
+      },
+      "nash13Epa": 0.0752,
+      "mean13RawEpa": 0.0815,
+      "nash13OffMix": {
+        "PA_UC_BOOT": 0.1,
+        "PA_FLOOD": 0,
+        "QUICK_SLANT": 45.8,
+        "DAGGER": 0,
+        "READ3_MESH_VOID": 18.1,
+        "OUTSIDE_ZONE": 0,
+        "DUO": 0,
+        "PIN_PULL": 36
+      },
+      "seasonEqual0": {
+        "avgWins": 13.46,
+        "playoffPct": 98.8,
+        "sbPct": 39.6,
+        "pfG": 31.17,
+        "paG": 20.85,
+        "diffG": 10.33,
+        "qb1HealthyG": 16.82,
+        "qb1HitsYr": 35.6,
+        "qb2HitsYr": 0
+      },
+      "seasonHaircut10": null,
+      "seasonHaircut20": null
+    }
+  ],
+  "marginalCapShifts": [
+    {
+      "id": "BASE_BALANCED",
+      "label": "Balanced Base ($22QB/$58OL/$46WR/$24TE/$15RB)",
+      "mean13Epa": -0.1149,
+      "deltaVsBase": 0,
+      "olAvg": 88,
+      "wr1Fin": 92,
+      "teBlk": 88
+    },
+    {
+      "id": "PLUS_12M_OL_MINUS_WR",
+      "label": "+$12M OL (from WR): $70M OL / $34M WR",
+      "mean13Epa": 0.0008,
+      "deltaVsBase": 0.1157,
+      "olAvg": 92,
+      "wr1Fin": 88,
+      "teBlk": 88
+    },
+    {
+      "id": "PLUS_12M_WR_MINUS_OL",
+      "label": "+$12M WR (from OL): $46M OL / $58M WR",
+      "mean13Epa": -0.1336,
+      "deltaVsBase": -0.0187,
+      "olAvg": 83,
+      "wr1Fin": 95,
+      "teBlk": 88
+    },
+    {
+      "id": "PLUS_10M_TE_MINUS_WR",
+      "label": "+$10M TE (from WR): $34M TE -> capped $26M / +$2M OL",
+      "mean13Epa": -0.02,
+      "deltaVsBase": 0.0949,
+      "olAvg": 88,
+      "wr1Fin": 89,
+      "teBlk": 89
+    },
+    {
+      "id": "UPGRADE_QB_FROM_OL_WR",
+      "label": "+$38M Elite QB (from OL -$20M, WR -$10M, TE -$8M)",
+      "mean13Epa": 0.0006,
+      "deltaVsBase": 0.1155,
+      "olAvg": 81,
+      "wr1Fin": 89,
+      "teBlk": 81
+    }
+  ]
+}

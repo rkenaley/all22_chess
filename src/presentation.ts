@@ -4,6 +4,7 @@ import read3Raw from './data/read3_scramble_dual_qb_report.json';
 import nashRaw from './data/nash_2qb_tournament_report.json';
 import seasonRaw from './data/season_4down_monte_carlo_report.json';
 import seqRaw from './data/play_sequencing_memory_report.json';
+import paretoRaw from './data/pareto_60pct_cap_report.json';
 
 interface SlideSpec {
   id: string;
@@ -19,6 +20,7 @@ const read3 = read3Raw as typeof read3Raw;
 const nash = nashRaw as typeof nashRaw;
 const season = seasonRaw as typeof seasonRaw;
 const seq = seqRaw as typeof seqRaw;
+const pareto = paretoRaw as typeof paretoRaw;
 
 function fmtEpa(v: number): string {
   return `${v >= 0 ? '+' : ''}${v.toFixed(3)}`;
@@ -636,10 +638,190 @@ const SLIDES: SlideSpec[] = [
     },
   },
 
-  // SLIDE 9: INTERACTIVE 1080P STUDIO & TAKEAWAYS
+  // SLIDE 9: FIXED 60%-CAP GM x OC PARETO FRONTIER
+  {
+    id: 'pareto-60pct',
+    shortTitle: '9. 60% Cap Pareto',
+    kicker: 'GM × OC ARBITRAGE · STRICT 60% ($165M) OFFENSIVE CAP FRONTIER',
+    badge: 'OL/TE ROI = 3.2× SUPERMAX QB PER $1M',
+    render: () => {
+      const ports = pareto.portfolios;
+      const frontierIds = new Set(pareto.paretoFrontierSteadyStateIds);
+
+      // Build crisp SVG Pareto scatter plot (X = 13-Front Nash EPA, Y = 17-Game Avg Wins)
+      const w = 680;
+      const h = 365;
+      const padL = 54;
+      const padR = 26;
+      const padT = 26;
+      const padB = 46;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+      const xMin = -0.11;
+      const xMax = 0.20;
+      const yMin = 2.0;
+      const yMax = 15.0;
+      const sx = (v: number) => padL + ((v - xMin) / (xMax - xMin)) * plotW;
+      const sy = (v: number) => padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+      const svgParts: string[] = [];
+      // Grid lines
+      for (const yv of [4, 6, 8, 10, 12, 14]) {
+        const y = sy(yv);
+        svgParts.push(
+          `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${w - padR}" y2="${y.toFixed(1)}" stroke="rgba(148,189,219,0.13)" />` +
+            `<text x="${padL - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" fill="#7b95a8" font-family="JetBrains Mono, monospace" font-size="10">${yv}W</text>`
+        );
+      }
+      for (const xv of [-0.10, -0.05, 0.0, 0.05, 0.10, 0.15, 0.20]) {
+        const x = sx(xv);
+        svgParts.push(
+          `<line x1="${x.toFixed(1)}" y1="${padT}" x2="${x.toFixed(1)}" y2="${padT + plotH}" stroke="${xv === 0 ? 'rgba(148,189,219,0.42)' : 'rgba(148,189,219,0.12)'}" ${xv === 0 ? 'stroke-dasharray="4 3"' : ''} />` +
+            `<text x="${x.toFixed(1)}" y="${padT + plotH + 16}" text-anchor="middle" fill="#7b95a8" font-family="JetBrains Mono, monospace" font-size="10">${xv >= 0 ? '+' : ''}${xv.toFixed(2)}</text>`
+        );
+      }
+      svgParts.push(
+        `<text x="${(padL + plotW * 0.5).toFixed(1)}" y="${h - 8}" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700">13-FRONT ADAPTIVE NASH EPA / PLAY (STRICT $165M OFFENSE)</text>`
+      );
+
+      // Steady-state Pareto Frontier connecting line
+      const fPts = ports
+        .filter((p) => frontierIds.has(p.id))
+        .sort((a, b) => a.nash13Epa - b.nash13Epa);
+      if (fPts.length >= 2) {
+        const ptsAttr = fPts.map((p) => `${sx(p.nash13Epa).toFixed(1)},${sy(p.seasonEqual0.avgWins).toFixed(1)}`).join(' ');
+        svgParts.push(
+          `<polyline points="${ptsAttr}" fill="none" stroke="#10b981" stroke-width="2.6" stroke-dasharray="6 4" />`
+        );
+        const mx = (sx(fPts[0].nash13Epa) + sx(fPts[1].nash13Epa)) * 0.5 + 28;
+        const my = Math.min(sy(fPts[0].seasonEqual0.avgWins), sy(fPts[1].seasonEqual0.avgWins)) - 22;
+        svgParts.push(
+          `<text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" fill="#10b981" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="800">STEADY-STATE PARETO FRONTIER</text>`
+        );
+      }
+
+      // Label placement tuned cleanly per portfolio ID
+      const labelPos: Record<string, { dx: number; dy: number; anchor: 'start' | 'end' | 'middle' }> = {
+        P1_CONV11_SUPERMAX_POCKET: { dx: 12, dy: 4, anchor: 'start' },
+        P2_CONV11_STAR_WR_CHEAP_OL: { dx: 12, dy: 4, anchor: 'start' },
+        P3_SHAN12_SUPERMAX_SQUEEZED: { dx: 12, dy: 4, anchor: 'start' },
+        P4_SHAN12_SUPERMAX_DUAL_SQUEEZED: { dx: 6, dy: 23, anchor: 'end' },
+        P5_SHAN12_TRENCH_BULLY_MID_MOB: { dx: -14, dy: 2, anchor: 'end' },
+        P6_CHIRAL_2QB_ELITE_OL_STATIC: { dx: 12, dy: 4, anchor: 'start' },
+        P7_CHIRAL_2QB_ELITE_OL_MDP: { dx: 12, dy: 14, anchor: 'start' },
+        P8_ROOKIE_WINDOW_SHAN12: { dx: -14, dy: 4, anchor: 'end' },
+      };
+
+      for (const p of ports) {
+        const cx = sx(p.nash13Epa);
+        const cy = sy(p.seasonEqual0.avgWins);
+        const isFrontier = frontierIds.has(p.id);
+        const isRookie = !p.repeatableSteadyState;
+        const color = isRookie
+          ? '#fbbf24'
+          : isFrontier
+          ? '#10b981'
+          : p.isDualQbOnField
+          ? '#38bdf8'
+          : p.schemeFamily === 'SHANAHAN_12'
+          ? '#a78bfa'
+          : '#fb7185';
+        const radius = Math.max(6.5, Math.min(13, 6 + Math.sqrt(p.seasonEqual0.sbPct) * 1.1));
+        const lp = labelPos[p.id] ?? { dx: 10, dy: 4, anchor: 'start' };
+
+        if (isRookie) {
+          svgParts.push(
+            `<polygon points="${cx},${cy - 10} ${cx + 10},${cy} ${cx},${cy + 10} ${cx - 10},${cy}" fill="${color}" stroke="#061016" stroke-width="2" />`
+          );
+        } else {
+          svgParts.push(
+            `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${radius.toFixed(1)}" fill="${color}" fill-opacity="0.88" stroke="${isFrontier ? '#ecfdf5' : '#071016'}" stroke-width="${isFrontier ? 2.2 : 1.5}" />`
+          );
+        }
+
+        svgParts.push(
+          `<text x="${(cx + lp.dx).toFixed(1)}" y="${(cy + lp.dy).toFixed(1)}" text-anchor="${lp.anchor}" fill="${isFrontier || isRookie ? '#f8fafc' : '#cbd5e1'}" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700">${esc(p.shortLabel)} (${p.seasonEqual0.avgWins.toFixed(1)}W · ${p.seasonEqual0.sbPct.toFixed(0)}% SB)</text>`
+        );
+      }
+
+      const marginal = pareto.marginalCapShifts.filter((m) => m.id !== 'BASE_BALANCED');
+      const mLabels: Record<string, string> = {
+        PLUS_12M_OL_MINUS_WR: '+$12M OL (from WR)',
+        PLUS_10M_TE_MINUS_WR: '+$10M TE/OL (from WR)',
+        UPGRADE_QB_FROM_OL_WR: '+$38M Elite QB (from OL/WR/TE)',
+        PLUS_12M_WR_MINUS_OL: '+$12M WR (starving OL)',
+      };
+      const marginalBars = svgHorizBars(
+        marginal.map((m) => ({
+          label: mLabels[m.id] || m.id,
+          value: m.deltaVsBase,
+          color: m.deltaVsBase >= 0.08 ? (m.id.includes('QB') ? '#fbbf24' : '#10b981') : '#fb7185',
+          display: `${fmtSigned(m.deltaVsBase, 3)} EPA`,
+        })),
+        { min: -0.04, max: 0.14, width: 620, height: 170, padL: 220, padR: 92 }
+      );
+
+      const top5 = [
+        ports.find((p) => p.id === 'P5_SHAN12_TRENCH_BULLY_MID_MOB')!,
+        ports.find((p) => p.id === 'P4_SHAN12_SUPERMAX_DUAL_SQUEEZED')!,
+        ports.find((p) => p.id === 'P7_CHIRAL_2QB_ELITE_OL_MDP')!,
+        ports.find((p) => p.id === 'P3_SHAN12_SUPERMAX_SQUEEZED')!,
+        ports.find((p) => p.id === 'P2_CONV11_STAR_WR_CHEAP_OL')!,
+      ];
+
+      return `
+        <div>
+          <div class="slide-kicker-row">
+            <span class="slide-kicker">FIXED 60% OFFENSIVE CAP ($165M) · ZERO DEFENSIVE BONUS ASSUMPTIONS</span>
+            <span class="slide-pill">EQUAL 0% HAIRCUT · 13 ADAPTIVE FRONTS</span>
+          </div>
+          <h2 class="slide-title">At Fixed 60% Cap, Trench-Bully Read-3 ($22M QB) Beats $60M Pocket by +3.6 Wins</h2>
+          <p class="slide-subtitle">When a $60M pocket QB actually pays his OL cap squeeze ($44M OL), wins drop to 8.67 (1.4% SB). Only Trench-Bully + Read-3 (12.27W) and Supermax Dual + Read-3 (11.93W) sit on the steady-state Pareto frontier.</p>
+        </div>
+        <div class="slide-body cols-equal-2">
+          <div class="card">
+            <div class="card-title">PARETO FRONTIER: 13-FRONT NASH EPA VS 17-GAME WINS (BUBBLE = SB%)</div>
+            <svg viewBox="0 0 ${w} ${h}" class="svg-chart">${svgParts.join('')}</svg>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px; min-height:0;">
+            <div class="card">
+              <div class="card-title">MARGINAL CAP ROI AT CONSTANT $165M (Δ 13-FRONT EPA)</div>
+              ${marginalBars}
+            </div>
+            <div class="card">
+              <div class="card-title">STEADY-STATE CAP-CONSTRAINED SCORECARD (EQUAL 40% DEF)</div>
+              <table class="deck-table">
+                <thead><tr><th>PORTFOLIO ($165M)</th><th>QB / OL</th><th>NASH13</th><th>WINS</th><th>SB%</th></tr></thead>
+                <tbody>
+                  ${top5
+                    .map(
+                      (p) => `
+                    <tr class="${frontierIds.has(p.id) ? 'hi' : ''}">
+                      <td>${esc(p.shortLabel)}</td>
+                      <td>$${p.budget.qbM}M / $${p.budget.olM}M</td>
+                      <td>${fmtSigned(p.nash13Epa, 3)}</td>
+                      <td>${p.seasonEqual0.avgWins.toFixed(2)}</td>
+                      <td>${p.seasonEqual0.sbPct.toFixed(1)}%</td>
+                    </tr>`
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <span>SOURCE: pareto_60pct_cap_report.json (18 reps/cell · 500 seasons · 0% equal haircut)</span>
+          <span>+$12M OL (+0.116 EPA) MATCHES +$38M POCKET QB (+0.116 EPA) AT 3.2× HIGHER CAPITAL EFFICIENCY</span>
+        </div>
+      `;
+    },
+  },
+
+  // SLIDE 10: INTERACTIVE 1080P STUDIO & TAKEAWAYS
   {
     id: 'studio-takeaways',
-    shortTitle: '9. 1080p Studio',
+    shortTitle: '10. 1080p Studio',
     kicker: 'ACTIONABLE PLAYBOOK & 1080P DESIGN WORKBENCH',
     badge: 'FULL NESTED ENGINE EXPOSED',
     render: () => `

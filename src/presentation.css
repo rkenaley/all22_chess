@@ -390,15 +390,16 @@ body {
 }
 
 .slide-pill-btn {
-  padding: 4px 10px;
+  padding: 4px 8px;
   border-radius: 5px;
   background: var(--bg-2);
   border: 1px solid var(--border-hairline);
   color: var(--fg-muted);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .slide-pill-btn:hover {
