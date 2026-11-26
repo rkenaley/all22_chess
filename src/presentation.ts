@@ -5,6 +5,7 @@ import nashRaw from './data/nash_2qb_tournament_report.json';
 import seasonRaw from './data/season_4down_monte_carlo_report.json';
 import seqRaw from './data/play_sequencing_memory_report.json';
 import paretoRaw from './data/pareto_60pct_cap_report.json';
+import winCompRaw from './data/win_component_analysis_report.json';
 
 interface SlideSpec {
   id: string;
@@ -21,6 +22,7 @@ const nash = nashRaw as typeof nashRaw;
 const season = seasonRaw as typeof seasonRaw;
 const seq = seqRaw as typeof seqRaw;
 const pareto = paretoRaw as typeof paretoRaw;
+const winComp = winCompRaw as typeof winCompRaw;
 
 function fmtEpa(v: number): string {
   return `${v >= 0 ? '+' : ''}${v.toFixed(3)}`;
@@ -818,10 +820,138 @@ const SLIDES: SlideSpec[] = [
     },
   },
 
-  // SLIDE 10: INTERACTIVE 1080P STUDIO & TAKEAWAYS
+  // SLIDE 10: 5-GROUP ORTHOGONAL WIN COMPONENT & QB x OL SUBSTITUTION ANALYSIS
+  {
+    id: 'win-components',
+    shortTitle: '10. Win Drivers',
+    kicker: 'ORTHOGONAL 2^(5-1) RESOLUTION-V DECOMPOSITION · QB / OL / WR / TE / RB',
+    badge: 'OL EXPLAINS 36.1% OF WIN VARIANCE (>2× QB)',
+    render: () => {
+      const me = winComp.mainEffects;
+      const ordered = [me.OL, me.QB, me.TE, me.RB, me.WR];
+      const runs = winComp.factorialRuns;
+      const avgW = (arr: typeof runs) => arr.reduce((s, r) => s + r.avgWins, 0) / Math.max(1, arr.length);
+
+      const qbLowOl = +(
+        avgW(runs.filter((r) => r.levels.OL === -1 && r.levels.QB === 1)) -
+        avgW(runs.filter((r) => r.levels.OL === -1 && r.levels.QB === -1))
+      ).toFixed(2);
+      const qbHighOl = +(
+        avgW(runs.filter((r) => r.levels.OL === 1 && r.levels.QB === 1)) -
+        avgW(runs.filter((r) => r.levels.OL === 1 && r.levels.QB === -1))
+      ).toFixed(2);
+      const olLowQb = +(
+        avgW(runs.filter((r) => r.levels.QB === -1 && r.levels.OL === 1)) -
+        avgW(runs.filter((r) => r.levels.QB === -1 && r.levels.OL === -1))
+      ).toFixed(2);
+      const olHighQb = +(
+        avgW(runs.filter((r) => r.levels.QB === 1 && r.levels.OL === 1)) -
+        avgW(runs.filter((r) => r.levels.QB === 1 && r.levels.OL === -1))
+      ).toFixed(2);
+
+      const probes = winComp.crossCheckProbes;
+      const cBase = probes.find((p) => p.code === 'CONV11_ALL_LOW')!;
+      const cOl = probes.find((p) => p.code === 'CONV11_PLUS_OL')!;
+      const cQb = probes.find((p) => p.code === 'CONV11_PLUS_QB')!;
+      const cWr = probes.find((p) => p.code === 'CONV11_PLUS_WR')!;
+
+      const rawBars = svgHorizBars(
+        ordered.map((m) => ({
+          label: `${m.group} (+$${m.deltaCapM}M)`,
+          value: m.deltaWins,
+          color:
+            m.group === 'OL'
+              ? '#10b981'
+              : m.group === 'QB'
+              ? '#38bdf8'
+              : m.group === 'RB'
+              ? '#fbbf24'
+              : m.group === 'TE'
+              ? '#a78bfa'
+              : '#fb7185',
+          display: `+${m.deltaWins.toFixed(2)}W (${m.varSharePct}% var)`,
+        })),
+        { max: 3.4, width: 650, height: 220, padL: 130, padR: 175 }
+      );
+
+      const roiBars = svgHorizBars(
+        [...ordered]
+          .sort((a, b) => b.winsPer10M - a.winsPer10M)
+          .map((m) => ({
+            label: `${m.group} Cap ROI`,
+            value: m.winsPer10M,
+            color:
+              m.group === 'RB'
+                ? '#fbbf24'
+                : m.group === 'OL'
+                ? '#10b981'
+                : m.group === 'TE'
+                ? '#a78bfa'
+                : m.group === 'QB'
+                ? '#38bdf8'
+                : '#fb7185',
+            display: `+${m.winsPer10M.toFixed(2)} W / $10M`,
+          })),
+        { max: 1.5, width: 620, height: 185, padL: 120, padR: 140 }
+      );
+
+      const qbOlInt = winComp.twoWayInteractions.find((x) => x.pair === 'QB × OL')!;
+
+      return `
+        <div>
+          <div class="slide-kicker-row">
+            <span class="slide-kicker">ORTHOGONAL COMPONENT ANALYSIS · UNCONFOUNDED 5-GROUP WIN LEVERAGE</span>
+            <span class="slide-pill">QB × OL INTERACTION = ${fmtSigned(qbOlInt.deltaWins, 2)}W (${qbOlInt.varSharePct}% VAR)</span>
+          </div>
+          <h2 class="slide-title">OL Drives +2.93W (36% Var) vs QB +1.99W—and Makes a $60M QB Almost Redundant</h2>
+          <p class="slide-subtitle">Upgrading OL cuts Pressure -16.0%, Sacks -2.04%, lifts Comp% +2.59%, AND adds +0.92 YPC. Once OL is elite ($74M), upgrading from a $20M Mid-Mobile QB to a $60M Elite Pocket QB adds just <strong>${fmtSigned(qbHighOl, 2)} Wins</strong>.</p>
+        </div>
+        <div class="slide-body cols-equal-2">
+          <div style="display:flex; flex-direction:column; gap:10px; min-height:0;">
+            <div class="card">
+              <div class="card-title">ORTHOGONAL MAIN EFFECT ON WINS (BUDGET → ELITE, SHAN-12)</div>
+              ${rawBars}
+            </div>
+            <div class="card">
+              <div class="card-title">CONV-11 SPREAD CROSS-CHECK (OL STILL BEATS QB &amp; WR)</div>
+              <table class="deck-table">
+                <thead><tr><th>UPGRADE FROM ALL-BUDGET CONV-11</th><th>WINS</th><th>Δ WINS</th><th>PRESS%</th><th>RUSH YPC</th></tr></thead>
+                <tbody>
+                  <tr><td>All-Budget Baseline</td><td>${cBase.avgWins.toFixed(2)}</td><td>—</td><td>${cBase.pressRatePct}%</td><td>${cBase.rushYpc}y</td></tr>
+                  <tr class="hi"><td>+ Elite OL (+$36M)</td><td>${cOl.avgWins.toFixed(2)}</td><td>+${(cOl.avgWins - cBase.avgWins).toFixed(2)}W</td><td>${cOl.pressRatePct}%</td><td>${cOl.rushYpc}y</td></tr>
+                  <tr><td>+ Elite Pocket QB (+$40M)</td><td>${cQb.avgWins.toFixed(2)}</td><td>+${(cQb.avgWins - cBase.avgWins).toFixed(2)}W</td><td>${cQb.pressRatePct}%</td><td>${cQb.rushYpc}y</td></tr>
+                  <tr><td>+ Elite WR Corps (+$28M)</td><td>${cWr.avgWins.toFixed(2)}</td><td>${(cWr.avgWins - cBase.avgWins).toFixed(2)}W</td><td>${cWr.pressRatePct}%</td><td>${cWr.rushYpc}y</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px; min-height:0;">
+            <div class="card">
+              <div class="card-title">CAP EFFICIENCY: MARGINAL WINS PER $10M SPENT</div>
+              ${roiBars}
+            </div>
+            <div class="card">
+              <div class="card-title">THE QB × OL SUBSTITUTION LAW (CONDITIONAL Δ WINS)</div>
+              <ul class="insight-list">
+                <li class="emerald"><strong>Upgrade OL (+$36M):</strong> adds <strong>${fmtSigned(olLowQb, 2)}W</strong> with a $20M Mobile QB, and still adds <strong>${fmtSigned(olHighQb, 2)}W</strong> on top of a $60M Pocket QB.</li>
+                <li class="gold"><strong>Upgrade QB (+$40M):</strong> adds <strong>${fmtSigned(qbLowOl, 2)}W</strong> behind a $38M OL (rescue effect), but only <strong>${fmtSigned(qbHighOl, 2)}W</strong> behind a $74M Elite OL.</li>
+                <li class="rose"><strong>Market Steal &amp; Trap:</strong> RB (+${me.RB.winsPer10M}W/$10M), OL (+${me.OL.winsPer10M}W), and TE (+${me.TE.winsPer10M}W) crush WR (+${me.WR.winsPer10M}W/$10M).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <span>SOURCE: win_component_analysis_report.json (16 orthogonal runs · 3,120 Hi vs 3,120 Lo snaps/group)</span>
+          <span>NOTE: LOW QB TIER IS A $20M COMPETENT MOBILE STARTER (NOT REPLACEMENT-LEVEL SCRUB)</span>
+        </div>
+      `;
+    },
+  },
+
+  // SLIDE 11: INTERACTIVE 1080P STUDIO & TAKEAWAYS
   {
     id: 'studio-takeaways',
-    shortTitle: '10. 1080p Studio',
+    shortTitle: '11. 1080p Studio',
     kicker: 'ACTIONABLE PLAYBOOK & 1080P DESIGN WORKBENCH',
     badge: 'FULL NESTED ENGINE EXPOSED',
     render: () => `

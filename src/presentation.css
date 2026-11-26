@@ -386,17 +386,17 @@ body {
 .slide-pills {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .slide-pill-btn {
-  padding: 4px 8px;
+  padding: 4px 7px;
   border-radius: 5px;
   background: var(--bg-2);
   border: 1px solid var(--border-hairline);
   color: var(--fg-muted);
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;

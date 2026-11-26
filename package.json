@@ -29,7 +29,8 @@
     "analyze:nash2qb": "npx tsx src/run_dual_qb_nash_tournament.ts",
     "simulate:season": "npx tsx src/simulate_4down_season.ts",
     "analyze:sequencing": "npx tsx src/analyze_play_sequencing_memory.ts",
-    "analyze:pareto60": "npx tsx src/analyze_pareto_60pct_cap.ts"
+    "analyze:pareto60": "npx tsx src/analyze_pareto_60pct_cap.ts",
+    "analyze:components": "npx tsx src/analyze_win_components_5groups.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

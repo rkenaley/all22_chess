@@ -1,0 +1,758 @@
+{
+  "generatedAt": "2026-11-25T17:56:14.763Z",
+  "design": "Resolution-V Orthogonal 2^(5-1) Fractional Factorial (16 runs, 5 main effects + 10 2-way interactions unconfounded)",
+  "meanWinsAcross16Runs": 14.51,
+  "ssTotalWins": 95.07,
+  "groupTiers": {
+    "QB": {
+      "lowCapM": 20,
+      "highCapM": 60,
+      "deltaCapM": 40,
+      "lowLabel": "Mid-Mobile QB ($20M: 89 SPD / 84 FIN / 83 AWR)",
+      "highLabel": "Elite Pocket QB ($60M: 74 SPD / 95 FIN / 95 AWR)",
+      "lowRatings": {
+        "speed": 89,
+        "accel": 90,
+        "power": 85,
+        "finesse": 84,
+        "awareness": 83
+      },
+      "highRatings": {
+        "speed": 74,
+        "accel": 78,
+        "power": 75,
+        "finesse": 95,
+        "awareness": 95
+      }
+    },
+    "OL": {
+      "lowCapM": 38,
+      "highCapM": 74,
+      "deltaCapM": 36,
+      "lowLabel": "Budget OL ($38M: 80 BLK / 81 PWR / 80 FIN)",
+      "highLabel": "Elite OL ($74M: 93 BLK / 93 PWR / 92 FIN)",
+      "lowRatings": {
+        "speed": 72,
+        "accel": 78,
+        "power": 81,
+        "finesse": 80,
+        "awareness": 81
+      },
+      "highRatings": {
+        "speed": 81,
+        "accel": 87,
+        "power": 93,
+        "finesse": 92,
+        "awareness": 92
+      },
+      "lowBlock": 80,
+      "highBlock": 93
+    },
+    "WR": {
+      "lowCapM": 30,
+      "highCapM": 58,
+      "deltaCapM": 28,
+      "lowLabel": "Budget WR Corps ($30M: WR1 88 SPD / 87 FIN)",
+      "highLabel": "Elite WR Corps ($58M: WR1 95 SPD / 95 FIN)",
+      "lowRatings": {
+        "speed": 88,
+        "accel": 88,
+        "power": 70,
+        "finesse": 87,
+        "awareness": 86
+      },
+      "highRatings": {
+        "speed": 95,
+        "accel": 95,
+        "power": 74,
+        "finesse": 95,
+        "awareness": 93
+      }
+    },
+    "TE": {
+      "lowCapM": 10,
+      "highCapM": 26,
+      "deltaCapM": 16,
+      "lowLabel": "Budget TE Corps ($10M: 76 BLK / 80 FIN)",
+      "highLabel": "Elite Dual-TE ($26M: 89 BLK / 89 FIN)",
+      "lowRatings": {
+        "speed": 82,
+        "accel": 84,
+        "power": 77,
+        "finesse": 80,
+        "awareness": 81
+      },
+      "highRatings": {
+        "speed": 88,
+        "accel": 89,
+        "power": 88,
+        "finesse": 89,
+        "awareness": 89
+      },
+      "lowBlock": 76,
+      "highBlock": 89
+    },
+    "RB": {
+      "lowCapM": 6,
+      "highCapM": 14,
+      "deltaCapM": 8,
+      "lowLabel": "Budget RB ($6M: 89 SPD / 80 PWR / 84 FIN)",
+      "highLabel": "Elite RB ($14M: 92 SPD / 86 PWR / 90 FIN)",
+      "lowRatings": {
+        "speed": 89,
+        "accel": 90,
+        "power": 80,
+        "finesse": 84,
+        "awareness": 83
+      },
+      "highRatings": {
+        "speed": 92,
+        "accel": 93,
+        "power": 86,
+        "finesse": 90,
+        "awareness": 88
+      },
+      "lowBlock": 68,
+      "highBlock": 77
+    }
+  },
+  "mainEffects": {
+    "QB": {
+      "group": "QB",
+      "deltaCapM": 40,
+      "lowWins": 13.51,
+      "highWins": 15.5,
+      "deltaWins": 1.99,
+      "winsPer10M": 0.5,
+      "varSharePct": 16.7,
+      "deltaPf": 4.13,
+      "deltaEpa": 0.0438,
+      "deltaNash": 0.0682,
+      "physics": {
+        "deltaSack": -0.99,
+        "deltaPress": -3,
+        "deltaComp": 2.14,
+        "deltaRush": 0.25,
+        "deltaTrench": 0.02
+      }
+    },
+    "OL": {
+      "group": "OL",
+      "deltaCapM": 36,
+      "lowWins": 13.04,
+      "highWins": 15.97,
+      "deltaWins": 2.93,
+      "winsPer10M": 0.81,
+      "varSharePct": 36.1,
+      "deltaPf": 8.95,
+      "deltaEpa": 0.0627,
+      "deltaNash": 0.1051,
+      "physics": {
+        "deltaSack": -2.04,
+        "deltaPress": -16,
+        "deltaComp": 2.59,
+        "deltaRush": 0.92,
+        "deltaTrench": 0.57
+      }
+    },
+    "WR": {
+      "group": "WR",
+      "deltaCapM": 28,
+      "lowWins": 14.42,
+      "highWins": 14.6,
+      "deltaWins": 0.18,
+      "winsPer10M": 0.06,
+      "varSharePct": 0.1,
+      "deltaPf": 1.63,
+      "deltaEpa": 0.0439,
+      "deltaNash": 0.0533,
+      "physics": {
+        "deltaSack": -0.11,
+        "deltaPress": -1.75,
+        "deltaComp": -0.06,
+        "deltaRush": 0.38,
+        "deltaTrench": 0.02
+      }
+    },
+    "TE": {
+      "group": "TE",
+      "deltaCapM": 16,
+      "lowWins": 13.96,
+      "highWins": 15.06,
+      "deltaWins": 1.1,
+      "winsPer10M": 0.69,
+      "varSharePct": 5.1,
+      "deltaPf": 2.03,
+      "deltaEpa": 0.044,
+      "deltaNash": 0.0006,
+      "physics": {
+        "deltaSack": 0.34,
+        "deltaPress": 3.95,
+        "deltaComp": 0.11,
+        "deltaRush": 0.71,
+        "deltaTrench": 0.03
+      }
+    },
+    "RB": {
+      "group": "RB",
+      "deltaCapM": 8,
+      "lowWins": 13.99,
+      "highWins": 15.03,
+      "deltaWins": 1.04,
+      "winsPer10M": 1.3,
+      "varSharePct": 4.6,
+      "deltaPf": 2.91,
+      "deltaEpa": 0.004,
+      "deltaNash": 0.0424,
+      "physics": {
+        "deltaSack": 0.26,
+        "deltaPress": 0.35,
+        "deltaComp": -0.94,
+        "deltaRush": 0.28,
+        "deltaTrench": -0.01
+      }
+    }
+  },
+  "twoWayInteractions": [
+    {
+      "pair": "QB × OL",
+      "deltaWins": -1.84,
+      "varSharePct": 14.2
+    },
+    {
+      "pair": "QB × TE",
+      "deltaWins": -1.09,
+      "varSharePct": 5
+    },
+    {
+      "pair": "OL × TE",
+      "deltaWins": -0.99,
+      "varSharePct": 4.1
+    },
+    {
+      "pair": "TE × RB",
+      "deltaWins": -0.95,
+      "varSharePct": 3.8
+    },
+    {
+      "pair": "QB × RB",
+      "deltaWins": -0.93,
+      "varSharePct": 3.6
+    },
+    {
+      "pair": "QB × WR",
+      "deltaWins": 0.89,
+      "varSharePct": 3.3
+    },
+    {
+      "pair": "WR × RB",
+      "deltaWins": 0.64,
+      "varSharePct": 1.7
+    },
+    {
+      "pair": "OL × RB",
+      "deltaWins": -0.57,
+      "varSharePct": 1.4
+    },
+    {
+      "pair": "WR × TE",
+      "deltaWins": -0.07,
+      "varSharePct": 0
+    },
+    {
+      "pair": "OL × WR",
+      "deltaWins": -0.03,
+      "varSharePct": 0
+    }
+  ],
+  "factorialRuns": [
+    {
+      "code": "qowtR",
+      "levels": {
+        "QB": -1,
+        "OL": -1,
+        "WR": -1,
+        "TE": -1,
+        "RB": 1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 11.26,
+      "pfG": 27.13,
+      "sbPct": 14.6,
+      "nash13Epa": -0.0453,
+      "mean13Epa": 0.0472,
+      "sackRatePct": 4.9,
+      "pressRatePct": 24.9,
+      "compRatePct": 66.2,
+      "intRatePct": 2.7,
+      "rushYpc": 5.21,
+      "trenchNetYds": -1.33
+    },
+    {
+      "code": "Qowtr",
+      "levels": {
+        "QB": 1,
+        "OL": -1,
+        "WR": -1,
+        "TE": -1,
+        "RB": -1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 13.38,
+      "pfG": 31.28,
+      "sbPct": 39.6,
+      "nash13Epa": 0.0969,
+      "mean13Epa": 0.0966,
+      "sackRatePct": 3.9,
+      "pressRatePct": 22.6,
+      "compRatePct": 71.3,
+      "intRatePct": 1.3,
+      "rushYpc": 5.05,
+      "trenchNetYds": -1.32
+    },
+    {
+      "code": "qOwtr",
+      "levels": {
+        "QB": -1,
+        "OL": 1,
+        "WR": -1,
+        "TE": -1,
+        "RB": -1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 14.78,
+      "pfG": 35.84,
+      "sbPct": 61.2,
+      "nash13Epa": 0.0637,
+      "mean13Epa": 0.1517,
+      "sackRatePct": 1.8,
+      "pressRatePct": 7.5,
+      "compRatePct": 70.6,
+      "intRatePct": 2.6,
+      "rushYpc": 6.34,
+      "trenchNetYds": -0.75
+    },
+    {
+      "code": "QOwtR",
+      "levels": {
+        "QB": 1,
+        "OL": 1,
+        "WR": -1,
+        "TE": -1,
+        "RB": 1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 15.91,
+      "pfG": 37.84,
+      "sbPct": 75.4,
+      "nash13Epa": 0.1403,
+      "mean13Epa": 0.1667,
+      "sackRatePct": 1.3,
+      "pressRatePct": 7.7,
+      "compRatePct": 72.1,
+      "intRatePct": 1.3,
+      "rushYpc": 6.14,
+      "trenchNetYds": -0.73
+    },
+    {
+      "code": "qoWtr",
+      "levels": {
+        "QB": -1,
+        "OL": -1,
+        "WR": 1,
+        "TE": -1,
+        "RB": -1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 7.16,
+      "pfG": 19.29,
+      "sbPct": 0.8,
+      "nash13Epa": -0.12,
+      "mean13Epa": 0.0865,
+      "sackRatePct": 4.6,
+      "pressRatePct": 23.3,
+      "compRatePct": 66.7,
+      "intRatePct": 0.9,
+      "rushYpc": 5.16,
+      "trenchNetYds": -1.29
+    },
+    {
+      "code": "QoWtR",
+      "levels": {
+        "QB": 1,
+        "OL": -1,
+        "WR": 1,
+        "TE": -1,
+        "RB": 1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 16.18,
+      "pfG": 41.25,
+      "sbPct": 81.6,
+      "nash13Epa": 0.2131,
+      "mean13Epa": 0.1894,
+      "sackRatePct": 4.3,
+      "pressRatePct": 16,
+      "compRatePct": 68.4,
+      "intRatePct": 0.4,
+      "rushYpc": 6.5,
+      "trenchNetYds": -1.29
+    },
+    {
+      "code": "qOWtR",
+      "levels": {
+        "QB": -1,
+        "OL": 1,
+        "WR": 1,
+        "TE": -1,
+        "RB": 1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 16.46,
+      "pfG": 43.26,
+      "sbPct": 87.2,
+      "nash13Epa": 0.2387,
+      "mean13Epa": 0.2048,
+      "sackRatePct": 2.6,
+      "pressRatePct": 9.5,
+      "compRatePct": 68.4,
+      "intRatePct": 1.3,
+      "rushYpc": 6.66,
+      "trenchNetYds": -0.73
+    },
+    {
+      "code": "QOWtr",
+      "levels": {
+        "QB": 1,
+        "OL": 1,
+        "WR": 1,
+        "TE": -1,
+        "RB": -1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 16.53,
+      "pfG": 42.76,
+      "sbPct": 87.2,
+      "nash13Epa": 0.2362,
+      "mean13Epa": 0.2624,
+      "sackRatePct": 1.3,
+      "pressRatePct": 4.7,
+      "compRatePct": 76.4,
+      "intRatePct": 0.9,
+      "rushYpc": 6.77,
+      "trenchNetYds": -0.71
+    },
+    {
+      "code": "qowTr",
+      "levels": {
+        "QB": -1,
+        "OL": -1,
+        "WR": -1,
+        "TE": 1,
+        "RB": -1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 12.62,
+      "pfG": 29.73,
+      "sbPct": 27.8,
+      "nash13Epa": 0.0167,
+      "mean13Epa": 0.1402,
+      "sackRatePct": 5,
+      "pressRatePct": 28.3,
+      "compRatePct": 70.3,
+      "intRatePct": 0.5,
+      "rushYpc": 5.77,
+      "trenchNetYds": -1.27
+    },
+    {
+      "code": "QowTR",
+      "levels": {
+        "QB": 1,
+        "OL": -1,
+        "WR": -1,
+        "TE": 1,
+        "RB": 1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 14.48,
+      "pfG": 34.24,
+      "sbPct": 55.8,
+      "nash13Epa": -0.0183,
+      "mean13Epa": 0.1771,
+      "sackRatePct": 3.5,
+      "pressRatePct": 26.8,
+      "compRatePct": 67.5,
+      "intRatePct": 0.9,
+      "rushYpc": 6.7,
+      "trenchNetYds": -1.26
+    },
+    {
+      "code": "qOwTR",
+      "levels": {
+        "QB": -1,
+        "OL": 1,
+        "WR": -1,
+        "TE": 1,
+        "RB": 1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 16.8,
+      "pfG": 44.53,
+      "sbPct": 90.2,
+      "nash13Epa": 0.2122,
+      "mean13Epa": 0.2164,
+      "sackRatePct": 3.9,
+      "pressRatePct": 10.9,
+      "compRatePct": 72.5,
+      "intRatePct": 0.9,
+      "rushYpc": 7.06,
+      "trenchNetYds": -0.74
+    },
+    {
+      "code": "QOwTr",
+      "levels": {
+        "QB": 1,
+        "OL": 1,
+        "WR": -1,
+        "TE": 1,
+        "RB": -1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 16.09,
+      "pfG": 39.66,
+      "sbPct": 78.6,
+      "nash13Epa": 0.1464,
+      "mean13Epa": 0.21,
+      "sackRatePct": 2.2,
+      "pressRatePct": 10.3,
+      "compRatePct": 70.3,
+      "intRatePct": 0.4,
+      "rushYpc": 6.87,
+      "trenchNetYds": -0.71
+    },
+    {
+      "code": "qoWTR",
+      "levels": {
+        "QB": -1,
+        "OL": -1,
+        "WR": 1,
+        "TE": 1,
+        "RB": 1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 13.45,
+      "pfG": 30.98,
+      "sbPct": 39,
+      "nash13Epa": 0.1166,
+      "mean13Epa": 0.1675,
+      "sackRatePct": 4.5,
+      "pressRatePct": 29.9,
+      "compRatePct": 69.2,
+      "intRatePct": 1.8,
+      "rushYpc": 6.23,
+      "trenchNetYds": -1.3
+    },
+    {
+      "code": "QoWTr",
+      "levels": {
+        "QB": 1,
+        "OL": -1,
+        "WR": 1,
+        "TE": 1,
+        "RB": -1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 15.79,
+      "pfG": 37.07,
+      "sbPct": 76.2,
+      "nash13Epa": 0.1458,
+      "mean13Epa": 0.2262,
+      "sackRatePct": 3.5,
+      "pressRatePct": 24.2,
+      "compRatePct": 70.6,
+      "intRatePct": 0.9,
+      "rushYpc": 6.36,
+      "trenchNetYds": -1.26
+    },
+    {
+      "code": "qOWTr",
+      "levels": {
+        "QB": -1,
+        "OL": 1,
+        "WR": 1,
+        "TE": 1,
+        "RB": -1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 15.55,
+      "pfG": 39.51,
+      "sbPct": 75,
+      "nash13Epa": 0.0705,
+      "mean13Epa": 0.192,
+      "sackRatePct": 2.7,
+      "pressRatePct": 9.7,
+      "compRatePct": 68.1,
+      "intRatePct": 2.2,
+      "rushYpc": 7.23,
+      "trenchNetYds": -0.69
+    },
+    {
+      "code": "QOWTR",
+      "levels": {
+        "QB": 1,
+        "OL": 1,
+        "WR": 1,
+        "TE": 1,
+        "RB": 1
+      },
+      "scheme": "SHANAHAN_12",
+      "avgWins": 15.67,
+      "pfG": 39.21,
+      "sbPct": 79.2,
+      "nash13Epa": 0.1383,
+      "mean13Epa": 0.2283,
+      "sackRatePct": 2.1,
+      "pressRatePct": 7.7,
+      "compRatePct": 72.5,
+      "intRatePct": 1.3,
+      "rushYpc": 7.29,
+      "trenchNetYds": -0.68
+    }
+  ],
+  "crossCheckProbes": [
+    {
+      "code": "SHAN_DUAL_LOW_OL",
+      "levels": {
+        "QB": 1,
+        "OL": -1,
+        "WR": -1,
+        "TE": -1,
+        "RB": -1
+      },
+      "qbOverride": "ELITE_DUAL",
+      "scheme": "SHANAHAN_12",
+      "avgWins": 10.85,
+      "pfG": 25.58,
+      "sbPct": 11.4,
+      "nash13Epa": 0.0415,
+      "mean13Epa": 0.096,
+      "sackRatePct": 4.5,
+      "pressRatePct": 22.9,
+      "compRatePct": 72.2,
+      "intRatePct": 0.4,
+      "rushYpc": 4.43,
+      "trenchNetYds": -1.32
+    },
+    {
+      "code": "SHAN_DUAL_HIGH_OL",
+      "levels": {
+        "QB": 1,
+        "OL": 1,
+        "WR": -1,
+        "TE": -1,
+        "RB": -1
+      },
+      "qbOverride": "ELITE_DUAL",
+      "scheme": "SHANAHAN_12",
+      "avgWins": 15.85,
+      "pfG": 37.54,
+      "sbPct": 76.4,
+      "nash13Epa": 0.1699,
+      "mean13Epa": 0.2103,
+      "sackRatePct": 1.3,
+      "pressRatePct": 3.9,
+      "compRatePct": 72.7,
+      "intRatePct": 0,
+      "rushYpc": 6.28,
+      "trenchNetYds": -0.73
+    },
+    {
+      "code": "CONV11_ALL_LOW",
+      "levels": {
+        "QB": -1,
+        "OL": -1,
+        "WR": -1,
+        "TE": -1,
+        "RB": -1
+      },
+      "scheme": "CONV_11",
+      "avgWins": 2.66,
+      "pfG": 11.59,
+      "sbPct": 0,
+      "nash13Epa": -0.187,
+      "mean13Epa": -0.238,
+      "sackRatePct": 12.8,
+      "pressRatePct": 28,
+      "compRatePct": 61.1,
+      "intRatePct": 3.3,
+      "rushYpc": 1.66,
+      "trenchNetYds": -1.43
+    },
+    {
+      "code": "CONV11_PLUS_QB",
+      "levels": {
+        "QB": 1,
+        "OL": -1,
+        "WR": -1,
+        "TE": -1,
+        "RB": -1
+      },
+      "scheme": "CONV_11",
+      "avgWins": 5.68,
+      "pfG": 16.18,
+      "sbPct": 0.2,
+      "nash13Epa": -0.1348,
+      "mean13Epa": -0.0887,
+      "sackRatePct": 6.6,
+      "pressRatePct": 18.4,
+      "compRatePct": 64.5,
+      "intRatePct": 1.8,
+      "rushYpc": 2.29,
+      "trenchNetYds": -1.49
+    },
+    {
+      "code": "CONV11_PLUS_OL",
+      "levels": {
+        "QB": -1,
+        "OL": 1,
+        "WR": -1,
+        "TE": -1,
+        "RB": -1
+      },
+      "scheme": "CONV_11",
+      "avgWins": 7.79,
+      "pfG": 19.91,
+      "sbPct": 1.6,
+      "nash13Epa": -0.0514,
+      "mean13Epa": -0.0088,
+      "sackRatePct": 3.9,
+      "pressRatePct": 7.5,
+      "compRatePct": 63.2,
+      "intRatePct": 1.8,
+      "rushYpc": 3.73,
+      "trenchNetYds": -0.88
+    },
+    {
+      "code": "CONV11_PLUS_WR",
+      "levels": {
+        "QB": -1,
+        "OL": -1,
+        "WR": 1,
+        "TE": -1,
+        "RB": -1
+      },
+      "scheme": "CONV_11",
+      "avgWins": 1.38,
+      "pfG": 8.97,
+      "sbPct": 0,
+      "nash13Epa": -0.5117,
+      "mean13Epa": -0.1906,
+      "sackRatePct": 10.5,
+      "pressRatePct": 31.1,
+      "compRatePct": 58.9,
+      "intRatePct": 3.2,
+      "rushYpc": 2.18,
+      "trenchNetYds": -1.47
+    }
+  ]
+}
